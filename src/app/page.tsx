@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Image from "next/image";
 import {
   createUserWithEmailAndPassword,
   GoogleAuthProvider,
@@ -226,11 +227,21 @@ export default function HomePage() {
   return (
     <main>
       <header>
-        <div>
-          <h1>Todo Tracker</h1>
-          <p className="small">
-            Keep an eye on priorities, schedule dates, and completion history.
-          </p>
+        <div className="brand">
+          <Image
+            src="/aura-pulse.png"
+            alt="Aura Pulse logo"
+            width={48}
+            height={48}
+            className="brand-logo"
+            priority
+          />
+          <div>
+            <h1>Aura Pulse</h1>
+            <p className="small">
+              Keep an eye on priorities, schedule dates, and completion history.
+            </p>
+          </div>
         </div>
         {user ? (
           <button className="secondary" onClick={handleSignOut}>
