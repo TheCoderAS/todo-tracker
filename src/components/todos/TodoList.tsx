@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { FiCheckCircle, FiCircle, FiFlag, FiX } from "react-icons/fi";
+import { FiCheckCircle, FiCircle, FiEdit2, FiFlag, FiTrash2, FiX } from "react-icons/fi";
 
 import Modal from "@/components/ui/Modal";
 import type { Todo } from "@/lib/types";
@@ -93,12 +93,26 @@ export default function TodoList({
         {selectedTodo ? (
           <div className="grid gap-5">
             <div className="flex items-start justify-between gap-4">
-              <div>
+              <div className="grid gap-2">
                 <h3 className="text-lg font-semibold text-white">{selectedTodo.title}</h3>
-                <p className="text-xs text-slate-400">
-                  Priority {formatTitleCase(selectedTodo.priority)} · Status{" "}
-                  {formatTitleCase(selectedTodo.status)}
-                </p>
+                <div className="flex flex-wrap items-center gap-2 text-xs text-slate-400">
+                  <span
+                    className={`flex items-center gap-1 rounded-full bg-slate-950/70 px-2 py-1 ${priorityIconStyles[selectedTodo.priority]}`}
+                  >
+                    <FiFlag aria-hidden />
+                    <span>{formatTitleCase(selectedTodo.priority)}</span>
+                  </span>
+                  <span
+                    className={`flex items-center gap-1 rounded-full bg-slate-950/70 px-2 py-1 ${statusIconStyles[selectedTodo.status]}`}
+                  >
+                    {selectedTodo.status === "completed" ? (
+                      <FiCheckCircle aria-hidden />
+                    ) : (
+                      <FiCircle aria-hidden />
+                    )}
+                    <span>{formatTitleCase(selectedTodo.status)}</span>
+                  </span>
+                </div>
               </div>
               <button
                 type="button"
@@ -112,10 +126,12 @@ export default function TodoList({
             <div className="grid gap-2 text-xs text-slate-300">
               <p>Scheduled: {formatDate(selectedTodo.scheduledDate)}</p>
               <p>
-                Completed:{" "}
-                {selectedTodo.completedDate
-                  ? formatDate(selectedTodo.completedDate)
-                  : "Not completed"}
+                Status:{" "}
+                {selectedTodo.status === "completed"
+                  ? selectedTodo.completedDate
+                    ? `Completed on ${formatDate(selectedTodo.completedDate)}`
+                    : "Completed"
+                  : "Pending"}
               </p>
               <p>Tags: {selectedTodo.tags.length ? selectedTodo.tags.join(", ") : "—"}</p>
             </div>
@@ -135,33 +151,44 @@ export default function TodoList({
             <div className="flex flex-wrap gap-3">
               <button
                 type="button"
-                className="rounded-full border border-slate-700/70 px-4 py-2 text-xs font-semibold text-slate-200"
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-700/70 text-slate-200 transition hover:border-slate-500"
                 onClick={() => {
                   onEdit(selectedTodo);
                   setSelectedTodo(null);
                 }}
+                aria-label="Edit todo"
               >
-                Edit
+                <FiEdit2 aria-hidden />
               </button>
               <button
                 type="button"
-                className="rounded-full border border-slate-700/70 px-4 py-2 text-xs font-semibold text-slate-200"
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-700/70 text-slate-200 transition hover:border-slate-500"
                 onClick={() => {
                   onToggleStatus(selectedTodo);
                   setSelectedTodo(null);
                 }}
+                aria-label={
+                  selectedTodo.status === "completed"
+                    ? "Mark todo as pending"
+                    : "Mark todo as completed"
+                }
               >
-                {selectedTodo.status === "completed" ? "Mark pending" : "Mark completed"}
+                {selectedTodo.status === "completed" ? (
+                  <FiCircle aria-hidden />
+                ) : (
+                  <FiCheckCircle aria-hidden />
+                )}
               </button>
               <button
                 type="button"
-                className="rounded-full bg-rose-400/20 px-4 py-2 text-xs font-semibold text-rose-100"
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-rose-400/40 text-rose-100 transition hover:border-rose-300"
                 onClick={() => {
                   onDelete(selectedTodo.id);
                   setSelectedTodo(null);
                 }}
+                aria-label="Delete todo"
               >
-                Delete
+                <FiTrash2 aria-hidden />
               </button>
             </div>
           </div>

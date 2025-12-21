@@ -29,6 +29,7 @@ import AuthForm, { type AuthFormState, type AuthMode } from "@/components/auth/A
 import AuthIntro from "@/components/auth/AuthIntro";
 import TodoForm from "@/components/todos/TodoForm";
 import TodoList from "@/components/todos/TodoList";
+import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import Modal from "@/components/ui/Modal";
 import OverlayLoader from "@/components/ui/OverlayLoader";
 import Snackbar, { type SnackbarVariant } from "@/components/ui/Snackbar";
@@ -92,6 +93,9 @@ export default function HomePage() {
   const [form, setForm] = useState<TodoInput>(defaultForm);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [authForm, setAuthForm] = useState<AuthFormState>(defaultAuthForm);
+  const [authFieldErrors, setAuthFieldErrors] = useState<
+    Partial<Record<keyof AuthFormState, boolean>>
+  >({});
   const [authError, setAuthError] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
   const [titleHasError, setTitleHasError] = useState(false);
@@ -99,6 +103,9 @@ export default function HomePage() {
     message: string;
     variant: SnackbarVariant;
   } | null>(null);
+  const [confirmAction, setConfirmAction] = useState<
+    { type: "signout" } | { type: "delete"; todoId: string } | null
+  >(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
 
@@ -150,6 +157,25 @@ export default function HomePage() {
   ) => {
     const { name, value } = event.target;
     setAuthForm((prev) => ({ ...prev, [name]: value }));
+    setAuthFieldErrors((prev) => ({ ...prev, [name]: false }));
+  };
+
+  const validateAuthFields = (fields: (keyof AuthFormState)[]) => {
+    const nextErrors: Partial<Record<keyof AuthFormState, boolean>> = {};
+    fields.forEach((field) => {
+      if (!authForm[field].trim()) {
+        nextErrors[field] = true;
+      }
+    });
+
+    setAuthFieldErrors(nextErrors);
+
+    if (Object.keys(nextErrors).length > 0) {
+      setAuthError("Please fill in the required fields.");
+      return false;
+    }
+
+    return true;
   };
 
   const handleFormChange = (
@@ -184,6 +210,9 @@ export default function HomePage() {
 
   const handleEmailSignIn = async () => {
     setAuthError(null);
+    if (!validateAuthFields(["email", "password"])) {
+      return;
+    }
     setActionLoading(true);
     try {
       await signInWithEmailAndPassword(auth, authForm.email, authForm.password);
@@ -200,6 +229,9 @@ export default function HomePage() {
 
   const handleEmailSignUp = async () => {
     setAuthError(null);
+    if (!validateAuthFields(["firstName", "lastName", "email", "password"])) {
+      return;
+    }
     setActionLoading(true);
     try {
       const credential = await createUserWithEmailAndPassword(
@@ -250,6 +282,23 @@ export default function HomePage() {
     } finally {
       setActionLoading(false);
     }
+  };
+
+  const handleConfirmAction = async () => {
+    if (!confirmAction) return;
+
+    if (confirmAction.type === "signout") {
+      await handleSignOut();
+    } else {
+      await handleDeleteTodo(confirmAction.todoId);
+    }
+
+    setConfirmAction(null);
+  };
+
+  const handleConfirmDismiss = () => {
+    if (actionLoading) return;
+    setConfirmAction(null);
   };
 
   const handleSubmitTodo = async (event: React.FormEvent) => {
@@ -368,6 +417,14 @@ export default function HomePage() {
     }
   };
 
+  const handleDeleteRequest = (todoId: string) => {
+    setConfirmAction({ type: "delete", todoId });
+  };
+
+  const handleSignOutRequest = () => {
+    setConfirmAction({ type: "signout" });
+  };
+
   useEffect(() => {
     if (!snackbar) return;
     const timer = window.setTimeout(() => setSnackbar(null), 3000);
@@ -440,7 +497,7 @@ export default function HomePage() {
         {user ? (
           <button
             className="rounded-full border border-slate-700/70 px-5 py-2 text-sm font-semibold text-slate-200 transition hover:border-slate-500"
-            onClick={handleSignOut}
+            onClick={handleSignOutRequest}
           >
             Sign out
           </button>
@@ -453,6 +510,7 @@ export default function HomePage() {
           <AuthForm
             mode={authMode}
             form={authForm}
+            fieldErrors={authFieldErrors}
             error={authError}
             isLoading={authLoading}
             onModeChange={setAuthMode}
@@ -471,7 +529,7 @@ export default function HomePage() {
               formatDate={formatDateDisplay}
               onEdit={handleEditTodo}
               onToggleStatus={handleToggleStatus}
-              onDelete={handleDeleteTodo}
+              onDelete={handleDeleteRequest}
             />
           </section>
           <button
@@ -496,6 +554,24 @@ export default function HomePage() {
           onCancelEdit={closeFormModal}
         />
       </Modal>
+      <ConfirmDialog
+        isOpen={Boolean(confirmAction)}
+        title={
+          confirmAction?.type === "signout"
+            ? "Sign out of Aura Pulse?"
+            : "Delete this todo?"
+        }
+        description={
+          confirmAction?.type === "signout"
+            ? "You will be signed out and need to log in again to access your todos."
+            : "This action cannot be undone."
+        }
+        confirmLabel={confirmAction?.type === "signout" ? "Sign out" : "Delete todo"}
+        cancelLabel="Cancel"
+        isLoading={actionLoading}
+        onConfirm={handleConfirmAction}
+        onCancel={handleConfirmDismiss}
+      />
       {authLoading || actionLoading ? <OverlayLoader /> : null}
       {snackbar ? (
         <Snackbar
