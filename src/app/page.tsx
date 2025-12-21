@@ -243,6 +243,9 @@ export default function HomePage() {
   };
 
   const handleSignOut = async () => {
+    if (!window.confirm("Are you sure you want to sign out?")) {
+      return;
+    }
     setActionLoading(true);
     try {
       await signOut(auth);
@@ -358,6 +361,10 @@ export default function HomePage() {
 
   const handleDeleteTodo = async (todoId: string) => {
     if (!user) return;
+
+    if (!window.confirm("Delete this todo?")) {
+      return;
+    }
 
     setActionLoading(true);
     try {
