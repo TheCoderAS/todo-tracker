@@ -2,8 +2,14 @@ import "./globals.css";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Todo Tracker",
-  description: "Firebase-powered todo tracking with Next.js"
+  title: "Aura Pulse",
+  description:
+    "Aura Pulse is a next-gen daily productivity hub for tasks, events, schedules, fitness tracking, and goal management, brought to life with modern 3D motion and analytics dashboards.",
+  applicationName: "Aura Pulse",
+  icons: {
+    icon: "/aura-pulse.png",
+    apple: "/aura-pulse.png"
+  }
 };
 
 export default function RootLayout({

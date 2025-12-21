@@ -1,6 +1,6 @@
-# Todo Tracker
+# Aura Pulse
 
-Firebase-backed todo tracking app built with Next.js.
+Next-gen daily productivity app built with Next.js.
 
 ## Firebase setup
 
