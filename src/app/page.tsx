@@ -21,9 +21,16 @@ import {
   query,
   serverTimestamp,
   Timestamp,
-  updateDoc
+  updateDoc,
+  setDoc
 } from "firebase/firestore";
 
+import AuthForm, { type AuthFormState, type AuthMode } from "@/components/auth/AuthForm";
+import AuthIntro from "@/components/auth/AuthIntro";
+import TodoForm from "@/components/todos/TodoForm";
+import TodoList from "@/components/todos/TodoList";
+import OverlayLoader from "@/components/ui/OverlayLoader";
+import Snackbar, { type SnackbarVariant } from "@/components/ui/Snackbar";
 import { auth, db } from "@/lib/firebase";
 import type { Todo, TodoInput, TodoPriority } from "@/lib/types";
 
@@ -32,25 +39,54 @@ const priorities: TodoPriority[] = ["low", "medium", "high"];
 const defaultForm: TodoInput = {
   title: "",
   scheduledDate: "",
+  scheduledTime: "",
   priority: "medium",
   tags: ""
+};
+
+const defaultAuthForm: AuthFormState = {
+  firstName: "",
+  lastName: "",
+  email: "",
+  phone: "",
+  gender: "",
+  password: ""
 };
 
 const formatDateInput = (timestamp: Timestamp | null) =>
   timestamp ? timestamp.toDate().toISOString().split("T")[0] : "";
 
+const formatTimeInput = (timestamp: Timestamp | null) => {
+  if (!timestamp) return "";
+  const date = timestamp.toDate();
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+  return `${hours}:${minutes}`;
+};
+
 const formatDateDisplay = (timestamp: Timestamp | null) =>
-  timestamp ? timestamp.toDate().toLocaleDateString() : "Not scheduled";
+  timestamp
+    ? timestamp.toDate().toLocaleString([], {
+        dateStyle: "medium",
+        timeStyle: "short"
+      })
+    : "Not scheduled";
 
 export default function HomePage() {
   const [user, setUser] = useState<User | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
+  const [authMode, setAuthMode] = useState<AuthMode>("signin");
   const [todos, setTodos] = useState<Todo[]>([]);
   const [form, setForm] = useState<TodoInput>(defaultForm);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [authForm, setAuthForm] = useState({ email: "", password: "" });
+  const [authForm, setAuthForm] = useState<AuthFormState>(defaultAuthForm);
   const [authError, setAuthError] = useState<string | null>(null);
   const [todoError, setTodoError] = useState<string | null>(null);
+  const [actionLoading, setActionLoading] = useState(false);
+  const [snackbar, setSnackbar] = useState<{
+    message: string;
+    variant: SnackbarVariant;
+  } | null>(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -85,7 +121,9 @@ export default function HomePage() {
 
   const isEditing = useMemo(() => Boolean(editingId), [editingId]);
 
-  const handleAuthChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAuthChange = (
+    event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = event.target;
     setAuthForm((prev) => ({ ...prev, [name]: value }));
   };
@@ -104,54 +142,88 @@ export default function HomePage() {
 
   const handleEmailSignIn = async () => {
     setAuthError(null);
+    setActionLoading(true);
     try {
       await signInWithEmailAndPassword(auth, authForm.email, authForm.password);
+      setSnackbar({ message: "Welcome back! You are signed in.", variant: "success" });
     } catch (error) {
       setAuthError("Unable to sign in with email/password.");
+      setSnackbar({ message: "Unable to sign in with email/password.", variant: "error" });
       console.error(error);
+    } finally {
+      setActionLoading(false);
     }
   };
 
   const handleEmailSignUp = async () => {
     setAuthError(null);
+    setActionLoading(true);
     try {
-      await createUserWithEmailAndPassword(
+      const credential = await createUserWithEmailAndPassword(
         auth,
         authForm.email,
         authForm.password
       );
+      await setDoc(doc(db, "users", credential.user.uid), {
+        firstName: authForm.firstName.trim(),
+        lastName: authForm.lastName.trim(),
+        email: authForm.email.trim(),
+        phone: authForm.phone.trim(),
+        gender: authForm.gender,
+        createdAt: serverTimestamp()
+      });
+      setSnackbar({ message: "Account created! Welcome to Aura Pulse.", variant: "success" });
     } catch (error) {
       setAuthError("Unable to create account.");
+      setSnackbar({ message: "Unable to create account.", variant: "error" });
       console.error(error);
+    } finally {
+      setActionLoading(false);
     }
   };
 
   const handleGoogleSignIn = async () => {
     setAuthError(null);
+    setActionLoading(true);
     try {
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
+      setSnackbar({ message: "Signed in with Google.", variant: "success" });
     } catch (error) {
       setAuthError("Unable to sign in with Google.");
+      setSnackbar({ message: "Unable to sign in with Google.", variant: "error" });
       console.error(error);
+    } finally {
+      setActionLoading(false);
     }
   };
 
   const handleSignOut = async () => {
-    await signOut(auth);
+    setActionLoading(true);
+    try {
+      await signOut(auth);
+      setSnackbar({ message: "Signed out successfully.", variant: "info" });
+    } finally {
+      setActionLoading(false);
+    }
   };
 
   const handleSubmitTodo = async (event: React.FormEvent) => {
     event.preventDefault();
     setTodoError(null);
+    setActionLoading(true);
 
     if (!user) {
       setTodoError("Sign in to manage todos.");
+      setSnackbar({ message: "Sign in to manage todos.", variant: "error" });
+      setActionLoading(false);
       return;
     }
 
     if (!form.title.trim()) {
       setTodoError("Title is required.");
+      setSnackbar({ message: "Please add a todo title.", variant: "error" });
+      setActionLoading(false);
       return;
     }
 
@@ -161,7 +233,11 @@ export default function HomePage() {
       .filter(Boolean);
 
     const scheduledDate = form.scheduledDate
-      ? Timestamp.fromDate(new Date(form.scheduledDate))
+      ? Timestamp.fromDate(
+          new Date(
+            `${form.scheduledDate}T${form.scheduledTime ? form.scheduledTime : "00:00"}`
+          )
+        )
       : null;
 
     try {
@@ -189,9 +265,16 @@ export default function HomePage() {
       }
 
       resetForm();
+      setSnackbar({
+        message: editingId ? "Todo updated successfully." : "Todo added to your list.",
+        variant: "success"
+      });
     } catch (error) {
       setTodoError("Unable to save todo.");
+      setSnackbar({ message: "Unable to save todo.", variant: "error" });
       console.error(error);
+    } finally {
+      setActionLoading(false);
     }
   };
 
@@ -200,6 +283,7 @@ export default function HomePage() {
     setForm({
       title: todo.title,
       scheduledDate: formatDateInput(todo.scheduledDate),
+      scheduledTime: formatTimeInput(todo.scheduledDate),
       priority: todo.priority,
       tags: todo.tags.join(", ")
     });
@@ -211,191 +295,161 @@ export default function HomePage() {
     const todoRef = doc(db, "users", user.uid, "todos", todo.id);
     const isCompleted = todo.status === "completed";
 
-    await updateDoc(todoRef, {
-      status: isCompleted ? "pending" : "completed",
-      completedDate: isCompleted ? null : serverTimestamp(),
-      updatedAt: serverTimestamp()
-    });
+    setActionLoading(true);
+    try {
+      await updateDoc(todoRef, {
+        status: isCompleted ? "pending" : "completed",
+        completedDate: isCompleted ? null : serverTimestamp(),
+        updatedAt: serverTimestamp()
+      });
+      setSnackbar({
+        message: isCompleted ? "Todo marked as pending." : "Todo marked as completed.",
+        variant: "info"
+      });
+    } finally {
+      setActionLoading(false);
+    }
   };
 
   const handleDeleteTodo = async (todoId: string) => {
     if (!user) return;
 
-    await deleteDoc(doc(db, "users", user.uid, "todos", todoId));
+    setActionLoading(true);
+    try {
+      await deleteDoc(doc(db, "users", user.uid, "todos", todoId));
+      setSnackbar({ message: "Todo deleted.", variant: "info" });
+    } finally {
+      setActionLoading(false);
+    }
   };
 
+  useEffect(() => {
+    if (!snackbar) return;
+    const timer = window.setTimeout(() => setSnackbar(null), 3000);
+    return () => window.clearTimeout(timer);
+  }, [snackbar]);
+
+  const groupedTodos = useMemo(() => {
+    if (todos.length === 0) return [];
+
+    const groups = new Map<string, { title: string; items: Todo[]; sortKey: number }>();
+    const unscheduled: Todo[] = [];
+
+    todos.forEach((todo) => {
+      if (!todo.scheduledDate) {
+        unscheduled.push(todo);
+        return;
+      }
+
+      const date = todo.scheduledDate.toDate();
+      const dateKey = date.toLocaleDateString([], {
+        weekday: "short",
+        month: "short",
+        day: "numeric"
+      });
+      const midnight = new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
+      const existing = groups.get(dateKey);
+      if (existing) {
+        existing.items.push(todo);
+      } else {
+        groups.set(dateKey, { title: dateKey, items: [todo], sortKey: midnight });
+      }
+    });
+
+    const orderedGroups = Array.from(groups.values())
+      .sort((a, b) => a.sortKey - b.sortKey)
+      .map((group) => ({
+        title: group.title,
+        items: group.items.sort((a, b) => {
+          if (!a.scheduledDate || !b.scheduledDate) return 0;
+          return a.scheduledDate.toMillis() - b.scheduledDate.toMillis();
+        })
+      }));
+
+    if (unscheduled.length) {
+      orderedGroups.push({ title: "Unscheduled", items: unscheduled });
+    }
+
+    return orderedGroups;
+  }, [todos]);
+
   return (
-    <main>
-      <header>
-        <div className="brand">
-          <Image
-            src="/aura-pulse.png"
-            alt="Aura Pulse logo"
-            width={48}
-            height={48}
-            className="brand-logo"
-            priority
-          />
+    <main className="mx-auto flex min-h-screen max-w-6xl flex-col gap-10 px-6 pb-16 pt-10 text-slate-100">
+      <header className="flex flex-wrap items-center justify-between gap-6">
+        <div className="flex items-center gap-4">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 shadow-xl shadow-slate-900/40">
+            <Image
+              src="/aura-pulse.png"
+              alt="Aura Pulse logo"
+              width={40}
+              height={40}
+              className="h-10 w-10 rounded-xl object-cover"
+              priority
+            />
+          </div>
           <div>
-            <h1>Aura Pulse</h1>
-            <p className="small">
+            <h1 className="text-2xl font-semibold text-white">Aura Pulse</h1>
+            <p className="text-sm text-slate-300">
               Keep an eye on priorities, schedule dates, and completion history.
             </p>
           </div>
         </div>
         {user ? (
-          <button className="secondary" onClick={handleSignOut}>
+          <button
+            className="rounded-full border border-slate-700/70 px-5 py-2 text-sm font-semibold text-slate-200 transition hover:border-slate-500"
+            onClick={handleSignOut}
+          >
             Sign out
           </button>
         ) : null}
       </header>
 
       {!user ? (
-        <section className="card stack">
-          <h2>Sign in to your workspace</h2>
-          <div className="row">
-            <input
-              name="email"
-              type="email"
-              placeholder="Email"
-              value={authForm.email}
-              onChange={handleAuthChange}
-            />
-            <input
-              name="password"
-              type="password"
-              placeholder="Password"
-              value={authForm.password}
-              onChange={handleAuthChange}
-            />
-          </div>
-          {authError ? <p className="small">{authError}</p> : null}
-          <div className="row">
-            <button onClick={handleEmailSignIn} disabled={authLoading}>
-              Email sign in
-            </button>
-            <button className="secondary" onClick={handleEmailSignUp}>
-              Create account
-            </button>
-            <button className="secondary" onClick={handleGoogleSignIn}>
-              Google sign in
-            </button>
-          </div>
+        <section className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
+          <AuthIntro />
+          <AuthForm
+            mode={authMode}
+            form={authForm}
+            error={authError}
+            isLoading={authLoading}
+            onModeChange={setAuthMode}
+            onChange={handleAuthChange}
+            onEmailSignIn={handleEmailSignIn}
+            onEmailSignUp={handleEmailSignUp}
+            onGoogleSignIn={handleGoogleSignIn}
+          />
         </section>
       ) : (
-        <section className="stack">
-          <form className="card stack" onSubmit={handleSubmitTodo}>
-            <h2>{isEditing ? "Edit todo" : "Add a new todo"}</h2>
-            <input
-              name="title"
-              placeholder="Todo title"
-              value={form.title}
-              onChange={handleFormChange}
+        <section className="grid gap-6">
+          <TodoForm
+            form={form}
+            priorities={priorities}
+            isEditing={isEditing}
+            error={todoError}
+            onChange={handleFormChange}
+            onSubmit={handleSubmitTodo}
+            onCancelEdit={resetForm}
+          />
+          <section className="grid gap-4">
+            <h2 className="text-xl font-semibold text-white">Your todos</h2>
+            <TodoList
+              groups={groupedTodos}
+              formatDate={formatDateDisplay}
+              onEdit={handleEditTodo}
+              onToggleStatus={handleToggleStatus}
+              onDelete={handleDeleteTodo}
             />
-            <div className="row">
-              <label className="row">
-                <span className="small">Scheduled date</span>
-                <input
-                  name="scheduledDate"
-                  type="date"
-                  value={form.scheduledDate}
-                  onChange={handleFormChange}
-                />
-              </label>
-              <label className="row">
-                <span className="small">Priority</span>
-                <select
-                  name="priority"
-                  value={form.priority}
-                  onChange={handleFormChange}
-                >
-                  {priorities.map((priority) => (
-                    <option key={priority} value={priority}>
-                      {priority}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label className="row">
-                <span className="small">Tags</span>
-                <input
-                  name="tags"
-                  placeholder="design, research"
-                  value={form.tags}
-                  onChange={handleFormChange}
-                />
-              </label>
-            </div>
-            {todoError ? <p className="small">{todoError}</p> : null}
-            <div className="row">
-              <button type="submit">{isEditing ? "Save changes" : "Add"}</button>
-              {isEditing ? (
-                <button
-                  type="button"
-                  className="secondary"
-                  onClick={resetForm}
-                >
-                  Cancel edit
-                </button>
-              ) : null}
-            </div>
-          </form>
-
-          <section className="stack">
-            <h2>Your todos</h2>
-            {todos.length === 0 ? (
-              <p className="small">No todos yet. Add one above.</p>
-            ) : (
-              todos.map((todo) => (
-                <article key={todo.id} className="todo-item">
-                  <div className="row">
-                    <strong>{todo.title}</strong>
-                    <span className="badge">{todo.priority}</span>
-                    <span className="badge">{todo.status}</span>
-                  </div>
-                  <div className="row small">
-                    <span>Scheduled: {formatDateDisplay(todo.scheduledDate)}</span>
-                    <span>
-                      Completed:{" "}
-                      {todo.completedDate
-                        ? formatDateDisplay(todo.completedDate)
-                        : "Not completed"}
-                    </span>
-                  </div>
-                  <div className="row small">
-                    <span>Tags: {todo.tags.length ? todo.tags.join(", ") : "—"}</span>
-                  </div>
-                  <div className="todo-actions">
-                    <button
-                      type="button"
-                      className="secondary"
-                      onClick={() => handleEditTodo(todo)}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      type="button"
-                      className="secondary"
-                      onClick={() => handleToggleStatus(todo)}
-                    >
-                      {todo.status === "completed"
-                        ? "Mark pending"
-                        : "Mark complete"}
-                    </button>
-                    <button
-                      type="button"
-                      className="danger"
-                      onClick={() => handleDeleteTodo(todo.id)}
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </article>
-              ))
-            )}
           </section>
         </section>
       )}
+      {authLoading || actionLoading ? <OverlayLoader /> : null}
+      {snackbar ? (
+        <Snackbar
+          message={snackbar.message}
+          variant={snackbar.variant}
+          onDismiss={() => setSnackbar(null)}
+        />
+      ) : null}
     </main>
   );
 }
