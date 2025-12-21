@@ -74,6 +74,16 @@ const formatDateDisplay = (timestamp: Timestamp | null) =>
       })
     : "Not scheduled";
 
+const formatGroupTitle = (date: Date) => {
+  const datePart = date.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric"
+  });
+  const dayPart = date.toLocaleDateString("en-US", { weekday: "long" });
+  return `${datePart} - ${dayPart}`;
+};
+
 export default function HomePage() {
   const [user, setUser] = useState<User | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
@@ -83,8 +93,8 @@ export default function HomePage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [authForm, setAuthForm] = useState<AuthFormState>(defaultAuthForm);
   const [authError, setAuthError] = useState<string | null>(null);
-  const [todoError, setTodoError] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
+  const [titleHasError, setTitleHasError] = useState(false);
   const [snackbar, setSnackbar] = useState<{
     message: string;
     variant: SnackbarVariant;
@@ -147,6 +157,9 @@ export default function HomePage() {
   ) => {
     const { name, value } = event.target;
     setForm((prev) => ({ ...prev, [name]: value }));
+    if (name === "title" && value.trim()) {
+      setTitleHasError(false);
+    }
   };
 
   const handleDescriptionChange = (value: string) => {
@@ -156,6 +169,7 @@ export default function HomePage() {
   const resetForm = () => {
     setForm(defaultForm);
     setEditingId(null);
+    setTitleHasError(false);
   };
 
   const openCreateModal = () => {
@@ -174,6 +188,7 @@ export default function HomePage() {
     try {
       await signInWithEmailAndPassword(auth, authForm.email, authForm.password);
       setSnackbar({ message: "Welcome back! You are signed in.", variant: "success" });
+      setAuthForm(defaultAuthForm);
     } catch (error) {
       setAuthError("Unable to sign in with email/password.");
       setSnackbar({ message: "Unable to sign in with email/password.", variant: "error" });
@@ -201,6 +216,7 @@ export default function HomePage() {
         createdAt: serverTimestamp()
       });
       setSnackbar({ message: "Account created! Welcome to Aura Pulse.", variant: "success" });
+      setAuthForm(defaultAuthForm);
     } catch (error) {
       setAuthError("Unable to create account.");
       setSnackbar({ message: "Unable to create account.", variant: "error" });
@@ -238,19 +254,16 @@ export default function HomePage() {
 
   const handleSubmitTodo = async (event: React.FormEvent) => {
     event.preventDefault();
-    setTodoError(null);
     setActionLoading(true);
 
     if (!user) {
-      setTodoError("Sign in to manage todos.");
       setSnackbar({ message: "Sign in to manage todos.", variant: "error" });
       setActionLoading(false);
       return;
     }
 
     if (!form.title.trim()) {
-      setTodoError("Title is required.");
-      setSnackbar({ message: "Please add a todo title.", variant: "error" });
+      setTitleHasError(true);
       setActionLoading(false);
       return;
     }
@@ -301,7 +314,6 @@ export default function HomePage() {
         variant: "success"
       });
     } catch (error) {
-      setTodoError("Unable to save todo.");
       setSnackbar({ message: "Unable to save todo.", variant: "error" });
       console.error(error);
     } finally {
@@ -375,11 +387,7 @@ export default function HomePage() {
       }
 
       const date = todo.scheduledDate.toDate();
-      const dateKey = date.toLocaleDateString([], {
-        weekday: "short",
-        month: "short",
-        day: "numeric"
-      });
+      const dateKey = formatGroupTitle(date);
       const midnight = new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
       const existing = groups.get(dateKey);
       if (existing) {
@@ -408,14 +416,14 @@ export default function HomePage() {
 
   if (authLoading || isInitialLoad) {
     return (
-      <main className="mx-auto flex min-h-screen max-w-6xl flex-col gap-10 px-6 pb-20 pt-24 text-slate-100">
+      <main className="mx-auto flex min-h-screen max-w-6xl flex-col gap-10 px-6 pb-20 pt-6 text-slate-100">
         <OverlayLoader />
       </main>
     );
   }
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-6xl flex-col gap-10 px-6 pb-20 pt-24 text-slate-100">
+    <main className="mx-auto flex min-h-screen max-w-6xl flex-col gap-10 px-6 pb-20 pt-6 text-slate-100">
       <header className="sticky top-0 z-30 -mx-6 flex items-center justify-between gap-6 border-b border-slate-900/60 bg-slate-950/85 px-6 py-4 backdrop-blur">
         <div className="flex items-center gap-4">
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 shadow-xl shadow-slate-900/40">
@@ -468,7 +476,7 @@ export default function HomePage() {
           </section>
           <button
             type="button"
-            className="fixed bottom-6 right-6 flex h-14 w-14 items-center justify-center rounded-full bg-sky-400 text-3xl font-semibold text-slate-950 shadow-xl shadow-slate-950/40 transition hover:bg-sky-300"
+            className="fixed bottom-6 right-6 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-400 text-3xl font-semibold text-slate-950 shadow-xl shadow-slate-950/40 transition hover:bg-emerald-300"
             onClick={openCreateModal}
             aria-label="Add todo"
           >
@@ -481,7 +489,7 @@ export default function HomePage() {
           form={form}
           priorities={priorities}
           isEditing={isEditing}
-          error={todoError}
+          titleHasError={titleHasError}
           onChange={handleFormChange}
           onDescriptionChange={handleDescriptionChange}
           onSubmit={handleSubmitTodo}
