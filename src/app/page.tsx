@@ -29,6 +29,7 @@ import AuthForm, { type AuthFormState, type AuthMode } from "@/components/auth/A
 import AuthIntro from "@/components/auth/AuthIntro";
 import TodoForm from "@/components/todos/TodoForm";
 import TodoList from "@/components/todos/TodoList";
+import Modal from "@/components/ui/Modal";
 import OverlayLoader from "@/components/ui/OverlayLoader";
 import Snackbar, { type SnackbarVariant } from "@/components/ui/Snackbar";
 import { auth, db } from "@/lib/firebase";
@@ -41,7 +42,8 @@ const defaultForm: TodoInput = {
   scheduledDate: "",
   scheduledTime: "",
   priority: "medium",
-  tags: ""
+  tags: "",
+  description: ""
 };
 
 const defaultAuthForm: AuthFormState = {
@@ -87,11 +89,18 @@ export default function HomePage() {
     message: string;
     variant: SnackbarVariant;
   } | null>(null);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       setAuthLoading(false);
+      if (currentUser) {
+        setIsInitialLoad(true);
+      } else {
+        setIsInitialLoad(false);
+      }
     });
 
     return () => unsubscribe();
@@ -108,12 +117,17 @@ export default function HomePage() {
       orderBy("createdAt", "desc")
     );
 
+    let isFirstSnapshot = true;
     const unsubscribe = onSnapshot(todosQuery, (snapshot) => {
       const data = snapshot.docs.map((docSnapshot) => ({
         id: docSnapshot.id,
         ...(docSnapshot.data() as Omit<Todo, "id">)
       }));
       setTodos(data);
+      if (isFirstSnapshot) {
+        setIsInitialLoad(false);
+        isFirstSnapshot = false;
+      }
     });
 
     return () => unsubscribe();
@@ -135,9 +149,23 @@ export default function HomePage() {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleDescriptionChange = (value: string) => {
+    setForm((prev) => ({ ...prev, description: value }));
+  };
+
   const resetForm = () => {
     setForm(defaultForm);
     setEditingId(null);
+  };
+
+  const openCreateModal = () => {
+    resetForm();
+    setIsFormOpen(true);
+  };
+
+  const closeFormModal = () => {
+    resetForm();
+    setIsFormOpen(false);
   };
 
   const handleEmailSignIn = async () => {
@@ -248,6 +276,7 @@ export default function HomePage() {
           scheduledDate,
           priority: form.priority,
           tags,
+          description: form.description.trim(),
           updatedAt: serverTimestamp()
         });
       } else {
@@ -259,12 +288,14 @@ export default function HomePage() {
           completedDate: null,
           priority: form.priority,
           tags,
+          description: form.description.trim(),
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp()
         });
       }
 
       resetForm();
+      setIsFormOpen(false);
       setSnackbar({
         message: editingId ? "Todo updated successfully." : "Todo added to your list.",
         variant: "success"
@@ -285,8 +316,10 @@ export default function HomePage() {
       scheduledDate: formatDateInput(todo.scheduledDate),
       scheduledTime: formatTimeInput(todo.scheduledDate),
       priority: todo.priority,
-      tags: todo.tags.join(", ")
+      tags: todo.tags.join(", "),
+      description: todo.description ?? ""
     });
+    setIsFormOpen(true);
   };
 
   const handleToggleStatus = async (todo: Todo) => {
@@ -373,9 +406,17 @@ export default function HomePage() {
     return orderedGroups;
   }, [todos]);
 
+  if (authLoading || isInitialLoad) {
+    return (
+      <main className="mx-auto flex min-h-screen max-w-6xl flex-col gap-10 px-6 pb-20 pt-24 text-slate-100">
+        <OverlayLoader />
+      </main>
+    );
+  }
+
   return (
-    <main className="mx-auto flex min-h-screen max-w-6xl flex-col gap-10 px-6 pb-16 pt-10 text-slate-100">
-      <header className="flex flex-wrap items-center justify-between gap-6">
+    <main className="mx-auto flex min-h-screen max-w-6xl flex-col gap-10 px-6 pb-20 pt-24 text-slate-100">
+      <header className="sticky top-0 z-30 -mx-6 flex items-center justify-between gap-6 border-b border-slate-900/60 bg-slate-950/85 px-6 py-4 backdrop-blur">
         <div className="flex items-center gap-4">
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 shadow-xl shadow-slate-900/40">
             <Image
@@ -386,12 +427,6 @@ export default function HomePage() {
               className="h-10 w-10 rounded-xl object-cover"
               priority
             />
-          </div>
-          <div>
-            <h1 className="text-2xl font-semibold text-white">Aura Pulse</h1>
-            <p className="text-sm text-slate-300">
-              Keep an eye on priorities, schedule dates, and completion history.
-            </p>
           </div>
         </div>
         {user ? (
@@ -421,15 +456,6 @@ export default function HomePage() {
         </section>
       ) : (
         <section className="grid gap-6">
-          <TodoForm
-            form={form}
-            priorities={priorities}
-            isEditing={isEditing}
-            error={todoError}
-            onChange={handleFormChange}
-            onSubmit={handleSubmitTodo}
-            onCancelEdit={resetForm}
-          />
           <section className="grid gap-4">
             <h2 className="text-xl font-semibold text-white">Your todos</h2>
             <TodoList
@@ -440,8 +466,28 @@ export default function HomePage() {
               onDelete={handleDeleteTodo}
             />
           </section>
+          <button
+            type="button"
+            className="fixed bottom-6 right-6 flex h-14 w-14 items-center justify-center rounded-full bg-sky-400 text-3xl font-semibold text-slate-950 shadow-xl shadow-slate-950/40 transition hover:bg-sky-300"
+            onClick={openCreateModal}
+            aria-label="Add todo"
+          >
+            +
+          </button>
         </section>
       )}
+      <Modal isOpen={isFormOpen} onClose={closeFormModal} ariaLabel="Todo form">
+        <TodoForm
+          form={form}
+          priorities={priorities}
+          isEditing={isEditing}
+          error={todoError}
+          onChange={handleFormChange}
+          onDescriptionChange={handleDescriptionChange}
+          onSubmit={handleSubmitTodo}
+          onCancelEdit={closeFormModal}
+        />
+      </Modal>
       {authLoading || actionLoading ? <OverlayLoader /> : null}
       {snackbar ? (
         <Snackbar
