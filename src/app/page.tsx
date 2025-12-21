@@ -29,6 +29,7 @@ import AuthForm, { type AuthFormState, type AuthMode } from "@/components/auth/A
 import AuthIntro from "@/components/auth/AuthIntro";
 import TodoForm from "@/components/todos/TodoForm";
 import TodoList from "@/components/todos/TodoList";
+import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import Modal from "@/components/ui/Modal";
 import OverlayLoader from "@/components/ui/OverlayLoader";
 import Snackbar, { type SnackbarVariant } from "@/components/ui/Snackbar";
@@ -99,6 +100,9 @@ export default function HomePage() {
     message: string;
     variant: SnackbarVariant;
   } | null>(null);
+  const [confirmAction, setConfirmAction] = useState<
+    { type: "signout" } | { type: "delete"; todoId: string } | null
+  >(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
 
@@ -243,9 +247,6 @@ export default function HomePage() {
   };
 
   const handleSignOut = async () => {
-    if (!window.confirm("Are you sure you want to sign out?")) {
-      return;
-    }
     setActionLoading(true);
     try {
       await signOut(auth);
@@ -253,6 +254,23 @@ export default function HomePage() {
     } finally {
       setActionLoading(false);
     }
+  };
+
+  const handleConfirmAction = async () => {
+    if (!confirmAction) return;
+
+    if (confirmAction.type === "signout") {
+      await handleSignOut();
+    } else {
+      await handleDeleteTodo(confirmAction.todoId);
+    }
+
+    setConfirmAction(null);
+  };
+
+  const handleConfirmDismiss = () => {
+    if (actionLoading) return;
+    setConfirmAction(null);
   };
 
   const handleSubmitTodo = async (event: React.FormEvent) => {
@@ -362,10 +380,6 @@ export default function HomePage() {
   const handleDeleteTodo = async (todoId: string) => {
     if (!user) return;
 
-    if (!window.confirm("Delete this todo?")) {
-      return;
-    }
-
     setActionLoading(true);
     try {
       await deleteDoc(doc(db, "users", user.uid, "todos", todoId));
@@ -373,6 +387,14 @@ export default function HomePage() {
     } finally {
       setActionLoading(false);
     }
+  };
+
+  const handleDeleteRequest = (todoId: string) => {
+    setConfirmAction({ type: "delete", todoId });
+  };
+
+  const handleSignOutRequest = () => {
+    setConfirmAction({ type: "signout" });
   };
 
   useEffect(() => {
@@ -447,7 +469,7 @@ export default function HomePage() {
         {user ? (
           <button
             className="rounded-full border border-slate-700/70 px-5 py-2 text-sm font-semibold text-slate-200 transition hover:border-slate-500"
-            onClick={handleSignOut}
+            onClick={handleSignOutRequest}
           >
             Sign out
           </button>
@@ -478,7 +500,7 @@ export default function HomePage() {
               formatDate={formatDateDisplay}
               onEdit={handleEditTodo}
               onToggleStatus={handleToggleStatus}
-              onDelete={handleDeleteTodo}
+              onDelete={handleDeleteRequest}
             />
           </section>
           <button
@@ -503,6 +525,24 @@ export default function HomePage() {
           onCancelEdit={closeFormModal}
         />
       </Modal>
+      <ConfirmDialog
+        isOpen={Boolean(confirmAction)}
+        title={
+          confirmAction?.type === "signout"
+            ? "Sign out of Aura Pulse?"
+            : "Delete this todo?"
+        }
+        description={
+          confirmAction?.type === "signout"
+            ? "You will be signed out and need to log in again to access your todos."
+            : "This action cannot be undone."
+        }
+        confirmLabel={confirmAction?.type === "signout" ? "Sign out" : "Delete todo"}
+        cancelLabel="Cancel"
+        isLoading={actionLoading}
+        onConfirm={handleConfirmAction}
+        onCancel={handleConfirmDismiss}
+      />
       {authLoading || actionLoading ? <OverlayLoader /> : null}
       {snackbar ? (
         <Snackbar
