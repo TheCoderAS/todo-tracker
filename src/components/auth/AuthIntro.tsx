@@ -25,7 +25,7 @@ const features = [
 export default function AuthIntro() {
   return (
     <Card className="bg-slate-900/50">
-      <span className="inline-flex items-center gap-2 rounded-full border border-sky-500/30 bg-sky-500/10 px-4 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-sky-200">
+      <span className="inline-flex items-center gap-2 rounded-full border border-sky-500/30 bg-sky-500/10 px-4 py-1 text-xs font-semibold uppercase tracking-[0.1em] text-sky-200">
         Modern workspace
       </span>
       <h2 className="mt-6 text-3xl font-semibold text-white">
