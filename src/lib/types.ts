@@ -16,6 +16,7 @@ export interface Todo {
 export interface TodoInput {
   title: string;
   scheduledDate: string;
+  scheduledTime: string;
   priority: TodoPriority;
   tags: string;
 }
