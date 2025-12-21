@@ -1,7 +1,8 @@
 import type { ReactNode } from "react";
 
-const labelClasses =
-  "flex flex-col gap-2 text-xs font-semibold uppercase tracking-[0.1em] text-slate-400";
+const labelClasses = "flex flex-col gap-2";
+const labelTextClasses =
+  "text-xs font-semibold capitalize tracking-[0.05em] text-slate-300";
 const controlClasses =
   "flex items-center gap-3 rounded-2xl border border-slate-800/70 bg-slate-900/60 px-4 py-3 text-slate-200";
 
@@ -22,7 +23,7 @@ export default function Field({
 }: FieldProps) {
   return (
     <label className={`${labelClasses}${className ? ` ${className}` : ""}`}>
-      {label}
+      <span className={labelTextClasses}>{label}</span>
       <span
         className={`${controlClasses}${controlClassName ? ` ${controlClassName}` : ""}`}
       >

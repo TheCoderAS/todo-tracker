@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { FiCheckCircle, FiCircle, FiFlag } from "react-icons/fi";
+import { FiCheckCircle, FiCircle, FiFlag, FiX } from "react-icons/fi";
 
 import Modal from "@/components/ui/Modal";
 import type { Todo } from "@/lib/types";
@@ -38,11 +38,14 @@ export default function TodoList({
     completed: "text-emerald-300"
   };
 
+  const formatTitleCase = (value: string) =>
+    value ? value.charAt(0).toUpperCase() + value.slice(1) : value;
+
   return (
     <div className="grid gap-4">
       {groups.map((group) => (
         <div key={group.title} className="grid gap-3">
-          <h3 className="text-sm font-semibold uppercase tracking-[0.1em] text-slate-400">
+          <h3 className="text-sm font-semibold capitalize tracking-[0.05em] text-slate-300">
             {group.title}
           </h3>
           {group.items.map((todo) => (
@@ -93,15 +96,17 @@ export default function TodoList({
               <div>
                 <h3 className="text-lg font-semibold text-white">{selectedTodo.title}</h3>
                 <p className="text-xs text-slate-400">
-                  Priority {selectedTodo.priority} · Status {selectedTodo.status}
+                  Priority {formatTitleCase(selectedTodo.priority)} · Status{" "}
+                  {formatTitleCase(selectedTodo.status)}
                 </p>
               </div>
               <button
                 type="button"
-                className="rounded-full border border-slate-700/70 px-4 py-1.5 text-xs font-semibold text-slate-200"
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-700/70 text-slate-200"
                 onClick={() => setSelectedTodo(null)}
+                aria-label="Close"
               >
-                Close
+                <FiX aria-hidden />
               </button>
             </div>
             <div className="grid gap-2 text-xs text-slate-300">
@@ -115,7 +120,7 @@ export default function TodoList({
               <p>Tags: {selectedTodo.tags.length ? selectedTodo.tags.join(", ") : "—"}</p>
             </div>
             <div className="grid gap-2 text-sm text-slate-200">
-              <p className="text-xs font-semibold uppercase tracking-[0.1em] text-slate-400">
+              <p className="text-xs font-semibold capitalize tracking-[0.05em] text-slate-300">
                 Description
               </p>
               {selectedTodo.description?.trim() ? (
