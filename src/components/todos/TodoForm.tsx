@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { FaBold, FaItalic, FaListUl } from "react-icons/fa6";
+import { FiPlus, FiSave, FiX } from "react-icons/fi";
 
 import type { TodoInput, TodoPriority } from "@/lib/types";
 
@@ -132,7 +133,7 @@ export default function TodoForm({
               name="priority"
               value={form.priority}
               onChange={onChange}
-              className={inputClasses}
+              className={`${inputClasses} pr-10`}
             >
               {priorities.map((priority) => (
                 <option key={priority} value={priority}>
@@ -211,16 +212,18 @@ export default function TodoForm({
       <div className="mt-5 flex flex-wrap gap-3">
         <button
           type="submit"
-          className="rounded-full bg-emerald-400 px-5 py-2 text-sm font-semibold text-slate-950 transition hover:bg-emerald-300"
+          className="flex items-center gap-2 rounded-full bg-emerald-400 px-5 py-2 text-sm font-semibold text-slate-950 transition hover:bg-emerald-300"
         >
-          {isEditing ? "Save changes" : "Add"}
+          {isEditing ? <FiSave aria-hidden /> : <FiPlus aria-hidden />}
+          <span>{isEditing ? "Save changes" : "Add"}</span>
         </button>
         <button
           type="button"
-          className="rounded-full border border-slate-700/70 px-5 py-2 text-sm font-semibold text-slate-200"
+          className="flex items-center gap-2 rounded-full border border-slate-700/70 px-5 py-2 text-sm font-semibold text-slate-200"
           onClick={onCancelEdit}
         >
-          Cancel
+          <FiX aria-hidden />
+          <span>Cancel</span>
         </button>
       </div>
     </form>

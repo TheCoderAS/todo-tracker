@@ -20,6 +20,7 @@ export type AuthFormState = {
 type AuthFormProps = {
   mode: AuthMode;
   form: AuthFormState;
+  fieldErrors: Partial<Record<keyof AuthFormState, boolean>>;
   error: string | null;
   isLoading: boolean;
   onModeChange: (mode: AuthMode) => void;
@@ -32,6 +33,7 @@ type AuthFormProps = {
 export default function AuthForm({
   mode,
   form,
+  fieldErrors,
   error,
   isLoading,
   onModeChange,
@@ -78,7 +80,11 @@ export default function AuthForm({
       <div className="mt-6 grid gap-4 sm:grid-cols-2">
         {mode === "signup" ? (
           <>
-            <Field label="First name" icon={<FiUser className="h-4 w-4 text-slate-400" />}>
+            <Field
+              label="First name"
+              icon={<FiUser className="h-4 w-4 text-slate-400" />}
+              controlClassName={fieldErrors.firstName ? "border-rose-500/70" : undefined}
+            >
               <TextInput
                 name="firstName"
                 type="text"
@@ -87,7 +93,11 @@ export default function AuthForm({
                 onChange={onChange}
               />
             </Field>
-            <Field label="Last name" icon={<FiUser className="h-4 w-4 text-slate-400" />}>
+            <Field
+              label="Last name"
+              icon={<FiUser className="h-4 w-4 text-slate-400" />}
+              controlClassName={fieldErrors.lastName ? "border-rose-500/70" : undefined}
+            >
               <TextInput
                 name="lastName"
                 type="text"
@@ -103,6 +113,7 @@ export default function AuthForm({
           label="Email address"
           icon={<FiMail className="h-4 w-4 text-slate-400" />}
           className="sm:col-span-2"
+          controlClassName={fieldErrors.email ? "border-rose-500/70" : undefined}
         >
           <TextInput
             name="email"
@@ -140,6 +151,7 @@ export default function AuthForm({
           label="Password"
           icon={<FiLock className="h-4 w-4 text-slate-400" />}
           className="sm:col-span-2"
+          controlClassName={fieldErrors.password ? "border-rose-500/70" : undefined}
         >
           <TextInput
             name="password"

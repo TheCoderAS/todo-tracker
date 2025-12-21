@@ -93,6 +93,9 @@ export default function HomePage() {
   const [form, setForm] = useState<TodoInput>(defaultForm);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [authForm, setAuthForm] = useState<AuthFormState>(defaultAuthForm);
+  const [authFieldErrors, setAuthFieldErrors] = useState<
+    Partial<Record<keyof AuthFormState, boolean>>
+  >({});
   const [authError, setAuthError] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
   const [titleHasError, setTitleHasError] = useState(false);
@@ -154,6 +157,25 @@ export default function HomePage() {
   ) => {
     const { name, value } = event.target;
     setAuthForm((prev) => ({ ...prev, [name]: value }));
+    setAuthFieldErrors((prev) => ({ ...prev, [name]: false }));
+  };
+
+  const validateAuthFields = (fields: (keyof AuthFormState)[]) => {
+    const nextErrors: Partial<Record<keyof AuthFormState, boolean>> = {};
+    fields.forEach((field) => {
+      if (!authForm[field].trim()) {
+        nextErrors[field] = true;
+      }
+    });
+
+    setAuthFieldErrors(nextErrors);
+
+    if (Object.keys(nextErrors).length > 0) {
+      setAuthError("Please fill in the required fields.");
+      return false;
+    }
+
+    return true;
   };
 
   const handleFormChange = (
@@ -188,6 +210,9 @@ export default function HomePage() {
 
   const handleEmailSignIn = async () => {
     setAuthError(null);
+    if (!validateAuthFields(["email", "password"])) {
+      return;
+    }
     setActionLoading(true);
     try {
       await signInWithEmailAndPassword(auth, authForm.email, authForm.password);
@@ -204,6 +229,9 @@ export default function HomePage() {
 
   const handleEmailSignUp = async () => {
     setAuthError(null);
+    if (!validateAuthFields(["firstName", "lastName", "email", "password"])) {
+      return;
+    }
     setActionLoading(true);
     try {
       const credential = await createUserWithEmailAndPassword(
@@ -482,6 +510,7 @@ export default function HomePage() {
           <AuthForm
             mode={authMode}
             form={authForm}
+            fieldErrors={authFieldErrors}
             error={authError}
             isLoading={authLoading}
             onModeChange={setAuthMode}

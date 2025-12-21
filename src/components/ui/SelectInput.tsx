@@ -1,7 +1,7 @@
 import type { SelectHTMLAttributes } from "react";
 
 const selectClasses =
-  "w-full bg-transparent text-sm text-slate-100 outline-none";
+  "w-full bg-transparent pr-8 text-sm text-slate-100 outline-none";
 
 type SelectInputProps = SelectHTMLAttributes<HTMLSelectElement> & {
   className?: string;
