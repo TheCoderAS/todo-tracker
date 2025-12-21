@@ -21,11 +21,11 @@ export default function TodoList({
   onToggleStatus,
   onDelete
 }: TodoListProps) {
+  const [selectedTodo, setSelectedTodo] = useState<Todo | null>(null);
+
   if (groups.length === 0 || groups.every((group) => group.items.length === 0)) {
     return <p className="text-sm text-slate-400">No todos yet. Add one with the + button.</p>;
   }
-
-  const [selectedTodo, setSelectedTodo] = useState<Todo | null>(null);
 
   const priorityIconStyles: Record<Todo["priority"], string> = {
     low: "text-emerald-300",
