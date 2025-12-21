@@ -11,6 +11,7 @@ export interface Todo {
   completedDate: Timestamp | null;
   priority: TodoPriority;
   tags: string[];
+  description: string;
 }
 
 export interface TodoInput {
@@ -19,4 +20,5 @@ export interface TodoInput {
   scheduledTime: string;
   priority: TodoPriority;
   tags: string;
+  description: string;
 }
