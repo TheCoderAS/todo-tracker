@@ -175,6 +175,7 @@ export default function HomePage() {
         });
       } else {
         await addDoc(collection(db, "users", user.uid, "todos"), {
+          author_uid: user.uid,
           title: form.title.trim(),
           status: "pending",
           scheduledDate,
