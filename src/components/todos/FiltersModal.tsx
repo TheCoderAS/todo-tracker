@@ -56,8 +56,8 @@ export default function FiltersModal({
   const [applyBounce, setApplyBounce] = useState(false);
   const showDatePicker = filterDraft.datePreset === "custom";
 
-  const sortByOptions = useMemo(() => {
-    const base = [
+  const sortByOptions = useMemo<Array<{ value: FilterDraft["sortBy"]; label: string }>>(() => {
+    const base: Array<{ value: FilterDraft["sortBy"]; label: string }> = [
       { value: "scheduled", label: "Scheduled date" },
       { value: "created", label: "Created date" },
       { value: "priority", label: "Priority" },
