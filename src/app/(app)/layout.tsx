@@ -31,7 +31,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <ProtectedRoute>
       <AppHeader showSignOut onSignOut={() => setShowConfirm(true)} />
-      <main className="relative z-10 mx-auto flex min-h-screen max-w-6xl flex-col gap-10 px-6 pb-28 pt-24 text-slate-100">
+      <main className="relative z-10 mx-auto flex min-h-screen max-w-6xl flex-col gap-10 px-6 pb-24 pt-20 text-slate-100">
         {children}
       </main>
       <BottomNav />

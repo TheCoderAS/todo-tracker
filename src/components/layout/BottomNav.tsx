@@ -14,7 +14,7 @@ export default function BottomNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-30 border-t border-slate-900/60 bg-slate-950/90 px-6 py-3 backdrop-blur">
+    <nav className="fixed bottom-0 left-0 right-0 z-20 border-t border-slate-900/60 bg-slate-950/90 px-6 py-2 backdrop-blur">
       <div className="mx-auto flex w-full max-w-6xl items-center justify-around gap-4">
         {navItems.map(({ href, label, icon: Icon }) => {
           const isActive =
@@ -29,7 +29,7 @@ export default function BottomNav() {
               aria-current={isActive ? "page" : undefined}
             >
               <span
-                className={`flex h-11 w-11 items-center justify-center rounded-2xl border ${
+                className={`flex h-9 w-9 items-center justify-center rounded-2xl border ${
                   isActive
                     ? "border-sky-400/50 bg-sky-400/10 text-sky-200"
                     : "border-slate-800/70 text-slate-300"
