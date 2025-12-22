@@ -1,0 +1,51 @@
+"use client";
+
+import { useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+
+import AppHeader from "@/components/layout/AppHeader";
+import BottomNav from "@/components/layout/BottomNav";
+import ConfirmDialog from "@/components/ui/ConfirmDialog";
+import OverlayLoader from "@/components/ui/OverlayLoader";
+import { useAuth } from "@/components/auth/AuthProvider";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
+
+export default function AppLayout({ children }: { children: React.ReactNode }) {
+  const { loading, signOutUser } = useAuth();
+  const router = useRouter();
+  const pathname = usePathname();
+  const [isSigningOut, setIsSigningOut] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+
+  const handleSignOut = async () => {
+    setShowConfirm(false);
+    setIsSigningOut(true);
+    try {
+      await signOutUser();
+      router.replace(`/auth?next=${encodeURIComponent(pathname ?? "/")}`);
+    } finally {
+      setIsSigningOut(false);
+    }
+  };
+
+  return (
+    <ProtectedRoute>
+      <AppHeader showSignOut onSignOut={() => setShowConfirm(true)} />
+      <main className="relative z-10 mx-auto flex min-h-screen max-w-6xl flex-col gap-10 px-6 pb-28 pt-24 text-slate-100">
+        {children}
+      </main>
+      <BottomNav />
+      <ConfirmDialog
+        isOpen={showConfirm}
+        title="Sign out of Aura Pulse?"
+        description="You will be signed out and need to log in again to access your account."
+        confirmLabel="Sign out"
+        cancelLabel="Cancel"
+        isLoading={isSigningOut}
+        onConfirm={handleSignOut}
+        onCancel={() => setShowConfirm(false)}
+      />
+      {loading || isSigningOut ? <OverlayLoader /> : null}
+    </ProtectedRoute>
+  );
+}

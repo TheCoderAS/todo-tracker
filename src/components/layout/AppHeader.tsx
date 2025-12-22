@@ -10,16 +10,17 @@ type AppHeaderProps = {
 
 export default function AppHeader({ showSignOut, onSignOut }: AppHeaderProps) {
   return (
-    <header className="sticky top-0 z-30 -mx-6 flex items-center justify-between gap-4 border-b border-slate-900/60 bg-slate-950/85 px-6 py-3 backdrop-blur">
+    <header className="fixed top-0 left-0 right-0 z-40 border-b border-slate-900/60 bg-slate-950/90 px-6 py-3 backdrop-blur">
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4">
       <div className="flex items-center gap-3">
-        <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10 shadow-xl shadow-slate-900/40">
+        <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10 shadow-xl shadow-slate-900/40 no-invert">
           <Image
             src="/aura-pulse.png"
             alt="Aura Pulse logo"
             width={40}
             height={40}
             sizes="40px"
-            className="h-10 w-10 rounded-xl object-contain"
+            className="h-10 w-10 rounded-xl object-contain no-invert"
             priority
             unoptimized
           />
@@ -37,6 +38,7 @@ export default function AppHeader({ showSignOut, onSignOut }: AppHeaderProps) {
           <FiLogOut aria-hidden />
         </button>
       ) : null}
+      </div>
     </header>
   );
 }
