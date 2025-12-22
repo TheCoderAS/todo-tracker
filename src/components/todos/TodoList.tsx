@@ -36,10 +36,7 @@ export default function TodoList({
   onSelectTodo
 }: TodoListProps) {
   const [countdown, setCountdown] = useState("00:00:00:00");
-
-  if (groups.length === 0 || groups.every((group) => group.items.length === 0)) {
-    return <p className="text-sm text-slate-400">No todos yet. Add one with the + button.</p>;
-  }
+  const isEmpty = groups.length === 0 || groups.every((group) => group.items.length === 0);
 
   const priorityIconStyles: Record<Todo["priority"], string> = {
     low: "text-emerald-300",
@@ -81,6 +78,10 @@ export default function TodoList({
     const interval = window.setInterval(updateCountdown, 60000);
     return () => window.clearInterval(interval);
   }, [selectedTodo]);
+
+  if (isEmpty) {
+    return <p className="text-sm text-slate-400">No todos yet. Add one with the + button.</p>;
+  }
 
   const getDueMeta = (todo: Todo) => {
     if (!todo.scheduledDate) {
