@@ -104,6 +104,9 @@ export default function HomePage() {
     message: string;
     variant: SnackbarVariant;
   } | null>(null);
+  const [statusFilter, setStatusFilter] = useState<"all" | Todo["status"]>("all");
+  const [priorityFilter, setPriorityFilter] = useState<"all" | TodoPriority>("all");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [confirmAction, setConfirmAction] = useState<
     { type: "signout" } | { type: "delete"; todoId: string } | null
   >(null);
@@ -506,12 +509,19 @@ export default function HomePage() {
   }, [snackbar]);
 
   const groupedTodos = useMemo(() => {
-    if (todos.length === 0) return [];
+    const filteredTodos = todos.filter((todo) => {
+      const matchesStatus = statusFilter === "all" || todo.status === statusFilter;
+      const matchesPriority = priorityFilter === "all" || todo.priority === priorityFilter;
+      return matchesStatus && matchesPriority;
+    });
+
+    if (filteredTodos.length === 0) return [];
 
     const groups = new Map<string, { title: string; items: Todo[]; sortKey: number }>();
     const unscheduled: Todo[] = [];
+    const sortDirection = sortOrder === "asc" ? 1 : -1;
 
-    todos.forEach((todo) => {
+    filteredTodos.forEach((todo) => {
       if (!todo.scheduledDate) {
         unscheduled.push(todo);
         return;
@@ -529,21 +539,22 @@ export default function HomePage() {
     });
 
     const orderedGroups = Array.from(groups.values())
-      .sort((a, b) => a.sortKey - b.sortKey)
+      .sort((a, b) => (a.sortKey - b.sortKey) * sortDirection)
       .map((group) => ({
         title: group.title,
         items: group.items.sort((a, b) => {
           if (!a.scheduledDate || !b.scheduledDate) return 0;
-          return a.scheduledDate.toMillis() - b.scheduledDate.toMillis();
+          return (a.scheduledDate.toMillis() - b.scheduledDate.toMillis()) * sortDirection;
         })
       }));
 
     if (unscheduled.length) {
+      unscheduled.sort((a, b) => a.title.localeCompare(b.title));
       orderedGroups.push({ title: "Unscheduled", items: unscheduled });
     }
 
     return orderedGroups;
-  }, [todos]);
+  }, [todos, statusFilter, priorityFilter, sortOrder]);
 
   if (authLoading || isInitialLoad) {
     return (
@@ -603,6 +614,48 @@ export default function HomePage() {
         <section className="grid gap-6">
           <section className="grid gap-4">
             <h2 className="text-xl font-semibold text-white">Your todos</h2>
+            <div className="grid gap-3 sm:grid-cols-3">
+              <label className="grid gap-1 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+                Status
+                <select
+                  value={statusFilter}
+                  onChange={(event) =>
+                    setStatusFilter(event.target.value as "all" | Todo["status"])
+                  }
+                  className="rounded-2xl border border-slate-800/70 bg-slate-950/60 px-3 py-2 text-sm text-slate-100"
+                >
+                  <option value="all">All</option>
+                  <option value="pending">Pending</option>
+                  <option value="completed">Completed</option>
+                </select>
+              </label>
+              <label className="grid gap-1 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+                Priority
+                <select
+                  value={priorityFilter}
+                  onChange={(event) =>
+                    setPriorityFilter(event.target.value as "all" | TodoPriority)
+                  }
+                  className="rounded-2xl border border-slate-800/70 bg-slate-950/60 px-3 py-2 text-sm text-slate-100"
+                >
+                  <option value="all">All</option>
+                  <option value="low">Low</option>
+                  <option value="medium">Medium</option>
+                  <option value="high">High</option>
+                </select>
+              </label>
+              <label className="grid gap-1 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+                Sort by date
+                <select
+                  value={sortOrder}
+                  onChange={(event) => setSortOrder(event.target.value as "asc" | "desc")}
+                  className="rounded-2xl border border-slate-800/70 bg-slate-950/60 px-3 py-2 text-sm text-slate-100"
+                >
+                  <option value="asc">Ascending</option>
+                  <option value="desc">Descending</option>
+                </select>
+              </label>
+            </div>
             <TodoList
               groups={groupedTodos}
               formatDate={formatDateDisplay}
