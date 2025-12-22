@@ -28,11 +28,11 @@ type TodoSectionProps = {
   onOpenCreate: () => void;
   statusFilter: "all" | Todo["status"];
   priorityFilter: "all" | Todo["priority"];
-  datePreset: "all" | "today" | "spillover" | "upcoming" | "custom";
-  sortBy: "scheduled" | "completed" | "priority";
+  datePreset: "all" | "today" | "spillover" | "upcoming" | "custom" | "tomorrow" | "week";
+  sortBy: "scheduled" | "completed" | "priority" | "created" | "manual";
   sortOrder: "asc" | "desc";
   onQuickFilter: (value: "all" | "today" | "completed" | "flagged") => void;
-  onSortByChange: (value: "scheduled" | "completed" | "priority") => void;
+  onSortByChange: (value: "scheduled" | "completed" | "priority" | "created" | "manual") => void;
   onSortOrderChange: (value: "asc" | "desc") => void;
   emptyStateLabel: string;
   todayStats: { total: number; completed: number; percent: number };

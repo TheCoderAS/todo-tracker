@@ -178,11 +178,13 @@ export default function TodosPage() {
   const handleApplyFilters = () => {
     setStatusFilter(filterDraft.status);
     setPriorityFilter(filterDraft.priority);
-    setSortBy(
-      filterDraft.status === "completed" || filterDraft.sortBy === "priority"
+    const nextSortBy =
+      filterDraft.status === "completed"
         ? filterDraft.sortBy
-        : defaultFilters.sortBy
-    );
+        : filterDraft.sortBy === "completed"
+        ? "scheduled"
+        : filterDraft.sortBy;
+    setSortBy(nextSortBy);
     setSortOrder(filterDraft.sortOrder);
     setDatePreset(filterDraft.datePreset);
     setSelectedDate(filterDraft.selectedDate);
@@ -409,15 +411,22 @@ export default function TodosPage() {
     tomorrowStart.setDate(todayStart.getDate() + 1);
     const tomorrowEnd = new Date(tomorrowStart);
     tomorrowEnd.setHours(23, 59, 59, 999);
+    const weekEnd = new Date(todayStart);
+    weekEnd.setDate(todayStart.getDate() + 6);
+    weekEnd.setHours(23, 59, 59, 999);
 
     const matchesDatePreset = (todo: Todo) => {
       if (!todo.scheduledDate) {
-        return filterDraft.datePreset === "all";
+        return datePreset === "all";
       }
       const scheduled = todo.scheduledDate.toDate();
       switch (datePreset) {
         case "today":
           return scheduled >= todayStart && scheduled <= todayEnd;
+        case "tomorrow":
+          return scheduled >= tomorrowStart && scheduled <= tomorrowEnd;
+        case "week":
+          return scheduled >= todayStart && scheduled <= weekEnd;
         case "spillover":
           return scheduled < todayStart;
         case "upcoming":
@@ -506,9 +515,15 @@ export default function TodosPage() {
         items: group.items.sort((a, b) => {
           if (sortBy === "priority") {
             const priorityOrder = { low: 3, medium: 2, high: 1 };
-            return (
-              (priorityOrder[a.priority] - priorityOrder[b.priority]) * sortDirection
-            );
+            return (priorityOrder[a.priority] - priorityOrder[b.priority]) * sortDirection;
+          }
+          if (sortBy === "created") {
+            const aMillis = a.createdAt?.toMillis() ?? 0;
+            const bMillis = b.createdAt?.toMillis() ?? 0;
+            return (aMillis - bMillis) * sortDirection;
+          }
+          if (sortBy === "manual") {
+            return 0;
           }
           const aMillis =
             sortBy === "completed"
