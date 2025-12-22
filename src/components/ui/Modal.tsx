@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 
 type ModalProps = {
   isOpen: boolean;
@@ -21,6 +22,11 @@ export default function Modal({
 }: ModalProps) {
   const [shouldRender, setShouldRender] = useState(isOpen);
   const [isClosing, setIsClosing] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   useEffect(() => {
     if (isOpen) {
@@ -54,7 +60,7 @@ export default function Modal({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [shouldRender, onClose]);
 
-  if (!shouldRender) return null;
+  if (!shouldRender || !isMounted) return null;
 
   const layoutClass =
     variant === "bottom-sheet"
@@ -65,9 +71,9 @@ export default function Modal({
       ? "max-h-[85vh] w-full max-w-xl rounded-t-3xl rounded-b-2xl"
       : "max-h-full w-full max-w-2xl rounded-3xl";
 
-  return (
+  return createPortal(
     <div
-      className={`fixed inset-0 z-[1000] flex bg-gradient-to-b from-slate-950/80 via-slate-950/70 to-slate-950/90 px-4 py-10 backdrop-blur-sm transition-opacity duration-200 ${layoutClass} ${
+      className={`fixed inset-0 z-[1000] flex bg-slate-950/70 px-4 py-10 backdrop-blur-xl backdrop-saturate-150 transition-opacity duration-200 ${layoutClass} ${
         isClosing ? "opacity-0" : "opacity-100"
       }`}
       role="dialog"
@@ -84,6 +90,7 @@ export default function Modal({
       >
         {children}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

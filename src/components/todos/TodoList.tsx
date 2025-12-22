@@ -247,7 +247,7 @@ export default function TodoList({
 
   const renderGroup = (group: { title: string; items: Todo[] }) => (
     <div key={group.title} className="grid gap-3">
-      <h3 className="flex items-center gap-2 text-sm font-semibold capitalize tracking-[0.1em] text-slate-300">
+      <h3 className="flex items-center gap-2 text-sm font-semibold capitalize text-slate-300">
         <FiCalendar aria-hidden className="text-slate-400" />
         <span>{group.title}</span>
       </h3>
@@ -455,7 +455,7 @@ export default function TodoList({
                 </div>
               </div>
               <div className="grid gap-2 text-sm text-slate-200">
-                <p className="text-xs font-semibold capitalize tracking-[0.05em] text-slate-300">
+                <p className="text-xs font-semibold capitalize text-slate-300">
                   Description
                 </p>
                 {selectedTodo.description?.trim() ? (

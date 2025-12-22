@@ -166,7 +166,7 @@ export default function ProfilePage() {
               {initials || "AP"}
             </div>
             <div>
-              <p className="text-xs uppercase tracking-[0.1em] text-slate-400">
+              <p className="text-xs uppercase text-slate-400">
                 Profile
               </p>
               <h2 className="text-xl font-semibold text-white">{displayName}</h2>
@@ -191,7 +191,7 @@ export default function ProfilePage() {
         >
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="flex flex-col gap-2">
-              <span className="text-xs font-semibold capitalize tracking-[0.05em] text-slate-300">
+              <span className="text-xs font-semibold capitalize text-slate-300">
                 First name
               </span>
               <input
@@ -202,7 +202,7 @@ export default function ProfilePage() {
               />
             </label>
             <label className="flex flex-col gap-2">
-              <span className="text-xs font-semibold capitalize tracking-[0.05em] text-slate-300">
+              <span className="text-xs font-semibold capitalize text-slate-300">
                 Last name
               </span>
               <input
@@ -215,7 +215,7 @@ export default function ProfilePage() {
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="flex flex-col gap-2">
-              <span className="text-xs font-semibold capitalize tracking-[0.05em] text-slate-300">
+              <span className="text-xs font-semibold capitalize text-slate-300">
                 Phone
               </span>
               <input
@@ -226,7 +226,7 @@ export default function ProfilePage() {
               />
             </label>
             <label className="flex flex-col gap-2">
-              <span className="text-xs font-semibold capitalize tracking-[0.05em] text-slate-300">
+              <span className="text-xs font-semibold capitalize text-slate-300">
                 Gender
               </span>
               <select

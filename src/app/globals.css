@@ -17,6 +17,12 @@
 
   * {
     scrollbar-width: none;
+    letter-spacing: normal;
+  }
+
+  *::before,
+  *::after {
+    letter-spacing: normal;
   }
 
   *::-webkit-scrollbar {
