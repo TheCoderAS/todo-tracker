@@ -2,15 +2,7 @@
 
 import { useEffect, useState } from "react";
 import type { User } from "firebase/auth";
-import {
-  collection,
-  count,
-  getAggregateFromServer,
-  getDocs,
-  query,
-  Timestamp,
-  where
-} from "firebase/firestore";
+import { collection, onSnapshot, Timestamp } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
 import type { Todo } from "@/lib/types";
@@ -58,55 +50,50 @@ export function useCompletionAnalytics(user: User | null): CompletionAnalytics {
     }
 
     let isMounted = true;
-    const fetchAnalytics = async () => {
-      setAnalytics((prev) => ({ ...prev, loading: true }));
-      try {
-        const today = new Date();
-        const days = Array.from({ length: 7 }).map((_, index) => {
-          const date = new Date(today);
-          date.setDate(today.getDate() - (6 - index));
-          return date;
-        });
+    const today = new Date();
+    const days = Array.from({ length: 7 }).map((_, index) => {
+      const date = new Date(today);
+      date.setDate(today.getDate() - (6 - index));
+      return date;
+    });
 
-        const completionCounts = await Promise.all(
-          days.map(async (date) => {
-            const { start, end } = buildDayRange(date);
-            const completionQuery = query(
-              collection(db, "users", user.uid, "todos"),
-              where("status", "==", "completed"),
-              where("completedDate", ">=", Timestamp.fromDate(start)),
-              where("completedDate", "<=", Timestamp.fromDate(end))
-            );
-            const snapshot = await getAggregateFromServer(completionQuery, {
-              count: count()
-            });
-            return { date: start, count: snapshot.data().count };
-          })
-        );
+    const inRange = (timestamp: Timestamp | null, start: Date, end: Date) => {
+      if (!timestamp) return false;
+      const value = timestamp.toDate();
+      return value >= start && value <= end;
+    };
+
+    setAnalytics((prev) => ({ ...prev, loading: true }));
+
+    const unsubscribe = onSnapshot(
+      collection(db, "users", user.uid, "todos"),
+      (snapshot) => {
+        const todos = snapshot.docs.map((docSnapshot) => ({
+          id: docSnapshot.id,
+          ...(docSnapshot.data() as Omit<Todo, "id">)
+        }));
+
+        const completionCounts = days.map((date) => {
+          const { start, end } = buildDayRange(date);
+          const count = todos.filter(
+            (todo) => todo.status === "completed" && inRange(todo.completedDate, start, end)
+          ).length;
+          return { date: start, count };
+        });
 
         const { start: todayStart, end: todayEnd } = buildDayRange(today);
-        const todayCompletions = completionCounts[completionCounts.length - 1]?.count ?? 0;
-        const targetQuery = query(
-          collection(db, "users", user.uid, "todos"),
-          where("scheduledDate", ">=", Timestamp.fromDate(todayStart)),
-          where("scheduledDate", "<=", Timestamp.fromDate(todayEnd))
-        );
-        const targetSnapshot = await getAggregateFromServer(targetQuery, {
-          count: count()
-        });
+        const todayTarget = todos.filter((todo) =>
+          inRange(todo.scheduledDate, todayStart, todayEnd)
+        ).length;
 
-        const todayCompletedQuery = query(
-          collection(db, "users", user.uid, "todos"),
-          where("status", "==", "completed"),
-          where("completedDate", ">=", Timestamp.fromDate(todayStart)),
-          where("completedDate", "<=", Timestamp.fromDate(todayEnd))
+        const todayCompletedTodos = todos.filter(
+          (todo) => todo.status === "completed" && inRange(todo.completedDate, todayStart, todayEnd)
         );
-        const todayDocs = await getDocs(todayCompletedQuery);
+
         let onTime = 0;
         let spillover = 0;
-        todayDocs.forEach((docSnapshot) => {
-          const data = docSnapshot.data() as Todo;
-          const scheduledDate = data.scheduledDate?.toDate();
+        todayCompletedTodos.forEach((todo) => {
+          const scheduledDate = todo.scheduledDate?.toDate();
           if (scheduledDate && scheduledDate < todayStart) {
             spillover += 1;
             return;
@@ -117,24 +104,26 @@ export function useCompletionAnalytics(user: User | null): CompletionAnalytics {
         if (!isMounted) return;
         setAnalytics({
           dailyCompletions: completionCounts,
-          todayCompleted: todayCompletions,
-          todayTarget: targetSnapshot.data().count,
+          todayCompleted: completionCounts[completionCounts.length - 1]?.count ?? 0,
+          todayTarget,
           onTimeCompletions: onTime,
           spilloverCompletions: spillover,
           loading: false
         });
-      } catch (error) {
+      },
+      (error) => {
         console.error(error);
         if (isMounted) {
           setAnalytics((prev) => ({ ...prev, loading: false }));
         }
       }
-    };
-
-    fetchAnalytics();
+    );
 
     return () => {
       isMounted = false;
+      if (typeof unsubscribe === "function") {
+        unsubscribe();
+      }
     };
   }, [user]);
 

@@ -11,7 +11,7 @@ export default function SpilloverSummaryCard({
 }: SpilloverSummaryCardProps) {
   return (
     <div className="rounded-3xl border border-slate-900/60 bg-slate-950/70 p-6">
-      <p className="text-xs uppercase tracking-[0.3em] text-slate-400">
+      <p className="text-xs uppercase tracking-[0.12em] text-slate-400">
         Spillover vs On-Time
       </p>
       <div className="mt-5 grid gap-4 text-sm text-slate-300">
@@ -24,7 +24,7 @@ export default function SpilloverSummaryCard({
           <span className="text-lg font-semibold text-white">{spillover}</span>
         </div>
       </div>
-      <p className="mt-3 text-xs uppercase tracking-[0.3em] text-slate-500">
+      <p className="mt-3 text-xs uppercase tracking-[0.12em] text-slate-500">
         Today&apos;s completions
       </p>
     </div>

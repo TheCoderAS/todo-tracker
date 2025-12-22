@@ -117,12 +117,17 @@ export default function TodosPage() {
         setTitleHasError(false);
       }
     }
-    if (name === "scheduledDate" || name === "scheduledTime") {
-      if (nextValue.trim()) {
-        setScheduleHasError(false);
+    setForm((prev) => {
+      const nextForm = { ...prev, [name]: nextValue };
+      if (name === "scheduledDate" || name === "scheduledTime") {
+        const hasScheduledDate = Boolean(nextForm.scheduledDate.trim());
+        const hasScheduledTime = Boolean(nextForm.scheduledTime.trim());
+        if (hasScheduledDate === hasScheduledTime) {
+          setScheduleHasError(false);
+        }
       }
-    }
-    setForm((prev) => ({ ...prev, [name]: nextValue }));
+      return nextForm;
+    });
   };
 
   const handleDescriptionChange = (value: string) => {
@@ -244,15 +249,19 @@ export default function TodosPage() {
       return;
     }
 
-    if (!form.scheduledDate || !form.scheduledTime) {
+    const hasScheduledDate = Boolean(form.scheduledDate);
+    const hasScheduledTime = Boolean(form.scheduledTime);
+
+    if (hasScheduledDate !== hasScheduledTime) {
       setScheduleHasError(true);
       setActionLoading(false);
       return;
     }
 
-    const scheduledDate = Timestamp.fromDate(
-      new Date(`${form.scheduledDate}T${form.scheduledTime}`)
-    );
+    const scheduledDate =
+      hasScheduledDate && hasScheduledTime
+        ? Timestamp.fromDate(new Date(`${form.scheduledDate}T${form.scheduledTime}`))
+        : null;
 
     try {
       if (editingId) {

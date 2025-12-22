@@ -107,7 +107,6 @@ export default function TodoForm({
                 type="date"
                 value={form.scheduledDate}
                 onChange={onChange}
-                required
                 className={`${inputClasses} ${
                   scheduleHasError ? "border-rose-500/80 text-rose-100" : ""
                 }`}
@@ -128,7 +127,6 @@ export default function TodoForm({
                 type="time"
                 value={form.scheduledTime}
                 onChange={onChange}
-                required
                 className={`${inputClasses} ${
                   scheduleHasError ? "border-rose-500/80 text-rose-100" : ""
                 }`}
