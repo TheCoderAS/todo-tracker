@@ -276,9 +276,9 @@ export default function TodoList({
                     }
                   >
                     {todo.status === "completed" ? (
-                      <FiCheckCircle aria-hidden />
-                    ) : (
                       <FiCircle aria-hidden />
+                    ) : (
+                      <FiCheckCircle aria-hidden />
                     )}
                   </button>
                 </div>
