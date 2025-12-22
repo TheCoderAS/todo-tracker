@@ -44,7 +44,7 @@ export default function AuthForm({
 }: AuthFormProps) {
   return (
     <div className="rounded-3xl border border-slate-800/60 bg-slate-950/60 p-8 shadow-2xl shadow-slate-950/40">
-      <div className="flex flex-wrap items-center justify-between gap-4">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="text-2xl font-semibold text-white">
             {mode === "signin" ? "Welcome back" : "Create your account"}
@@ -55,10 +55,10 @@ export default function AuthForm({
               : "Tell us a little about you to personalize the workspace."}
           </p>
         </div>
-        <div className="flex rounded-full border border-slate-800/70 bg-slate-900/60 p-1 text-xs font-semibold">
+        <div className="flex w-full rounded-full border border-slate-800/70 bg-slate-900/60 p-1 text-xs font-semibold sm:w-auto">
           <button
             type="button"
-            className={`rounded-full px-4 py-2 transition ${
+            className={`flex-1 rounded-full px-4 py-2 text-center transition sm:flex-none ${
               mode === "signin" ? "bg-sky-500/20 text-sky-200" : "text-slate-400"
             }`}
             onClick={() => onModeChange("signin")}
@@ -67,7 +67,7 @@ export default function AuthForm({
           </button>
           <button
             type="button"
-            className={`rounded-full px-4 py-2 transition ${
+            className={`flex-1 rounded-full px-4 py-2 text-center transition sm:flex-none ${
               mode === "signup" ? "bg-sky-500/20 text-sky-200" : "text-slate-400"
             }`}
             onClick={() => onModeChange("signup")}

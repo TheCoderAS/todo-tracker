@@ -30,19 +30,23 @@ export default function AuthSection({
 }: AuthSectionProps) {
   return (
     <section className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
-      <AuthIntro />
-      <AuthForm
-        mode={mode}
-        form={form}
-        fieldErrors={fieldErrors}
-        error={error}
-        isLoading={isLoading}
-        onModeChange={onModeChange}
-        onChange={onChange}
-        onEmailSignIn={onEmailSignIn}
-        onEmailSignUp={onEmailSignUp}
-        onGoogleSignIn={onGoogleSignIn}
-      />
+      <div className="order-2 lg:order-1">
+        <AuthIntro />
+      </div>
+      <div className="order-1 lg:order-2">
+        <AuthForm
+          mode={mode}
+          form={form}
+          fieldErrors={fieldErrors}
+          error={error}
+          isLoading={isLoading}
+          onModeChange={onModeChange}
+          onChange={onChange}
+          onEmailSignIn={onEmailSignIn}
+          onEmailSignUp={onEmailSignUp}
+          onGoogleSignIn={onGoogleSignIn}
+        />
+      </div>
     </section>
   );
 }

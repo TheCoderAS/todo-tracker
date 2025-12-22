@@ -285,6 +285,8 @@ export default function TodosPage() {
             .map((tag) => tag.trim())
             .filter(Boolean),
           description: form.description,
+          status: "pending",
+          completedDate: null,
           author_uid: user.uid,
           updatedAt: serverTimestamp()
         });

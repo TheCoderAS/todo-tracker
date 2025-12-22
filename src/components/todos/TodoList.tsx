@@ -77,7 +77,12 @@ export default function TodoList({
   };
 
   useEffect(() => {
-    if (!selectedTodo?.scheduledDate) {
+    if (!selectedTodo) {
+      setCountdown("00:00:00");
+      return;
+    }
+    const isCompleted = selectedTodo.status === "completed";
+    if (isCompleted || !selectedTodo.scheduledDate) {
       setCountdown("00:00:00");
       return;
     }
@@ -210,10 +215,12 @@ export default function TodoList({
                   <FiCalendar aria-hidden className="text-slate-400" />
                   <span>{formatDate(selectedTodo.scheduledDate)}</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <FiWatch aria-hidden className="text-slate-400" />
-                  <span>{countdown}</span>
-                </div>
+                {selectedTodo.status !== "completed" ? (
+                  <div className="flex items-center gap-2">
+                    <FiWatch aria-hidden className="text-slate-400" />
+                    <span>{countdown}</span>
+                  </div>
+                ) : null}
                 <div className="flex items-center gap-2">
                   <FiTag aria-hidden className="text-slate-400" />
                   <span>{selectedTodo.tags.length ? selectedTodo.tags.join(", ") : "—"}</span>

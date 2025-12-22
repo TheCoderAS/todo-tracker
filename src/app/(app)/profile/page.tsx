@@ -123,6 +123,7 @@ export default function ProfilePage() {
         { merge: true }
       );
       setSnackbar({ message: "Profile updated.", variant: "success" });
+      setIsEditing(false);
     } catch (error) {
       console.error(error);
       setSnackbar({ message: "Unable to update profile.", variant: "error" });
