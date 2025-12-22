@@ -64,6 +64,78 @@ export default function TodoList({
   const formatTitleCase = (value: string) =>
     value ? value.charAt(0).toUpperCase() + value.slice(1) : value;
 
+  const looksLikeHtml = (value: string) => /<\/?[a-z][\s\S]*>/i.test(value);
+
+  const escapeHtml = (value: string) =>
+    value
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+
+  const formatInlineMarkdown = (value: string) =>
+    escapeHtml(value)
+      .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+      .replace(/\*(.+?)\*/g, "<em>$1</em>");
+
+  const markdownToHtml = (value: string) => {
+    const lines = value.split(/\r?\n/);
+    let html = "";
+    let listMode: "ol" | "ul" | null = null;
+    const closeList = () => {
+      if (listMode) {
+        html += `</${listMode}>`;
+        listMode = null;
+      }
+    };
+
+    lines.forEach((line) => {
+      const trimmed = line.trim();
+      const unorderedMatch = /^\s*[-*]\s+(.+)/.exec(line);
+      const orderedMatch = /^\s*\d+\.\s+(.+)/.exec(line);
+
+      if (unorderedMatch) {
+        if (listMode !== "ul") {
+          closeList();
+          html += "<ul>";
+          listMode = "ul";
+        }
+        html += `<li>${formatInlineMarkdown(unorderedMatch[1])}</li>`;
+        return;
+      }
+
+      if (orderedMatch) {
+        if (listMode !== "ol") {
+          closeList();
+          html += "<ol>";
+          listMode = "ol";
+        }
+        html += `<li>${formatInlineMarkdown(orderedMatch[1])}</li>`;
+        return;
+      }
+
+      closeList();
+      if (trimmed) {
+        html += `<p>${formatInlineMarkdown(trimmed)}</p>`;
+      }
+    });
+
+    closeList();
+    return html;
+  };
+
+  const formatDescriptionHtml = (value: string) =>
+    looksLikeHtml(value) ? value : markdownToHtml(value);
+
+  const countListItems = (value: string) => {
+    if (!value) return 0;
+    if (looksLikeHtml(value)) {
+      return value.match(/<li>/g)?.length ?? 0;
+    }
+    return value
+      .split(/\r?\n/)
+      .filter((line) => /^\s*(?:[-*]|\d+\.)\s+/.test(line)).length;
+  };
+
   const now = new Date();
   const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const todayEnd = new Date(todayStart);
@@ -194,7 +266,7 @@ export default function TodoList({
             todo.status !== "completed" && diffHours !== null && diffHours > 0 && diffHours <= 3;
           const isCompleted = todo.status === "completed";
           const shouldCelebrate = todo.id === lastCompletedId;
-          const subtaskCount = todo.description?.match(/<li>/g)?.length ?? 0;
+          const subtaskCount = countListItems(todo.description ?? "");
           const cardTone = isOverdue
             ? "glow-rose"
             : isDueSoon
@@ -388,8 +460,10 @@ export default function TodoList({
                 </p>
                 {selectedTodo.description?.trim() ? (
                   <div
-                    className="space-y-2 text-sm text-slate-200 [&_ol]:list-decimal [&_ol]:pl-5 [&_strong]:text-white [&_ul]:list-disc [&_ul]:pl-5"
-                    dangerouslySetInnerHTML={{ __html: selectedTodo.description }}
+                    className="space-y-2 text-sm text-slate-200 [&_em]:text-slate-100 [&_ol]:list-decimal [&_ol]:pl-5 [&_strong]:text-white [&_ul]:list-disc [&_ul]:pl-5"
+                    dangerouslySetInnerHTML={{
+                      __html: formatDescriptionHtml(selectedTodo.description)
+                    }}
                   />
                 ) : (
                   <p className="text-xs text-slate-400">No description provided.</p>
