@@ -53,6 +53,11 @@ export default function TodoList({
   const formatTitleCase = (value: string) =>
     value ? value.charAt(0).toUpperCase() + value.slice(1) : value;
 
+  const now = new Date();
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const todayEnd = new Date(todayStart);
+  todayEnd.setHours(23, 59, 59, 999);
+
   const formatCountdown = (target: Date | null) => {
     if (!target) return "00:00:00";
     const diffMs = target.getTime() - Date.now();
@@ -131,10 +136,24 @@ export default function TodoList({
           </h3>
           {group.items.map((todo) => {
             const dueMeta = getDueMeta(todo);
+            const scheduledDate = todo.scheduledDate?.toDate() ?? null;
+            const isOverdue =
+              todo.status !== "completed" &&
+              scheduledDate !== null &&
+              scheduledDate.getTime() < Date.now();
+            const isToday =
+              scheduledDate !== null &&
+              scheduledDate >= todayStart &&
+              scheduledDate <= todayEnd;
+            const borderClass = isOverdue
+              ? "border-rose-400/70"
+              : isToday
+              ? "border-emerald-400/70"
+              : "border-slate-800/60";
             return (
               <article
                 key={todo.id}
-                className="flex items-center gap-3 rounded-2xl border border-slate-800/60 bg-slate-900/50 px-4 py-3 transition hover:border-slate-700/80"
+                className={`flex items-center gap-3 rounded-2xl border bg-slate-900/50 px-4 py-3 transition hover:border-slate-700/80 ${borderClass}`}
                 role="button"
                 tabIndex={0}
                 onClick={() => onSelectTodo(todo)}

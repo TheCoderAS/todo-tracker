@@ -60,7 +60,9 @@ export default function TodosPage() {
     status: "pending",
     priority: "all",
     sortBy: "scheduled",
-    sortOrder: "asc"
+    sortOrder: "asc",
+    datePreset: "all",
+    selectedDate: ""
   };
   const [statusFilter, setStatusFilter] = useState<"all" | Todo["status"]>(
     defaultFilters.status
@@ -70,6 +72,10 @@ export default function TodosPage() {
   );
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">(defaultFilters.sortOrder);
   const [sortBy, setSortBy] = useState<FilterDraft["sortBy"]>(defaultFilters.sortBy);
+  const [datePreset, setDatePreset] = useState<FilterDraft["datePreset"]>(
+    defaultFilters.datePreset
+  );
+  const [selectedDate, setSelectedDate] = useState(defaultFilters.selectedDate);
   const [filterDraft, setFilterDraft] = useState<FilterDraft>(defaultFilters);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -156,7 +162,9 @@ export default function TodosPage() {
       status: statusFilter,
       priority: priorityFilter,
       sortBy,
-      sortOrder
+      sortOrder,
+      datePreset,
+      selectedDate
     });
     setIsFilterOpen(true);
   };
@@ -173,6 +181,8 @@ export default function TodosPage() {
       filterDraft.status === "completed" ? filterDraft.sortBy : defaultFilters.sortBy
     );
     setSortOrder(filterDraft.sortOrder);
+    setDatePreset(filterDraft.datePreset);
+    setSelectedDate(filterDraft.selectedDate);
     setIsFilterOpen(false);
   };
 
@@ -182,6 +192,8 @@ export default function TodosPage() {
     setPriorityFilter(defaultFilters.priority);
     setSortBy(defaultFilters.sortBy);
     setSortOrder(defaultFilters.sortOrder);
+    setDatePreset(defaultFilters.datePreset);
+    setSelectedDate(defaultFilters.selectedDate);
   };
 
   const handleEditTodo = (todo: Todo) => {
@@ -324,10 +336,41 @@ export default function TodosPage() {
   };
 
   const groupedTodos = useMemo(() => {
+    const now = new Date();
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const todayEnd = new Date(todayStart);
+    todayEnd.setHours(23, 59, 59, 999);
+
+    const matchesDatePreset = (todo: Todo) => {
+      if (!todo.scheduledDate) {
+        return filterDraft.datePreset === "all";
+      }
+      const scheduled = todo.scheduledDate.toDate();
+      switch (datePreset) {
+        case "today":
+          return scheduled >= todayStart && scheduled <= todayEnd;
+        case "spillover":
+          return scheduled < todayStart;
+        case "upcoming":
+          return scheduled > todayEnd;
+        case "custom": {
+          if (!selectedDate) return true;
+          const selected = new Date(`${selectedDate}T00:00:00`);
+          const selectedEnd = new Date(selected);
+          selectedEnd.setHours(23, 59, 59, 999);
+          return scheduled >= selected && scheduled <= selectedEnd;
+        }
+        case "all":
+        default:
+          return true;
+      }
+    };
+
     const filteredTodos = todos.filter((todo) => {
       const matchesStatus = statusFilter === "all" || todo.status === statusFilter;
       const matchesPriority = priorityFilter === "all" || todo.priority === priorityFilter;
-      return matchesStatus && matchesPriority;
+      const matchesDate = matchesDatePreset(todo);
+      return matchesStatus && matchesPriority && matchesDate;
     });
 
     if (filteredTodos.length === 0) return [];
@@ -387,7 +430,7 @@ export default function TodosPage() {
     }
 
     return orderedGroups;
-  }, [todos, statusFilter, priorityFilter, sortBy, sortOrder]);
+  }, [todos, statusFilter, priorityFilter, sortBy, sortOrder, datePreset, selectedDate]);
 
   if (loading || isInitialLoad) {
     return (

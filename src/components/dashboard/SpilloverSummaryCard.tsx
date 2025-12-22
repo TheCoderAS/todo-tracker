@@ -24,9 +24,7 @@ export default function SpilloverSummaryCard({
           <span className="text-lg font-semibold text-white">{spillover}</span>
         </div>
       </div>
-      <p className="mt-3 text-xs uppercase tracking-[0.12em] text-slate-500">
-        Today&apos;s completions
-      </p>
+      <p className="mt-3 text-xs text-slate-500">Today&apos;s Completions</p>
     </div>
   );
 }
