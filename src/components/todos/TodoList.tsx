@@ -1,13 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
+  FiAlertTriangle,
   FiCalendar,
   FiCheckCircle,
   FiCircle,
   FiClock,
   FiEdit2,
   FiFlag,
+  FiLayers,
   FiTag,
   FiTrash2,
   FiWatch,
@@ -22,9 +24,13 @@ type TodoListProps = {
   formatDate: (timestamp: Todo["scheduledDate"]) => string;
   onEdit: (todo: Todo) => void;
   onToggleStatus: (todo: Todo) => void;
+  onToggleFlag: (todo: Todo) => void;
   onDelete: (todoId: string) => void;
   selectedTodo: Todo | null;
   onSelectTodo: (todo: Todo | null) => void;
+  emptyStateLabel: string;
+  lastCompletedId: string | null;
+  isLoading: boolean;
 };
 
 export default function TodoList({
@@ -32,11 +38,16 @@ export default function TodoList({
   formatDate,
   onEdit,
   onToggleStatus,
+  onToggleFlag,
   onDelete,
   selectedTodo,
-  onSelectTodo
+  onSelectTodo,
+  emptyStateLabel,
+  lastCompletedId,
+  isLoading
 }: TodoListProps) {
   const [countdown, setCountdown] = useState("00:00:00");
+  const [showCompleted, setShowCompleted] = useState(false);
   const isEmpty = groups.length === 0 || groups.every((group) => group.items.length === 0);
 
   const priorityIconStyles: Record<Todo["priority"], string> = {
@@ -81,6 +92,21 @@ export default function TodoList({
     return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
   };
 
+  const groupSplit = useMemo(() => {
+    const pendingGroups: { title: string; items: Todo[] }[] = [];
+    const completedGroups: { title: string; items: Todo[] }[] = [];
+    groups.forEach((group) => {
+      const pendingItems = group.items.filter((todo) => todo.status !== "completed");
+      const completedItems = group.items.filter((todo) => todo.status === "completed");
+      if (pendingItems.length) pendingGroups.push({ title: group.title, items: pendingItems });
+      if (completedItems.length)
+        completedGroups.push({ title: group.title, items: completedItems });
+    });
+    return { pendingGroups, completedGroups };
+  }, [groups]);
+
+  const hasCompleted = groupSplit.completedGroups.some((group) => group.items.length > 0);
+
   useEffect(() => {
     if (!selectedTodo) {
       setCountdown("00:00:00");
@@ -98,8 +124,29 @@ export default function TodoList({
     return () => window.clearInterval(interval);
   }, [selectedTodo]);
 
+  if (isLoading) {
+    return (
+      <div className="grid gap-4">
+        {[...Array(3)].map((_, index) => (
+          <div
+            key={`skeleton-${index}`}
+            className="status-ring animate-pulse rounded-3xl bg-slate-900/60 p-4"
+          >
+            <div className="h-3 w-24 rounded-full bg-slate-800/70" />
+            <div className="mt-4 h-4 w-3/4 rounded-full bg-slate-800/70" />
+            <div className="mt-3 h-3 w-1/2 rounded-full bg-slate-800/70" />
+            <div className="mt-4 flex gap-2">
+              <div className="h-7 w-16 rounded-full bg-slate-800/70" />
+              <div className="h-7 w-20 rounded-full bg-slate-800/70" />
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
   if (isEmpty) {
-    return <p className="text-sm text-slate-400">No todos yet. Add one with the + button.</p>;
+    return <p className="text-sm text-slate-400">{emptyStateLabel}</p>;
   }
 
   const getDueMeta = (todo: Todo) => {
@@ -126,78 +173,168 @@ export default function TodoList({
     return { label: `Due in ${hours}h ${minutes}m`, className };
   };
 
-  return (
-    <div className="grid gap-4">
-      {groups.map((group) => (
-        <div key={group.title} className="grid gap-3">
-          <h3 className="flex items-center gap-2 text-sm font-semibold capitalize tracking-[0.05em] text-slate-300">
-            <FiCalendar aria-hidden className="text-slate-400" />
-            <span>{group.title}</span>
-          </h3>
-          {group.items.map((todo) => {
-            const dueMeta = getDueMeta(todo);
-            const scheduledDate = todo.scheduledDate?.toDate() ?? null;
-            const isOverdue =
-              todo.status !== "completed" &&
-              scheduledDate !== null &&
-              scheduledDate.getTime() < Date.now();
-            const isToday =
-              scheduledDate !== null &&
-              scheduledDate >= todayStart &&
-              scheduledDate <= todayEnd;
-            const borderClass = isOverdue
-              ? "border-rose-400/70"
-              : isToday
-              ? "border-emerald-400/70"
-              : "border-slate-800/60";
-            return (
-              <article
-                key={todo.id}
-                className={`flex items-center gap-3 rounded-2xl border bg-slate-900/50 px-4 py-3 transition hover:border-slate-700/80 ${borderClass}`}
-                role="button"
-                tabIndex={0}
-                onClick={() => onSelectTodo(todo)}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter" || event.key === " ") {
-                    event.preventDefault();
-                    onSelectTodo(todo);
-                  }
-                }}
-              >
-                <div className="flex min-w-0 flex-1 items-center gap-3">
-                  <div className="min-w-0">
-                    <strong className="block truncate text-sm font-semibold text-white">
-                      {todo.title}
-                    </strong>
-                    <span className={`mt-1 flex items-center gap-1 text-xs ${dueMeta.className}`}>
+  const renderGroup = (group: { title: string; items: Todo[] }) => (
+    <div key={group.title} className="grid gap-3">
+      <h3 className="flex items-center gap-2 text-sm font-semibold capitalize tracking-[0.18em] text-slate-300">
+        <FiCalendar aria-hidden className="text-slate-400" />
+        <span>{group.title}</span>
+      </h3>
+      <div className="grid gap-3">
+        {group.items.map((todo) => {
+          const dueMeta = getDueMeta(todo);
+          const scheduledDate = todo.scheduledDate?.toDate() ?? null;
+          const isOverdue =
+            todo.status !== "completed" &&
+            scheduledDate !== null &&
+            scheduledDate.getTime() < Date.now();
+          const diffHours = scheduledDate
+            ? (scheduledDate.getTime() - Date.now()) / 3600000
+            : null;
+          const isDueSoon =
+            todo.status !== "completed" && diffHours !== null && diffHours > 0 && diffHours <= 3;
+          const isCompleted = todo.status === "completed";
+          const shouldCelebrate = todo.id === lastCompletedId;
+          const subtaskCount = todo.description?.match(/<li>/g)?.length ?? 0;
+          const cardTone = isOverdue
+            ? "glow-rose"
+            : isDueSoon
+            ? "glow-amber"
+            : isCompleted
+            ? "glow-emerald"
+            : "status-ring";
+          return (
+            <article
+              key={todo.id}
+              className={`flex flex-col gap-4 rounded-3xl border border-slate-900/60 bg-gradient-to-br from-slate-900/80 via-slate-950/90 to-slate-950/80 px-5 py-4 transition hover:border-slate-700/70 ${cardTone} ${
+                isCompleted ? "opacity-70" : ""
+              } ${isDueSoon ? "amber-pulse" : ""}`}
+              role="button"
+              tabIndex={0}
+              onClick={() => onSelectTodo(todo)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  onSelectTodo(todo);
+                }
+              }}
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <strong
+                    className={`block truncate text-base font-semibold text-white ${
+                      isCompleted ? "line-through decoration-emerald-400/70" : ""
+                    }`}
+                  >
+                    {todo.title}
+                  </strong>
+                  <span
+                    className={`mt-1 flex items-center gap-2 text-xs ${dueMeta.className} ${
+                      isOverdue ? "text-rose-300" : ""
+                    }`}
+                  >
+                    {isOverdue ? (
+                      <FiAlertTriangle aria-hidden className="text-rose-300" />
+                    ) : (
                       <FiClock aria-hidden />
-                      {dueMeta.label}
-                    </span>
-                  </div>
+                    )}
+                    {dueMeta.label}
+                  </span>
                 </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    className={`flex h-10 w-10 items-center justify-center rounded-full border border-slate-800/70 bg-slate-950/60 text-sm transition hover:border-slate-600/70 ${
+                      todo.priority === "high"
+                        ? "text-amber-200"
+                        : "text-slate-400 hover:text-slate-200"
+                    }`}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      onToggleFlag(todo);
+                    }}
+                    aria-label={
+                      todo.priority === "high"
+                        ? "Remove priority flag"
+                        : "Flag as priority"
+                    }
+                  >
+                    <FiFlag aria-hidden />
+                  </button>
+                  <button
+                    type="button"
+                    className={`flex h-10 w-10 items-center justify-center rounded-full border border-slate-800/70 bg-slate-950/60 text-sm transition hover:border-slate-600/70 ${
+                      isCompleted ? "text-emerald-200" : "text-slate-300 hover:text-white"
+                    } ${shouldCelebrate ? "celebrate-pop" : ""}`}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      onToggleStatus(todo);
+                    }}
+                    aria-label={
+                      todo.status === "completed"
+                        ? "Mark todo as pending"
+                        : "Mark todo as completed"
+                    }
+                  >
+                    {todo.status === "completed" ? (
+                      <FiCheckCircle aria-hidden />
+                    ) : (
+                      <FiCircle aria-hidden />
+                    )}
+                  </button>
+                </div>
+              </div>
+              <div className="flex flex-wrap items-center gap-2 text-xs text-slate-300">
                 <span
-                  className={`flex h-8 w-8 items-center justify-center rounded-full bg-slate-950/70 ${priorityIconStyles[todo.priority]}`}
-                  title={`Priority: ${todo.priority}`}
+                  className={`flex items-center gap-1 rounded-full bg-slate-950/70 px-2 py-1 ${
+                    priorityIconStyles[todo.priority]
+                  }`}
                 >
                   <FiFlag aria-hidden />
-                  <span className="sr-only">Priority {todo.priority}</span>
+                  {formatTitleCase(todo.priority)}
                 </span>
-                <span
-                  className={`flex h-8 w-8 items-center justify-center rounded-full bg-slate-950/70 ${statusIconStyles[todo.status]}`}
-                  title={`Status: ${todo.status}`}
-                >
-                  {todo.status === "completed" ? (
-                    <FiCheckCircle aria-hidden />
-                  ) : (
-                    <FiCircle aria-hidden />
-                  )}
-                  <span className="sr-only">Status {todo.status}</span>
-                </span>
-              </article>
-            );
-          })}
+                {todo.tags.slice(0, 2).map((tag) => (
+                  <span
+                    key={`${todo.id}-${tag}`}
+                    className="rounded-full border border-slate-800/70 bg-slate-950/70 px-2 py-1 text-slate-300"
+                  >
+                    #{tag}
+                  </span>
+                ))}
+                {subtaskCount > 0 ? (
+                  <span className="flex items-center gap-1 rounded-full border border-slate-800/70 bg-slate-950/70 px-2 py-1 text-slate-300">
+                    <FiLayers aria-hidden />
+                    {subtaskCount} subtasks
+                  </span>
+                ) : null}
+              </div>
+            </article>
+          );
+        })}
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="grid gap-6">
+      {groupSplit.pendingGroups.map((group) => renderGroup(group))}
+      {hasCompleted ? (
+        <div className="grid gap-3">
+          <button
+            type="button"
+            className="flex items-center justify-between rounded-2xl border border-slate-800/70 bg-slate-950/60 px-4 py-3 text-xs font-semibold text-slate-200 transition hover:border-slate-600/70"
+            onClick={() => setShowCompleted((prev) => !prev)}
+            aria-expanded={showCompleted}
+          >
+            <span>Completed tasks</span>
+            <span className="text-slate-400">{showCompleted ? "Hide" : "Show"}</span>
+          </button>
+          {showCompleted ? (
+            <div className="grid gap-4">
+              {groupSplit.completedGroups.map((group) => renderGroup(group))}
+            </div>
+          ) : null}
         </div>
-      ))}
+      ) : null}
       <Modal
         isOpen={Boolean(selectedTodo)}
         onClose={() => onSelectTodo(null)}

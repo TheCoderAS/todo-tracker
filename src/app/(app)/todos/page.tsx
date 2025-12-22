@@ -82,6 +82,7 @@ export default function TodosPage() {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [selectedTodo, setSelectedTodo] = useState<Todo | null>(null);
+  const [lastCompletedId, setLastCompletedId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) {
@@ -177,9 +178,13 @@ export default function TodosPage() {
   const handleApplyFilters = () => {
     setStatusFilter(filterDraft.status);
     setPriorityFilter(filterDraft.priority);
-    setSortBy(
-      filterDraft.status === "completed" ? filterDraft.sortBy : defaultFilters.sortBy
-    );
+    const nextSortBy =
+      filterDraft.status === "completed"
+        ? filterDraft.sortBy
+        : filterDraft.sortBy === "completed"
+        ? "scheduled"
+        : filterDraft.sortBy;
+    setSortBy(nextSortBy);
     setSortOrder(filterDraft.sortOrder);
     setDatePreset(filterDraft.datePreset);
     setSelectedDate(filterDraft.selectedDate);
@@ -240,6 +245,10 @@ export default function TodosPage() {
         status: nextStatus,
         completedDate: nextStatus === "completed" ? serverTimestamp() : null
       });
+      if (nextStatus === "completed") {
+        setLastCompletedId(todo.id);
+        window.setTimeout(() => setLastCompletedId(null), 1200);
+      }
       setSnackbar({
         message:
           nextStatus === "completed"
@@ -249,6 +258,29 @@ export default function TodosPage() {
       });
     } catch (error) {
       setSnackbar({ message: "Unable to update todo status.", variant: "error" });
+      console.error(error);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleToggleFlag = async (todo: Todo) => {
+    if (!user) return;
+    setActionLoading(true);
+    try {
+      const todoRef = doc(db, "users", user.uid, "todos", todo.id);
+      const nextPriority = todo.priority === "high" ? "medium" : "high";
+      await updateDoc(todoRef, {
+        priority: nextPriority,
+        updatedAt: serverTimestamp()
+      });
+      setSnackbar({
+        message:
+          nextPriority === "high" ? "Flagged for priority focus." : "Flag removed.",
+        variant: "success"
+      });
+    } catch (error) {
+      setSnackbar({ message: "Unable to update priority flag.", variant: "error" });
       console.error(error);
     } finally {
       setActionLoading(false);
@@ -335,20 +367,66 @@ export default function TodosPage() {
     }
   };
 
+  const todayStats = useMemo(() => {
+    const now = new Date();
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const todayEnd = new Date(todayStart);
+    todayEnd.setHours(23, 59, 59, 999);
+    const todaysTodos = todos.filter((todo) => {
+      const scheduled = todo.scheduledDate?.toDate();
+      return scheduled && scheduled >= todayStart && scheduled <= todayEnd;
+    });
+    const completed = todaysTodos.filter((todo) => todo.status === "completed").length;
+    return {
+      total: todaysTodos.length,
+      completed,
+      percent: todaysTodos.length ? Math.round((completed / todaysTodos.length) * 100) : 0
+    };
+  }, [todos]);
+
+  const streakCount = useMemo(() => {
+    const completedDates = new Set<string>();
+    todos.forEach((todo) => {
+      if (todo.status !== "completed" || !todo.completedDate) return;
+      const date = todo.completedDate.toDate();
+      completedDates.add(date.toISOString().split("T")[0]);
+    });
+    let streak = 0;
+    const cursor = new Date();
+    for (let i = 0; i < 30; i += 1) {
+      const key = cursor.toISOString().split("T")[0];
+      if (!completedDates.has(key)) break;
+      streak += 1;
+      cursor.setDate(cursor.getDate() - 1);
+    }
+    return streak;
+  }, [todos]);
+
   const groupedTodos = useMemo(() => {
     const now = new Date();
     const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const todayEnd = new Date(todayStart);
     todayEnd.setHours(23, 59, 59, 999);
+    const tomorrowStart = new Date(todayStart);
+    tomorrowStart.setDate(todayStart.getDate() + 1);
+    const tomorrowEnd = new Date(tomorrowStart);
+    tomorrowEnd.setHours(23, 59, 59, 999);
+    const weekEnd = new Date(todayStart);
+    weekEnd.setDate(todayStart.getDate() + 6);
+    weekEnd.setHours(23, 59, 59, 999);
 
     const matchesDatePreset = (todo: Todo) => {
       if (!todo.scheduledDate) {
-        return filterDraft.datePreset === "all";
+        return datePreset === "all";
       }
       const scheduled = todo.scheduledDate.toDate();
       switch (datePreset) {
         case "today":
           return scheduled >= todayStart && scheduled <= todayEnd;
+        case "tomorrow":
+          return scheduled >= tomorrowStart && scheduled <= tomorrowEnd;
+        case "week":
+          return scheduled >= todayStart && scheduled <= weekEnd;
         case "spillover":
           return scheduled < todayStart;
         case "upcoming":
@@ -375,7 +453,10 @@ export default function TodosPage() {
 
     if (filteredTodos.length === 0) return [];
 
-    const groups = new Map<string, { title: string; items: Todo[]; sortKey: number }>();
+    const groups = new Map<
+      string,
+      { title: string; items: Todo[]; sortKey: number; sectionRank: number }
+    >();
     const unscheduled: Todo[] = [];
     const sortDirection = sortOrder === "asc" ? 1 : -1;
 
@@ -389,7 +470,20 @@ export default function TodosPage() {
         return;
       }
 
-      const dateKey = formatGroupTitle(activeDate);
+      let sectionRank = 2;
+      let dateKey = formatGroupTitle(activeDate);
+      if (activeDate >= todayStart && activeDate <= todayEnd) {
+        sectionRank = 0;
+        dateKey = "Today";
+      } else if (activeDate >= tomorrowStart && activeDate <= tomorrowEnd) {
+        sectionRank = 1;
+        dateKey = "Tomorrow";
+      } else if (activeDate > tomorrowEnd) {
+        sectionRank = 2;
+        dateKey = `Later · ${formatGroupTitle(activeDate)}`;
+      } else if (activeDate < todayStart) {
+        sectionRank = 3;
+      }
       const midnight = new Date(
         activeDate.getFullYear(),
         activeDate.getMonth(),
@@ -399,15 +493,38 @@ export default function TodosPage() {
       if (existing) {
         existing.items.push(todo);
       } else {
-        groups.set(dateKey, { title: dateKey, items: [todo], sortKey: midnight });
+        groups.set(dateKey, {
+          title: dateKey,
+          items: [todo],
+          sortKey: midnight,
+          sectionRank
+        });
       }
     });
 
     const orderedGroups = Array.from(groups.values())
-      .sort((a, b) => (a.sortKey - b.sortKey) * sortDirection)
+      .sort((a, b) => {
+        if (a.sectionRank !== b.sectionRank) {
+          return a.sectionRank - b.sectionRank;
+        }
+        if (a.sectionRank === 0 && b.sectionRank === 0) return 0;
+        return (a.sortKey - b.sortKey) * sortDirection;
+      })
       .map((group) => ({
         title: group.title,
         items: group.items.sort((a, b) => {
+          if (sortBy === "priority") {
+            const priorityOrder = { low: 3, medium: 2, high: 1 };
+            return (priorityOrder[a.priority] - priorityOrder[b.priority]) * sortDirection;
+          }
+          if (sortBy === "created") {
+            const aMillis = a.createdAt?.toMillis() ?? 0;
+            const bMillis = b.createdAt?.toMillis() ?? 0;
+            return (aMillis - bMillis) * sortDirection;
+          }
+          if (sortBy === "manual") {
+            return 0;
+          }
           const aMillis =
             sortBy === "completed"
               ? a.completedDate?.toMillis()
@@ -432,13 +549,49 @@ export default function TodosPage() {
     return orderedGroups;
   }, [todos, statusFilter, priorityFilter, sortBy, sortOrder, datePreset, selectedDate]);
 
-  if (loading || isInitialLoad) {
-    return (
-      <section className="relative z-10 flex min-h-[60vh] items-center justify-center">
-        <OverlayLoader />
-      </section>
-    );
-  }
+  const emptyStateLabel = useMemo(() => {
+    if (datePreset === "today") return "Nothing due today.";
+    if (statusFilter === "completed") return "No completed tasks yet.";
+    if (priorityFilter === "high") return "No flagged tasks right now.";
+    return "No todos yet. Add one with the + button.";
+  }, [datePreset, statusFilter, priorityFilter]);
+
+  const handleQuickFilter = (value: "all" | "today" | "completed" | "flagged") => {
+    switch (value) {
+      case "today":
+        setStatusFilter("pending");
+        setPriorityFilter("all");
+        setDatePreset("today");
+        if (sortBy === "completed") {
+          setSortBy("scheduled");
+        }
+        break;
+      case "completed":
+        setStatusFilter("completed");
+        setPriorityFilter("all");
+        setDatePreset("all");
+        break;
+      case "flagged":
+        setStatusFilter("all");
+        setPriorityFilter("high");
+        setDatePreset("all");
+        if (sortBy === "completed") {
+          setSortBy("scheduled");
+        }
+        break;
+      case "all":
+      default:
+        setStatusFilter("all");
+        setPriorityFilter("all");
+        setDatePreset("all");
+        if (sortBy === "completed") {
+          setSortBy("scheduled");
+        }
+        break;
+    }
+  };
+
+  const isLoading = loading || isInitialLoad;
 
   return (
     <section className="flex flex-col gap-6">
@@ -447,11 +600,25 @@ export default function TodosPage() {
         formatDate={formatDateDisplay}
         onEdit={handleEditTodo}
         onToggleStatus={handleToggleStatus}
+        onToggleFlag={handleToggleFlag}
         onDelete={handleDeleteRequest}
         selectedTodo={selectedTodo}
         onSelectTodo={setSelectedTodo}
         onOpenFilter={openFilterModal}
         onOpenCreate={openCreateModal}
+        statusFilter={statusFilter}
+        priorityFilter={priorityFilter}
+        datePreset={datePreset}
+        sortBy={sortBy}
+        sortOrder={sortOrder}
+        onQuickFilter={handleQuickFilter}
+        onSortByChange={setSortBy}
+        onSortOrderChange={setSortOrder}
+        emptyStateLabel={emptyStateLabel}
+        todayStats={todayStats}
+        streakCount={streakCount}
+        lastCompletedId={lastCompletedId}
+        isLoading={isLoading}
       />
       <Modal isOpen={isFormOpen} onClose={closeFormModal} ariaLabel="Todo form">
         <TodoForm

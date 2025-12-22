@@ -7,11 +7,18 @@ type ModalProps = {
   onClose: () => void;
   ariaLabel: string;
   children: React.ReactNode;
+  variant?: "center" | "bottom-sheet";
 };
 
 const CLOSE_DURATION_MS = 220;
 
-export default function Modal({ isOpen, onClose, ariaLabel, children }: ModalProps) {
+export default function Modal({
+  isOpen,
+  onClose,
+  ariaLabel,
+  children,
+  variant = "center"
+}: ModalProps) {
   const [shouldRender, setShouldRender] = useState(isOpen);
   const [isClosing, setIsClosing] = useState(false);
 
@@ -49,9 +56,18 @@ export default function Modal({ isOpen, onClose, ariaLabel, children }: ModalPro
 
   if (!shouldRender) return null;
 
+  const layoutClass =
+    variant === "bottom-sheet"
+      ? "items-end justify-center pb-8"
+      : "items-center justify-center";
+  const panelClass =
+    variant === "bottom-sheet"
+      ? "max-h-[85vh] w-full max-w-xl rounded-t-3xl rounded-b-2xl"
+      : "max-h-full w-full max-w-2xl rounded-3xl";
+
   return (
     <div
-      className={`fixed inset-0 z-40 flex items-center justify-center bg-gradient-to-b from-slate-950/80 via-slate-950/70 to-slate-950/90 px-4 py-10 backdrop-blur-sm transition-opacity duration-200 ${
+      className={`fixed inset-0 z-40 flex bg-gradient-to-b from-slate-950/80 via-slate-950/70 to-slate-950/90 px-4 py-10 backdrop-blur-sm transition-opacity duration-200 ${layoutClass} ${
         isClosing ? "opacity-0" : "opacity-100"
       }`}
       role="dialog"
@@ -61,8 +77,8 @@ export default function Modal({ isOpen, onClose, ariaLabel, children }: ModalPro
     >
       <div className="modal-ambient pointer-events-none absolute inset-0" aria-hidden />
       <div
-        className={`relative max-h-full w-full max-w-2xl overflow-y-auto rounded-3xl border border-slate-800/70 bg-slate-950/95 p-6 shadow-2xl shadow-slate-950/60 transition duration-200 ${
-          isClosing ? "scale-95 opacity-0" : "scale-100 opacity-100"
+        className={`relative overflow-y-auto border border-slate-800/70 bg-slate-950/95 p-6 shadow-2xl shadow-slate-950/60 transition duration-200 ${panelClass} ${
+          isClosing ? "translate-y-4 scale-95 opacity-0" : "translate-y-0 scale-100 opacity-100"
         }`}
         onClick={(event) => event.stopPropagation()}
       >

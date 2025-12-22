@@ -9,6 +9,7 @@ export interface Todo {
   status: TodoStatus;
   scheduledDate: Timestamp | null;
   completedDate: Timestamp | null;
+  createdAt?: Timestamp | null;
   priority: TodoPriority;
   tags: string[];
   description: string;
