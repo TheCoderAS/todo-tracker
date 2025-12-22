@@ -15,7 +15,7 @@ export default function SpilloverSummaryCard({
 
   return (
     <div className="group rounded-3xl border border-white/10 bg-slate-950/70 p-6 shadow-[0_0_30px_rgba(15,23,42,0.35)] transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_0_40px_rgba(56,189,248,0.15)]">
-      <p className="text-xs uppercase tracking-[0.1em] text-slate-400">
+      <p className="text-xs uppercase text-slate-400">
         On-time vs Spillover
       </p>
       <p className="mt-2 text-sm text-slate-300/80">
@@ -23,7 +23,7 @@ export default function SpilloverSummaryCard({
       </p>
       <div className="mt-5 grid gap-3 sm:grid-cols-2">
         <div className="rounded-2xl border border-emerald-400/20 bg-gradient-to-br from-emerald-500/10 via-slate-950/70 to-transparent p-4 transition-all duration-500 hover:shadow-[0_0_25px_rgba(16,185,129,0.25)]">
-          <p className="text-xs uppercase tracking-[0.1em] text-emerald-200/80">
+          <p className="text-xs uppercase text-emerald-200/80">
             On-time
           </p>
           <p className="mt-2 text-2xl font-semibold text-white">{onTime}</p>
@@ -32,7 +32,7 @@ export default function SpilloverSummaryCard({
           </p>
         </div>
         <div className="rounded-2xl border border-rose-400/20 bg-gradient-to-br from-rose-500/10 via-slate-950/70 to-transparent p-4 transition-all duration-500 hover:shadow-[0_0_25px_rgba(244,63,94,0.2)]">
-          <p className="text-xs uppercase tracking-[0.1em] text-rose-200/80">
+          <p className="text-xs uppercase text-rose-200/80">
             Spillover
           </p>
           <p className="mt-2 text-2xl font-semibold text-white">{spillover}</p>
@@ -42,7 +42,7 @@ export default function SpilloverSummaryCard({
         </div>
       </div>
       <div className="mt-5">
-        <div className="flex items-center justify-between text-xs uppercase tracking-[0.1em] text-slate-400">
+        <div className="flex items-center justify-between text-xs uppercase text-slate-400">
           <span>Balance</span>
           <span>{onTimePercent}% on-time</span>
         </div>

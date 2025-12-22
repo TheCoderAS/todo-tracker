@@ -95,35 +95,10 @@ export default function TodoSection({
   return (
     <section className="grid gap-6">
       <section className="grid gap-5">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="grid gap-2">
-            <h2 className="text-xl font-semibold text-white">Your focus</h2>
-            <p className="text-xs text-slate-400">
-              Prioritize the day with fast filters and richer context.
-            </p>
-          </div>
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="rounded-2xl border border-slate-800/60 bg-slate-950/70 px-3 py-2 text-xs text-slate-200 shadow-lg shadow-slate-950/40">
-              <span className="text-slate-400">Streak</span>
-              <span className="ml-2 text-sm font-semibold text-emerald-200">
-                {streakCount} days
-              </span>
-            </div>
-            <button
-              type="button"
-              className="flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-700/70 text-slate-200 transition hover:border-slate-500"
-              onClick={onOpenFilter}
-              aria-label="Open filters"
-            >
-              <FiFilter aria-hidden />
-            </button>
-          </div>
-        </div>
-
         <div className="grid gap-4 rounded-3xl border border-slate-900/70 bg-gradient-to-br from-slate-900/80 via-slate-950/90 to-slate-950/80 p-5 shadow-xl shadow-slate-950/40">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.1em] text-slate-500">
+              <p className="text-xs font-semibold uppercase text-slate-500">
                 Today progress
               </p>
               <p className="text-lg font-semibold text-white">
@@ -145,32 +120,49 @@ export default function TodoSection({
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="rounded-2xl border border-slate-800/60 bg-slate-950/70 px-3 py-2 text-xs text-slate-200 shadow-lg shadow-slate-950/40">
+            <span className="text-slate-400">Streak</span>
+            <span className="ml-2 text-xs font-semibold text-emerald-200">
+              {streakCount} days
+            </span>
+          </div>
+          <button
+            type="button"
+            className="flex h-9 w-9 items-center justify-center rounded-2xl border border-slate-700/70 text-sm text-slate-200 transition hover:border-slate-500"
+            onClick={onOpenFilter}
+            aria-label="Open filters"
+          >
+            <FiFilter aria-hidden />
+          </button>
+        </div>
+
+        <div className="flex flex-nowrap items-center justify-between gap-2">
+          <div className="flex flex-nowrap items-center gap-2 overflow-x-auto">
             {quickFilters.map(({ id, label, icon: Icon }) => {
               const isActive = activeQuickFilter === id;
               return (
                 <button
                   key={id}
                   type="button"
-                  className={`flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-semibold transition ${
+                  className={`flex items-center gap-1.5 rounded-full border px-3 py-1 text-[0.7rem] font-semibold transition ${
                     isActive
                       ? "border-sky-400/60 bg-sky-400/15 text-sky-100 shadow-lg shadow-sky-500/20"
                       : "border-slate-800/70 bg-slate-950/40 text-slate-300 hover:border-slate-600/70 hover:text-white"
                   }`}
                   onClick={() => onQuickFilter(id as "all" | "today" | "completed" | "flagged")}
                 >
-                  <Icon aria-hidden />
+                  <Icon aria-hidden className="text-[0.7rem]" />
                   {label}
                 </button>
               );
             })}
           </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="flex items-center rounded-full border border-slate-800/70 bg-slate-950/40 p-1 text-xs font-semibold text-slate-200">
+          <div className="flex flex-nowrap items-center gap-2">
+            <div className="flex items-center rounded-full border border-slate-800/70 bg-slate-950/40 p-1 text-[0.7rem] font-semibold text-slate-200">
               <button
                 type="button"
-                className={`rounded-full px-3 py-1 transition ${
+                className={`rounded-full px-2.5 py-1 transition ${
                   sortBy === "scheduled" || sortBy === "completed"
                     ? "bg-slate-800/70 text-white"
                     : "text-slate-400 hover:text-white"
@@ -183,7 +175,7 @@ export default function TodoSection({
               </button>
               <button
                 type="button"
-                className={`rounded-full px-3 py-1 transition ${
+                className={`rounded-full px-2.5 py-1 transition ${
                   sortBy === "priority"
                     ? "bg-slate-800/70 text-white"
                     : "text-slate-400 hover:text-white"

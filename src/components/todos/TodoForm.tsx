@@ -12,7 +12,7 @@ const inputClasses =
 
 const labelClasses = "flex flex-col gap-2";
 const labelTextClasses =
-  "text-xs font-semibold capitalize tracking-[0.05em] text-slate-300";
+  "text-xs font-semibold capitalize text-slate-300";
 
 type TodoFormProps = {
   form: TodoInput;
@@ -193,7 +193,7 @@ export default function TodoForm({
                         } as React.ChangeEvent<HTMLSelectElement>)
                       }
                       aria-pressed={isActive}
-                      className={`rounded-full border px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] transition ${
+                      className={`rounded-full border px-4 py-2 text-xs font-semibold uppercase transition ${
                         isActive
                           ? `${colorClasses} bg-white/5`
                           : "border-slate-800/80 text-slate-400 hover:border-slate-600/70 hover:text-slate-200"
@@ -318,7 +318,7 @@ export default function TodoForm({
       <div className="sticky bottom-0 -mx-5 mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-slate-900/60 bg-slate-950/80 px-5 py-4 backdrop-blur">
         <button
           type="submit"
-          className="flex flex-1 items-center justify-center gap-2 rounded-full bg-emerald-400 px-6 py-3 text-sm font-semibold text-slate-950 shadow-[0_0_25px_rgba(16,185,129,0.45)] transition hover:bg-emerald-300 active:scale-[0.98]"
+          className="flex items-center justify-center gap-2 rounded-full bg-emerald-400 px-5 py-3 text-sm font-semibold text-slate-950 shadow-[0_0_25px_rgba(16,185,129,0.45)] transition hover:bg-emerald-300 active:scale-[0.98]"
         >
           {isEditing ? <FiSave aria-hidden /> : <FiPlus aria-hidden />}
           <span>{isEditing ? "Save changes" : "Add todo"}</span>
