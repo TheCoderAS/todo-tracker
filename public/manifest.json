@@ -1,1 +1,22 @@
-{}
+{
+  "name": "Aura Pulse",
+  "short_name": "Aura Pulse",
+  "description": "Aura Pulse is a next-gen daily productivity hub for tasks, events, schedules, fitness tracking, and goal management.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#020617",
+  "theme_color": "#020617",
+  "icons": [
+    {
+      "src": "/aura-pulse.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/favicon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png"
+    }
+  ]
+}

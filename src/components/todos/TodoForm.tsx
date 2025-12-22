@@ -41,7 +41,7 @@ export default function TodoForm({
   const [isDescriptionOpen, setIsDescriptionOpen] = useState(
     Boolean(form.description)
   );
-  const descriptionRef = useRef<HTMLTextAreaElement | null>(null);
+  const descriptionRef = useRef<HTMLDivElement | null>(null);
   const tagSuggestions = useMemo(
     () => ["focus", "design", "deep-work", "review", "research", "follow-up"],
     []
@@ -88,55 +88,33 @@ export default function TodoForm({
     }
   }, [form.description, isDescriptionOpen]);
 
-  const applyInlineFormat = (wrapper: string, placeholder: string) => {
-    const textarea = descriptionRef.current;
-    if (!textarea) return;
-    const start = textarea.selectionStart ?? 0;
-    const end = textarea.selectionEnd ?? 0;
-    const selection = form.description.slice(start, end);
-    const content = selection || placeholder;
-    const nextValue =
-      form.description.slice(0, start) +
-      wrapper +
-      content +
-      wrapper +
-      form.description.slice(end);
-    onDescriptionChange(nextValue);
-    window.setTimeout(() => {
-      textarea.focus();
-      const nextStart = start + wrapper.length;
-      const nextEnd = nextStart + content.length;
-      textarea.setSelectionRange(nextStart, nextEnd);
-    }, 0);
+  const applyInlineFormat = (command: "bold" | "italic") => {
+    const editor = descriptionRef.current;
+    if (!editor) return;
+    editor.focus();
+    document.execCommand(command);
   };
 
   const applyListFormat = (type: "ordered" | "unordered") => {
-    const textarea = descriptionRef.current;
-    if (!textarea) return;
-    const start = textarea.selectionStart ?? 0;
-    const end = textarea.selectionEnd ?? 0;
-    const text = form.description;
-    const lineStart = text.lastIndexOf("\n", start - 1) + 1;
-    const lineEnd = text.indexOf("\n", end);
-    const blockEnd = lineEnd === -1 ? text.length : lineEnd;
-    const block = text.slice(lineStart, blockEnd);
-    const lines = block.split("\n");
-    const nextLines = lines.map((line, index) => {
-      if (!line.trim()) return line;
-      if (type === "ordered") {
-        const stripped = line.replace(/^\s*\d+\.\s+/, "");
-        return `${index + 1}. ${stripped}`;
-      }
-      const stripped = line.replace(/^\s*[-*]\s+/, "");
-      return `- ${stripped}`;
-    });
-    const nextValue = text.slice(0, lineStart) + nextLines.join("\n") + text.slice(blockEnd);
-    onDescriptionChange(nextValue);
-    window.setTimeout(() => {
-      textarea.focus();
-      textarea.setSelectionRange(lineStart, lineStart + nextLines.join("\n").length);
-    }, 0);
+    const editor = descriptionRef.current;
+    if (!editor) return;
+    editor.focus();
+    document.execCommand(type === "ordered" ? "insertOrderedList" : "insertUnorderedList");
   };
+
+  const handleDescriptionInput = () => {
+    const editor = descriptionRef.current;
+    if (!editor) return;
+    onDescriptionChange(editor.innerHTML);
+  };
+
+  useEffect(() => {
+    const editor = descriptionRef.current;
+    if (!editor) return;
+    if (editor.innerHTML !== form.description) {
+      editor.innerHTML = form.description;
+    }
+  }, [form.description]);
 
   return (
     <form
@@ -286,7 +264,7 @@ export default function TodoForm({
                 <button
                   type="button"
                   className="flex items-center gap-2 rounded-full border border-slate-700/70 px-3 py-1 text-xs font-semibold text-slate-200 transition hover:border-emerald-400/70 hover:text-emerald-100"
-                  onClick={() => applyInlineFormat("**", "bold text")}
+                  onClick={() => applyInlineFormat("bold")}
                   aria-label="Bold"
                 >
                   <BsTypeBold aria-hidden />
@@ -294,7 +272,7 @@ export default function TodoForm({
                 <button
                   type="button"
                   className="flex items-center gap-2 rounded-full border border-slate-700/70 px-3 py-1 text-xs font-semibold text-slate-200 transition hover:border-emerald-400/70 hover:text-emerald-100"
-                  onClick={() => applyInlineFormat("*", "italic text")}
+                  onClick={() => applyInlineFormat("italic")}
                   aria-label="Italic"
                 >
                   <BsTypeItalic aria-hidden />
@@ -316,15 +294,23 @@ export default function TodoForm({
                   <BsListOl aria-hidden />
                 </button>
               </div>
-              <textarea
-                name="description"
-                placeholder="Add helpful context (optional)"
-                value={form.description}
-                onChange={(event) => onDescriptionChange(event.target.value)}
-                rows={4}
-                ref={descriptionRef}
-                className={`${inputClasses} max-h-36 resize-none overflow-y-auto`}
-              />
+              <div className="relative">
+                {form.description.trim() ? null : (
+                  <span className="pointer-events-none absolute left-4 top-3 text-sm text-slate-500">
+                    Add helpful context (optional)
+                  </span>
+                )}
+                <div
+                  ref={descriptionRef}
+                  className={`${inputClasses} max-h-36 min-h-[6.5rem] overflow-y-auto [&_em]:text-slate-100 [&_ol]:list-decimal [&_ol]:pl-5 [&_strong]:text-white [&_ul]:list-disc [&_ul]:pl-5`}
+                  contentEditable
+                  suppressContentEditableWarning
+                  role="textbox"
+                  aria-multiline="true"
+                  onInput={handleDescriptionInput}
+                  onBlur={handleDescriptionInput}
+                />
+              </div>
             </label>
           )}
         </div>
