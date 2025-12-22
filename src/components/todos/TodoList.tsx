@@ -174,10 +174,14 @@ export default function TodoList({
           })}
         </div>
       ))}
-      <Modal isOpen={Boolean(selectedTodo)} onClose={() => onSelectTodo(null)} ariaLabel="Todo details">
+      <Modal
+        isOpen={Boolean(selectedTodo)}
+        onClose={() => onSelectTodo(null)}
+        ariaLabel="Todo details"
+      >
         {selectedTodo ? (
-          <div className="grid gap-6 sm:grid-cols-[1fr_auto]">
-          <div className="grid gap-5">
+          <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-6">
+            <div className="grid gap-5">
               <div className="flex items-start justify-between gap-4">
                 <div className="grid gap-2">
                   <h3 className="text-lg font-semibold text-white">{selectedTodo.title}</h3>
@@ -237,7 +241,7 @@ export default function TodoList({
                 )}
               </div>
             </div>
-            <div className="flex flex-col items-center gap-2 text-slate-200">
+            <div className="flex min-w-[3.5rem] flex-col items-center gap-2 text-slate-200">
               <button
                 type="button"
                 className="flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-700/70 text-slate-200 transition hover:border-slate-500"

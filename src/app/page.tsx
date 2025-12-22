@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
+import { FiCheck, FiFilter, FiLogOut, FiRotateCcw, FiX } from "react-icons/fi";
 import {
   createUserWithEmailAndPassword,
   GoogleAuthProvider,
@@ -104,13 +105,24 @@ export default function HomePage() {
     message: string;
     variant: SnackbarVariant;
   } | null>(null);
-  const [statusFilter, setStatusFilter] = useState<"all" | Todo["status"]>("all");
-  const [priorityFilter, setPriorityFilter] = useState<"all" | TodoPriority>("all");
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const defaultFilters = {
+    status: "pending" as const,
+    priority: "all" as const,
+    sortOrder: "asc" as const
+  };
+  const [statusFilter, setStatusFilter] = useState<"all" | Todo["status"]>(
+    defaultFilters.status
+  );
+  const [priorityFilter, setPriorityFilter] = useState<"all" | TodoPriority>(
+    defaultFilters.priority
+  );
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">(defaultFilters.sortOrder);
+  const [filterDraft, setFilterDraft] = useState(defaultFilters);
   const [confirmAction, setConfirmAction] = useState<
     { type: "signout" } | { type: "delete"; todoId: string } | null
   >(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [selectedTodo, setSelectedTodo] = useState<Todo | null>(null);
 
@@ -220,6 +232,25 @@ export default function HomePage() {
     resetForm();
     setSelectedTodo(null);
     setIsFormOpen(true);
+  };
+
+  const openFilterModal = () => {
+    setFilterDraft({ status: statusFilter, priority: priorityFilter, sortOrder });
+    setIsFilterOpen(true);
+  };
+
+  const handleApplyFilters = () => {
+    setStatusFilter(filterDraft.status);
+    setPriorityFilter(filterDraft.priority);
+    setSortOrder(filterDraft.sortOrder);
+    setIsFilterOpen(false);
+  };
+
+  const handleResetFilters = () => {
+    setFilterDraft(defaultFilters);
+    setStatusFilter(defaultFilters.status);
+    setPriorityFilter(defaultFilters.priority);
+    setSortOrder(defaultFilters.sortOrder);
   };
 
   const closeFormModal = () => {
@@ -558,14 +589,14 @@ export default function HomePage() {
 
   if (authLoading || isInitialLoad) {
     return (
-      <main className="mx-auto flex min-h-screen max-w-6xl flex-col gap-10 px-6 pb-20 pt-6 text-slate-100">
-        <OverlayLoader />
-      </main>
-    );
-  }
+    <main className="relative z-10 mx-auto flex min-h-screen max-w-6xl flex-col gap-10 px-6 pb-20 pt-6 text-slate-100">
+      <OverlayLoader />
+    </main>
+  );
+}
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-6xl flex-col gap-10 px-6 pb-20 pt-4 text-slate-100">
+    <main className="relative z-10 mx-auto flex min-h-screen max-w-6xl flex-col gap-10 px-6 pb-20 pt-4 text-slate-100">
       <header className="sticky top-0 z-30 -mx-6 flex items-center justify-between gap-4 border-b border-slate-900/60 bg-slate-950/85 px-6 py-3 backdrop-blur">
         <div className="flex items-center gap-3">
           <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10 shadow-xl shadow-slate-900/40">
@@ -586,10 +617,11 @@ export default function HomePage() {
         </div>
         {user ? (
           <button
-            className="rounded-full border border-slate-700/70 px-5 py-2 text-sm font-semibold text-slate-200 transition hover:border-slate-500"
+            className="flex h-11 w-11 items-center justify-center rounded-full border border-slate-700/70 text-slate-200 transition hover:border-slate-500"
             onClick={handleSignOutRequest}
+            aria-label="Sign out"
           >
-            Sign out
+            <FiLogOut aria-hidden />
           </button>
         ) : null}
       </header>
@@ -613,48 +645,16 @@ export default function HomePage() {
       ) : (
         <section className="grid gap-6">
           <section className="grid gap-4">
-            <h2 className="text-xl font-semibold text-white">Your todos</h2>
-            <div className="grid gap-3 sm:grid-cols-3">
-              <label className="grid gap-1 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
-                Status
-                <select
-                  value={statusFilter}
-                  onChange={(event) =>
-                    setStatusFilter(event.target.value as "all" | Todo["status"])
-                  }
-                  className="rounded-2xl border border-slate-800/70 bg-slate-950/60 px-3 py-2 text-sm text-slate-100"
-                >
-                  <option value="all">All</option>
-                  <option value="pending">Pending</option>
-                  <option value="completed">Completed</option>
-                </select>
-              </label>
-              <label className="grid gap-1 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
-                Priority
-                <select
-                  value={priorityFilter}
-                  onChange={(event) =>
-                    setPriorityFilter(event.target.value as "all" | TodoPriority)
-                  }
-                  className="rounded-2xl border border-slate-800/70 bg-slate-950/60 px-3 py-2 text-sm text-slate-100"
-                >
-                  <option value="all">All</option>
-                  <option value="low">Low</option>
-                  <option value="medium">Medium</option>
-                  <option value="high">High</option>
-                </select>
-              </label>
-              <label className="grid gap-1 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
-                Sort by date
-                <select
-                  value={sortOrder}
-                  onChange={(event) => setSortOrder(event.target.value as "asc" | "desc")}
-                  className="rounded-2xl border border-slate-800/70 bg-slate-950/60 px-3 py-2 text-sm text-slate-100"
-                >
-                  <option value="asc">Ascending</option>
-                  <option value="desc">Descending</option>
-                </select>
-              </label>
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="text-xl font-semibold text-white">Your todos</h2>
+              <button
+                type="button"
+                className="flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-700/70 text-slate-200 transition hover:border-slate-500"
+                onClick={openFilterModal}
+                aria-label="Open filters"
+              >
+                <FiFilter aria-hidden />
+              </button>
             </div>
             <TodoList
               groups={groupedTodos}
@@ -688,6 +688,97 @@ export default function HomePage() {
           onSubmit={handleSubmitTodo}
           onCancelEdit={closeFormModal}
         />
+      </Modal>
+      <Modal isOpen={isFilterOpen} onClose={() => setIsFilterOpen(false)} ariaLabel="Filter todos">
+        <div className="grid gap-6">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <h3 className="text-lg font-semibold text-white">Filter & sorting</h3>
+              <p className="text-xs text-slate-400">
+                Adjust status, priority, and date ordering.
+              </p>
+            </div>
+            <button
+              type="button"
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-700/70 text-slate-200 transition hover:border-slate-500"
+              onClick={() => setIsFilterOpen(false)}
+              aria-label="Close filters"
+            >
+              <FiX aria-hidden />
+            </button>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-3">
+            <label className="grid gap-1 text-xs font-semibold text-slate-400">
+              Status
+              <select
+                value={filterDraft.status}
+                onChange={(event) =>
+                  setFilterDraft((prev) => ({
+                    ...prev,
+                    status: event.target.value as "all" | Todo["status"]
+                  }))
+                }
+                className="rounded-2xl border border-slate-800/70 bg-slate-950/60 px-3 py-2 text-sm text-slate-100"
+              >
+                <option value="all">All</option>
+                <option value="pending">Pending</option>
+                <option value="completed">Completed</option>
+              </select>
+            </label>
+            <label className="grid gap-1 text-xs font-semibold text-slate-400">
+              Priority
+              <select
+                value={filterDraft.priority}
+                onChange={(event) =>
+                  setFilterDraft((prev) => ({
+                    ...prev,
+                    priority: event.target.value as "all" | TodoPriority
+                  }))
+                }
+                className="rounded-2xl border border-slate-800/70 bg-slate-950/60 px-3 py-2 text-sm text-slate-100"
+              >
+                <option value="all">All</option>
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+              </select>
+            </label>
+            <label className="grid gap-1 text-xs font-semibold text-slate-400">
+              Sort by date
+              <select
+                value={filterDraft.sortOrder}
+                onChange={(event) =>
+                  setFilterDraft((prev) => ({
+                    ...prev,
+                    sortOrder: event.target.value as "asc" | "desc"
+                  }))
+                }
+                className="rounded-2xl border border-slate-800/70 bg-slate-950/60 px-3 py-2 text-sm text-slate-100"
+              >
+                <option value="asc">Ascending</option>
+                <option value="desc">Descending</option>
+              </select>
+            </label>
+          </div>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <button
+              type="button"
+              className="inline-flex items-center gap-2 rounded-full border border-slate-700/70 px-4 py-2 text-xs font-semibold text-slate-200 transition hover:border-slate-500"
+              onClick={handleResetFilters}
+            >
+              <FiRotateCcw aria-hidden />
+              Reset defaults
+            </button>
+            <button
+              type="button"
+              className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-400 text-slate-950 shadow-lg shadow-emerald-500/30 transition hover:bg-emerald-300"
+              onClick={handleApplyFilters}
+              aria-label="Apply filters"
+            >
+              <FiCheck aria-hidden />
+            </button>
+          </div>
+        </div>
       </Modal>
       <ConfirmDialog
         isOpen={Boolean(confirmAction)}
