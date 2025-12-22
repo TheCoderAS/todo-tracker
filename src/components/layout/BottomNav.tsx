@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { FiGrid, FiList } from "react-icons/fi";
+import { FiGrid, FiList, FiUser } from "react-icons/fi";
 
 const navItems = [
   { href: "/", label: "Dashboard", icon: FiGrid },
-  { href: "/todos", label: "Todos", icon: FiList }
+  { href: "/todos", label: "Todos", icon: FiList },
+  { href: "/profile", label: "Profile", icon: FiUser }
 ];
 
 export default function BottomNav() {
