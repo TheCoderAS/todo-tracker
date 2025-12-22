@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
-import { FaBold, FaItalic, FaListUl } from "react-icons/fa6";
+import { FaBold, FaItalic, FaListOl, FaListUl } from "react-icons/fa6";
 import { FiPlus, FiSave, FiX } from "react-icons/fi";
 
 import type { TodoInput, TodoPriority } from "@/lib/types";
@@ -22,6 +22,7 @@ type TodoFormProps = {
   priorities: TodoPriority[];
   isEditing: boolean;
   titleHasError: boolean;
+  scheduleHasError: boolean;
   onChange: (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
   onDescriptionChange: (value: string) => void;
   onSubmit: (event: FormEvent) => void;
@@ -33,6 +34,7 @@ export default function TodoForm({
   priorities,
   isEditing,
   titleHasError,
+  scheduleHasError,
   onChange,
   onDescriptionChange,
   onSubmit,
@@ -42,7 +44,8 @@ export default function TodoForm({
   const [activeFormats, setActiveFormats] = useState({
     bold: false,
     italic: false,
-    bullets: false
+    bullets: false,
+    ordered: false
   });
 
   useEffect(() => {
@@ -56,7 +59,8 @@ export default function TodoForm({
     setActiveFormats({
       bold: document.queryCommandState("bold"),
       italic: document.queryCommandState("italic"),
-      bullets: document.queryCommandState("insertUnorderedList")
+      bullets: document.queryCommandState("insertUnorderedList"),
+      ordered: document.queryCommandState("insertOrderedList")
     });
   };
 
@@ -65,7 +69,9 @@ export default function TodoForm({
     updateToolbarState();
   };
 
-  const applyFormat = (command: "bold" | "italic" | "insertUnorderedList") => {
+  const applyFormat = (
+    command: "bold" | "italic" | "insertUnorderedList" | "insertOrderedList"
+  ) => {
     descriptionRef.current?.focus();
     document.execCommand(command);
     handleDescriptionInput();
@@ -84,6 +90,8 @@ export default function TodoForm({
         placeholder="Todo title"
         value={form.title}
         onChange={onChange}
+        maxLength={24}
+        required
         className={`w-full ${inputClasses} ${
           titleHasError ? "border-rose-500/80 text-rose-100" : ""
         }`}
@@ -99,7 +107,11 @@ export default function TodoForm({
                 type="date"
                 value={form.scheduledDate}
                 onChange={onChange}
-                className={inputClasses}
+                required
+                className={`${inputClasses} ${
+                  scheduleHasError ? "border-rose-500/80 text-rose-100" : ""
+                }`}
+                aria-invalid={scheduleHasError}
               />
               {!form.scheduledDate ? (
                 <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-sm text-slate-500">
@@ -116,7 +128,11 @@ export default function TodoForm({
                 type="time"
                 value={form.scheduledTime}
                 onChange={onChange}
-                className={inputClasses}
+                required
+                className={`${inputClasses} ${
+                  scheduleHasError ? "border-rose-500/80 text-rose-100" : ""
+                }`}
+                aria-invalid={scheduleHasError}
               />
               {!form.scheduledTime ? (
                 <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-sm text-slate-500">
@@ -196,16 +212,27 @@ export default function TodoForm({
             <FaListUl aria-hidden />
             <span className="sr-only">Bullets</span>
           </button>
+          <button
+            type="button"
+            className={`${toolbarButtonClasses} ${
+              activeFormats.ordered
+                ? "border-sky-400/80 bg-sky-400 text-slate-950"
+                : ""
+            }`}
+            onClick={() => applyFormat("insertOrderedList")}
+            aria-pressed={activeFormats.ordered}
+          >
+            <FaListOl aria-hidden />
+            <span className="sr-only">Numbered list</span>
+          </button>
         </div>
         <div
           ref={descriptionRef}
-          className={`${inputClasses} min-h-[140px] text-sm`}
+          className={`${inputClasses} min-h-[140px] max-h-[200px] overflow-y-auto text-sm [&_ol]:list-decimal [&_ol]:pl-5 [&_strong]:text-white [&_ul]:list-disc [&_ul]:pl-5`}
           contentEditable
           role="textbox"
           aria-multiline="true"
           onInput={handleDescriptionInput}
-          onKeyUp={updateToolbarState}
-          onMouseUp={updateToolbarState}
           suppressContentEditableWarning
         />
       </label>

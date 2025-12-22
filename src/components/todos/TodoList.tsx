@@ -1,7 +1,17 @@
 "use client";
 
-import { useState } from "react";
-import { FiCheckCircle, FiCircle, FiEdit2, FiFlag, FiTrash2, FiX } from "react-icons/fi";
+import { useEffect, useState } from "react";
+import {
+  FiCalendar,
+  FiCheckCircle,
+  FiCircle,
+  FiClock,
+  FiEdit2,
+  FiFlag,
+  FiTag,
+  FiTrash2,
+  FiX
+} from "react-icons/fi";
 
 import Modal from "@/components/ui/Modal";
 import type { Todo } from "@/lib/types";
@@ -12,6 +22,8 @@ type TodoListProps = {
   onEdit: (todo: Todo) => void;
   onToggleStatus: (todo: Todo) => void;
   onDelete: (todoId: string) => void;
+  selectedTodo: Todo | null;
+  onSelectTodo: (todo: Todo | null) => void;
 };
 
 export default function TodoList({
@@ -19,9 +31,11 @@ export default function TodoList({
   formatDate,
   onEdit,
   onToggleStatus,
-  onDelete
+  onDelete,
+  selectedTodo,
+  onSelectTodo
 }: TodoListProps) {
-  const [selectedTodo, setSelectedTodo] = useState<Todo | null>(null);
+  const [countdown, setCountdown] = useState("00:00:00:00");
 
   if (groups.length === 0 || groups.every((group) => group.items.length === 0)) {
     return <p className="text-sm text-slate-400">No todos yet. Add one with the + button.</p>;
@@ -41,131 +55,194 @@ export default function TodoList({
   const formatTitleCase = (value: string) =>
     value ? value.charAt(0).toUpperCase() + value.slice(1) : value;
 
+  const formatCountdown = (target: Date | null) => {
+    if (!target) return "00:00:00:00";
+    const diffMs = target.getTime() - Date.now();
+    if (diffMs <= 0) return "00:00:00:00";
+    const totalMinutes = Math.floor(diffMs / 60000);
+    const minutes = totalMinutes % 60;
+    const totalHours = Math.floor(totalMinutes / 60);
+    const hours = totalHours % 24;
+    const totalDays = Math.floor(totalHours / 24);
+    const days = totalDays % 30;
+    const months = Math.floor(totalDays / 30);
+    const pad = (value: number) => String(value).padStart(2, "0");
+    return `${pad(months)}:${pad(days)}:${pad(hours)}:${pad(minutes)}`;
+  };
+
+  useEffect(() => {
+    if (!selectedTodo?.scheduledDate) {
+      setCountdown("00:00:00:00");
+      return;
+    }
+    const targetDate = selectedTodo.scheduledDate.toDate();
+    const updateCountdown = () => setCountdown(formatCountdown(targetDate));
+    updateCountdown();
+    const interval = window.setInterval(updateCountdown, 60000);
+    return () => window.clearInterval(interval);
+  }, [selectedTodo]);
+
+  const getDueMeta = (todo: Todo) => {
+    if (!todo.scheduledDate) {
+      return { label: "No due time", className: "text-slate-500" };
+    }
+    const diffMs = todo.scheduledDate.toMillis() - Date.now();
+    if (diffMs <= 0) {
+      return { label: "Overdue", className: "text-rose-300" };
+    }
+    const totalMinutes = Math.ceil(diffMs / 60000);
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    const diffHours = diffMs / 3600000;
+    const className =
+      diffHours > 3
+        ? "text-emerald-300"
+        : diffHours > 1
+        ? "text-amber-300"
+        : "text-rose-300";
+    return { label: `Due in ${hours}h ${minutes}m`, className };
+  };
+
   return (
     <div className="grid gap-4">
       {groups.map((group) => (
         <div key={group.title} className="grid gap-3">
-          <h3 className="text-sm font-semibold capitalize tracking-[0.05em] text-slate-300">
-            {group.title}
+          <h3 className="flex items-center gap-2 text-sm font-semibold capitalize tracking-[0.05em] text-slate-300">
+            <FiCalendar aria-hidden className="text-slate-400" />
+            <span>{group.title}</span>
           </h3>
-          {group.items.map((todo) => (
-            <article
-              key={todo.id}
-              className="flex items-center gap-3 rounded-2xl border border-slate-800/60 bg-slate-900/50 px-4 py-3 transition hover:border-slate-700/80"
-              role="button"
-              tabIndex={0}
-              onClick={() => setSelectedTodo(todo)}
-              onKeyDown={(event) => {
-                if (event.key === "Enter" || event.key === " ") {
-                  event.preventDefault();
-                  setSelectedTodo(todo);
-                }
-              }}
-            >
-              <div className="flex min-w-0 flex-1 items-center gap-3">
-                <strong className="truncate text-sm font-semibold text-white">
-                  {todo.title}
-                </strong>
-              </div>
-              <span
-                className={`flex h-8 w-8 items-center justify-center rounded-full bg-slate-950/70 ${priorityIconStyles[todo.priority]}`}
-                title={`Priority: ${todo.priority}`}
+          {group.items.map((todo) => {
+            const dueMeta = getDueMeta(todo);
+            return (
+              <article
+                key={todo.id}
+                className="flex items-center gap-3 rounded-2xl border border-slate-800/60 bg-slate-900/50 px-4 py-3 transition hover:border-slate-700/80"
+                role="button"
+                tabIndex={0}
+                onClick={() => onSelectTodo(todo)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    onSelectTodo(todo);
+                  }
+                }}
               >
-                <FiFlag aria-hidden />
-                <span className="sr-only">Priority {todo.priority}</span>
-              </span>
-              <span
-                className={`flex h-8 w-8 items-center justify-center rounded-full bg-slate-950/70 ${statusIconStyles[todo.status]}`}
-                title={`Status: ${todo.status}`}
-              >
-                {todo.status === "completed" ? <FiCheckCircle aria-hidden /> : <FiCircle aria-hidden />}
-                <span className="sr-only">Status {todo.status}</span>
-              </span>
-            </article>
-          ))}
+                <div className="flex min-w-0 flex-1 items-center gap-3">
+                  <div className="min-w-0">
+                    <strong className="block truncate text-sm font-semibold text-white">
+                      {todo.title}
+                    </strong>
+                    <span className={`mt-1 flex items-center gap-1 text-xs ${dueMeta.className}`}>
+                      <FiClock aria-hidden />
+                      {dueMeta.label}
+                    </span>
+                  </div>
+                </div>
+                <span
+                  className={`flex h-8 w-8 items-center justify-center rounded-full bg-slate-950/70 ${priorityIconStyles[todo.priority]}`}
+                  title={`Priority: ${todo.priority}`}
+                >
+                  <FiFlag aria-hidden />
+                  <span className="sr-only">Priority {todo.priority}</span>
+                </span>
+                <span
+                  className={`flex h-8 w-8 items-center justify-center rounded-full bg-slate-950/70 ${statusIconStyles[todo.status]}`}
+                  title={`Status: ${todo.status}`}
+                >
+                  {todo.status === "completed" ? (
+                    <FiCheckCircle aria-hidden />
+                  ) : (
+                    <FiCircle aria-hidden />
+                  )}
+                  <span className="sr-only">Status {todo.status}</span>
+                </span>
+              </article>
+            );
+          })}
         </div>
       ))}
-      <Modal
-        isOpen={Boolean(selectedTodo)}
-        onClose={() => setSelectedTodo(null)}
-        ariaLabel="Todo details"
-      >
+      <Modal isOpen={Boolean(selectedTodo)} onClose={() => onSelectTodo(null)} ariaLabel="Todo details">
         {selectedTodo ? (
-          <div className="grid gap-5">
-            <div className="flex items-start justify-between gap-4">
-              <div className="grid gap-2">
-                <h3 className="text-lg font-semibold text-white">{selectedTodo.title}</h3>
-                <div className="flex flex-wrap items-center gap-2 text-xs text-slate-400">
-                  <span
-                    className={`flex items-center gap-1 rounded-full bg-slate-950/70 px-2 py-1 ${priorityIconStyles[selectedTodo.priority]}`}
-                  >
-                    <FiFlag aria-hidden />
-                    <span>{formatTitleCase(selectedTodo.priority)}</span>
-                  </span>
-                  <span
-                    className={`flex items-center gap-1 rounded-full bg-slate-950/70 px-2 py-1 ${statusIconStyles[selectedTodo.status]}`}
-                  >
-                    {selectedTodo.status === "completed" ? (
-                      <FiCheckCircle aria-hidden />
-                    ) : (
-                      <FiCircle aria-hidden />
-                    )}
-                    <span>{formatTitleCase(selectedTodo.status)}</span>
-                  </span>
+          <div className="grid gap-6 sm:grid-cols-[1fr_auto]">
+            <div className="grid gap-5">
+              <div className="flex items-start justify-between gap-4">
+                <div className="grid gap-2">
+                  <h3 className="text-lg font-semibold text-white">{selectedTodo.title}</h3>
+                  <div className="flex flex-wrap items-center gap-2 text-xs text-slate-400">
+                    <span
+                      className={`flex items-center gap-1 rounded-full bg-slate-950/70 px-2 py-1 ${priorityIconStyles[selectedTodo.priority]}`}
+                    >
+                      <FiFlag aria-hidden />
+                      <span>{formatTitleCase(selectedTodo.priority)}</span>
+                    </span>
+                    <span
+                      className={`flex items-center gap-1 rounded-full bg-slate-950/70 px-2 py-1 ${statusIconStyles[selectedTodo.status]}`}
+                    >
+                      {selectedTodo.status === "completed" ? (
+                        <FiCheckCircle aria-hidden />
+                      ) : (
+                        <FiCircle aria-hidden />
+                      )}
+                      <span>{formatTitleCase(selectedTodo.status)}</span>
+                    </span>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-700/70 text-slate-200"
+                  onClick={() => onSelectTodo(null)}
+                  aria-label="Close"
+                >
+                  <FiX aria-hidden />
+                </button>
+              </div>
+              <div className="grid gap-3 text-xs text-slate-300">
+                <div className="flex items-center gap-2">
+                  <FiCalendar aria-hidden className="text-slate-400" />
+                  <span>{formatDate(selectedTodo.scheduledDate)}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <FiClock aria-hidden className="text-slate-400" />
+                  <span>{countdown}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <FiTag aria-hidden className="text-slate-400" />
+                  <span>{selectedTodo.tags.length ? selectedTodo.tags.join(", ") : "—"}</span>
                 </div>
               </div>
+              <div className="grid gap-2 text-sm text-slate-200">
+                <p className="text-xs font-semibold capitalize tracking-[0.05em] text-slate-300">
+                  Description
+                </p>
+                {selectedTodo.description?.trim() ? (
+                  <div
+                    className="space-y-2 text-sm text-slate-200 [&_ol]:list-decimal [&_ol]:pl-5 [&_strong]:text-white [&_ul]:list-disc [&_ul]:pl-5"
+                    dangerouslySetInnerHTML={{ __html: selectedTodo.description }}
+                  />
+                ) : (
+                  <p className="text-xs text-slate-400">No description provided.</p>
+                )}
+              </div>
+            </div>
+            <div className="flex flex-col items-end gap-2 text-[10px] text-slate-200">
               <button
                 type="button"
-                className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-700/70 text-slate-200"
-                onClick={() => setSelectedTodo(null)}
-                aria-label="Close"
-              >
-                <FiX aria-hidden />
-              </button>
-            </div>
-            <div className="grid gap-2 text-xs text-slate-300">
-              <p>Scheduled: {formatDate(selectedTodo.scheduledDate)}</p>
-              <p>
-                Status:{" "}
-                {selectedTodo.status === "completed"
-                  ? selectedTodo.completedDate
-                    ? `Completed on ${formatDate(selectedTodo.completedDate)}`
-                    : "Completed"
-                  : "Pending"}
-              </p>
-              <p>Tags: {selectedTodo.tags.length ? selectedTodo.tags.join(", ") : "—"}</p>
-            </div>
-            <div className="grid gap-2 text-sm text-slate-200">
-              <p className="text-xs font-semibold capitalize tracking-[0.05em] text-slate-300">
-                Description
-              </p>
-              {selectedTodo.description?.trim() ? (
-                <div
-                  className="space-y-2 text-sm text-slate-200 [&_ol]:list-decimal [&_ol]:pl-5 [&_strong]:text-white [&_ul]:list-disc [&_ul]:pl-5"
-                  dangerouslySetInnerHTML={{ __html: selectedTodo.description }}
-                />
-              ) : (
-                <p className="text-xs text-slate-400">No description provided.</p>
-              )}
-            </div>
-            <div className="flex flex-wrap gap-3">
-              <button
-                type="button"
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-700/70 text-slate-200 transition hover:border-slate-500"
+                className="flex flex-col items-center gap-1 rounded-2xl border border-slate-700/70 px-3 py-2 text-slate-200 transition hover:border-slate-500"
                 onClick={() => {
                   onEdit(selectedTodo);
-                  setSelectedTodo(null);
+                  onSelectTodo(null);
                 }}
                 aria-label="Edit todo"
               >
                 <FiEdit2 aria-hidden />
+                <span>Edit</span>
               </button>
               <button
                 type="button"
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-700/70 text-slate-200 transition hover:border-slate-500"
+                className="flex flex-col items-center gap-1 rounded-2xl border border-slate-700/70 px-3 py-2 text-slate-200 transition hover:border-slate-500"
                 onClick={() => {
                   onToggleStatus(selectedTodo);
-                  setSelectedTodo(null);
+                  onSelectTodo(null);
                 }}
                 aria-label={
                   selectedTodo.status === "completed"
@@ -178,17 +255,19 @@ export default function TodoList({
                 ) : (
                   <FiCheckCircle aria-hidden />
                 )}
+                <span>{selectedTodo.status === "completed" ? "Reopen" : "Done"}</span>
               </button>
               <button
                 type="button"
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-rose-400/40 text-rose-100 transition hover:border-rose-300"
+                className="flex flex-col items-center gap-1 rounded-2xl border border-rose-400/40 px-3 py-2 text-rose-100 transition hover:border-rose-300"
                 onClick={() => {
                   onDelete(selectedTodo.id);
-                  setSelectedTodo(null);
+                  onSelectTodo(null);
                 }}
                 aria-label="Delete todo"
               >
                 <FiTrash2 aria-hidden />
+                <span>Delete</span>
               </button>
             </div>
           </div>

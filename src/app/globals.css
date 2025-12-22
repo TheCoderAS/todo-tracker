@@ -7,6 +7,15 @@
     @apply bg-slate-950 text-slate-100;
     background-image: radial-gradient(circle at top, #1e293b 0%, #0b1120 55%);
   }
+
+  * {
+    scrollbar-width: none;
+  }
+
+  *::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+  }
 }
 
 @layer utilities {
