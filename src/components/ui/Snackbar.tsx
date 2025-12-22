@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import type { ReactNode } from "react";
 import { FiX } from "react-icons/fi";
 
@@ -20,6 +21,14 @@ export default function Snackbar({
   variant = "info",
   onDismiss
 }: SnackbarProps) {
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      onDismiss();
+    }, 4500);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [onDismiss]);
+
   return (
     <div
       className={`fixed right-6 top-24 z-50 flex max-w-sm items-start gap-3 rounded-2xl border px-4 py-3 text-sm shadow-xl ${

@@ -209,7 +209,10 @@ export default function TodosPage() {
     try {
       const todoRef = doc(db, "users", user.uid, "todos", todo.id);
       const nextStatus = todo.status === "completed" ? "pending" : "completed";
-      await updateDoc(todoRef, { status: nextStatus });
+      await updateDoc(todoRef, {
+        status: nextStatus,
+        completedDate: nextStatus === "completed" ? serverTimestamp() : null
+      });
       setSnackbar({
         message:
           nextStatus === "completed"
@@ -279,6 +282,7 @@ export default function TodosPage() {
           createdAt: serverTimestamp(),
           priority: form.priority,
           status: "pending",
+          completedDate: null,
           tags: form.tags
             .split(",")
             .map((tag) => tag.trim())

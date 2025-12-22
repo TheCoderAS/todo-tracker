@@ -23,7 +23,7 @@ export default function BottomNav() {
             <Link
               key={href}
               href={href}
-              className={`flex flex-1 flex-col items-center gap-1 text-xs font-semibold tracking-[0.2em] ${
+              className={`flex flex-1 flex-col items-center gap-1 text-xs font-semibold tracking-[0.08em] ${
                 isActive ? "text-sky-300" : "text-slate-400"
               }`}
               aria-current={isActive ? "page" : undefined}
