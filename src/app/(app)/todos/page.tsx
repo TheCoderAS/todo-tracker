@@ -285,6 +285,7 @@ export default function TodosPage() {
             .map((tag) => tag.trim())
             .filter(Boolean),
           description: form.description,
+          author_uid: user.uid,
           updatedAt: serverTimestamp()
         });
         setSnackbar({
@@ -301,6 +302,7 @@ export default function TodosPage() {
           priority: form.priority,
           status: "pending",
           completedDate: null,
+          author_uid: user.uid,
           tags: form.tags
             .split(",")
             .map((tag) => tag.trim())
