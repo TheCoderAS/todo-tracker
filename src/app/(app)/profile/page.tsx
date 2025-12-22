@@ -95,7 +95,7 @@ export default function ProfilePage() {
     setIsSaving(true);
     try {
       const nextDisplayName = [form.firstName, form.lastName].filter(Boolean).join(" ");
-      if (nextDisplayName && nextDisplayName !== user.displayName) {
+      if (auth.currentUser && nextDisplayName && nextDisplayName !== user.displayName) {
         await updateProfile(auth.currentUser, { displayName: nextDisplayName });
       }
       await setDoc(
