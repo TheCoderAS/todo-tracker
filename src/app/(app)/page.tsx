@@ -12,7 +12,6 @@ export default function DashboardPage() {
   const { user } = useAuth();
   const pathname = usePathname();
   const {
-    dailyCompletions,
     todayTarget,
     todayCompleted,
     onTimeCompletions,
@@ -29,7 +28,7 @@ export default function DashboardPage() {
           loading={analyticsLoading}
         />
         <SpilloverSummaryCard onTime={onTimeCompletions} spillover={spilloverCompletions} />
-        <WeeklyCompletionChart days={dailyCompletions} />
+        <WeeklyCompletionChart onTime={onTimeCompletions} spillover={spilloverCompletions} />
       </div>
     </section>
   );

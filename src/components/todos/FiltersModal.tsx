@@ -10,6 +10,8 @@ export type FilterDraft = {
   priority: "all" | TodoPriority;
   sortBy: "scheduled" | "completed";
   sortOrder: "asc" | "desc";
+  datePreset: "all" | "today" | "spillover" | "upcoming" | "custom";
+  selectedDate: string;
 };
 
 type FiltersModalProps = {
@@ -71,6 +73,40 @@ export default function FiltersModal({
               <option value="pending">Pending</option>
               <option value="completed">Completed</option>
             </select>
+          </label>
+          <label className="grid gap-1 text-xs font-semibold text-slate-400">
+            Date filter
+            <select
+              value={filterDraft.datePreset}
+              onChange={(event) =>
+                onDraftChange({
+                  ...filterDraft,
+                  datePreset: event.target.value as FilterDraft["datePreset"]
+                })
+              }
+              className="rounded-2xl border border-slate-800/70 bg-slate-950/60 px-3 py-2 text-sm text-slate-100"
+            >
+              <option value="all">All dates</option>
+              <option value="today">Today</option>
+              <option value="spillover">Spillover</option>
+              <option value="upcoming">Upcoming</option>
+              <option value="custom">Select date</option>
+            </select>
+          </label>
+          <label className="grid gap-1 text-xs font-semibold text-slate-400">
+            Choose date
+            <input
+              type="date"
+              value={filterDraft.selectedDate}
+              onChange={(event) =>
+                onDraftChange({
+                  ...filterDraft,
+                  selectedDate: event.target.value,
+                  datePreset: "custom"
+                })
+              }
+              className="rounded-2xl border border-slate-800/70 bg-slate-950/60 px-3 py-2 text-sm text-slate-100"
+            />
           </label>
           <label className="grid gap-1 text-xs font-semibold text-slate-400">
             Priority
