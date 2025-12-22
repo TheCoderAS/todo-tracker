@@ -204,14 +204,6 @@ export default function TodoList({
                     </span>
                   </div>
                 </div>
-                <button
-                  type="button"
-                  className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-700/70 text-slate-200"
-                  onClick={() => onSelectTodo(null)}
-                  aria-label="Close"
-                >
-                  <FiX aria-hidden />
-                </button>
               </div>
               <div className="grid gap-3 text-xs text-slate-300">
                 <div className="flex items-center gap-2">
@@ -241,7 +233,15 @@ export default function TodoList({
                 )}
               </div>
             </div>
-            <div className="flex min-w-0 flex-row flex-nowrap items-center gap-2 text-slate-200">
+            <div className="flex min-w-[3.5rem] flex-col items-center gap-2 text-slate-200">
+              <button
+                type="button"
+                className="flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-700/70 text-slate-200 transition hover:border-slate-500"
+                onClick={() => onSelectTodo(null)}
+                aria-label="Close"
+              >
+                <FiX aria-hidden />
+              </button>
               <button
                 type="button"
                 className="flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-700/70 text-slate-200 transition hover:border-slate-500"
