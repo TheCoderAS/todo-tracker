@@ -25,7 +25,7 @@ export default function AppHeader({ showSignOut, onSignOut }: AppHeaderProps) {
             unoptimized
           />
         </div>
-        <span className="text-sm font-semibold tracking-[0.2em] text-slate-200">
+        <span className="font-bold tracking-[0.1em] text-slate-200">
           Aura Pulse
         </span>
       </div>
