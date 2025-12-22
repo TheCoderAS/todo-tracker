@@ -166,7 +166,7 @@ export default function ProfilePage() {
               {initials || "AP"}
             </div>
             <div>
-              <p className="text-xs uppercase tracking-[0.3em] text-slate-400">
+              <p className="text-xs uppercase tracking-[0.1em] text-slate-400">
                 Profile
               </p>
               <h2 className="text-xl font-semibold text-white">{displayName}</h2>

@@ -122,7 +122,7 @@ export default function FiltersModal({
       <div className="grid gap-6">
         <div className="flex items-center justify-between gap-4">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">
+            <p className="text-xs font-semibold uppercase tracking-[0.1em] text-slate-500">
               Filter & sorting
             </p>
             <h3 className="text-xl font-semibold text-white">Refine your focus</h3>

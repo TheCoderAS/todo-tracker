@@ -74,7 +74,7 @@ export default function CompletedTargetCard({
         </div>
       </div>
       {loading ? (
-        <p className="mt-3 text-xs uppercase tracking-[0.12em] text-slate-500">
+        <p className="mt-3 text-xs uppercase tracking-[0.1em] text-slate-500">
           Updating...
         </p>
       ) : null}
