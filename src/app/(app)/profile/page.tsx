@@ -28,6 +28,7 @@ export default function ProfilePage() {
   const [form, setForm] = useState<ProfileFormState>(defaultProfile);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const [snackbar, setSnackbar] = useState<{
     message: string;
     variant: SnackbarVariant;
@@ -146,7 +147,8 @@ export default function ProfilePage() {
   return (
     <section className="grid gap-6">
       <div className="rounded-3xl border border-slate-900/60 bg-slate-950/70 p-6 shadow-2xl shadow-slate-950/60">
-        <div className="flex items-center gap-4">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
           <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-slate-800/80 bg-slate-900/60 text-lg font-semibold text-slate-100">
             {initials || "AP"}
           </div>
@@ -155,86 +157,96 @@ export default function ProfilePage() {
             <h2 className="text-xl font-semibold text-white">{displayName}</h2>
             <p className="text-sm text-slate-400">{user?.email}</p>
           </div>
+          </div>
+          <button
+            type="button"
+            className="flex items-center gap-2 rounded-full border border-slate-700/70 px-4 py-2 text-sm font-semibold text-slate-200"
+            onClick={() => setIsEditing((prev) => !prev)}
+          >
+            {isEditing ? "Close" : "Edit profile"}
+          </button>
         </div>
       </div>
 
-      <form
-        className="grid gap-4 rounded-3xl border border-slate-900/60 bg-slate-950/70 p-6"
-        onSubmit={handleSave}
-      >
-        <div className="grid gap-4 sm:grid-cols-2">
-          <label className="flex flex-col gap-2">
-            <span className="text-xs font-semibold capitalize tracking-[0.05em] text-slate-300">
-              First name
-            </span>
-            <input
-              name="firstName"
-              value={form.firstName}
-              onChange={handleChange}
-              className="w-full rounded-2xl border border-slate-800/70 bg-slate-950/60 px-4 py-3 text-sm text-slate-100"
-            />
-          </label>
-          <label className="flex flex-col gap-2">
-            <span className="text-xs font-semibold capitalize tracking-[0.05em] text-slate-300">
-              Last name
-            </span>
-            <input
-              name="lastName"
-              value={form.lastName}
-              onChange={handleChange}
-              className="w-full rounded-2xl border border-slate-800/70 bg-slate-950/60 px-4 py-3 text-sm text-slate-100"
-            />
-          </label>
-        </div>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <label className="flex flex-col gap-2">
-            <span className="text-xs font-semibold capitalize tracking-[0.05em] text-slate-300">
-              Phone
-            </span>
-            <input
-              name="phone"
-              value={form.phone}
-              onChange={handleChange}
-              className="w-full rounded-2xl border border-slate-800/70 bg-slate-950/60 px-4 py-3 text-sm text-slate-100"
-            />
-          </label>
-          <label className="flex flex-col gap-2">
-            <span className="text-xs font-semibold capitalize tracking-[0.05em] text-slate-300">
-              Gender
-            </span>
-            <select
-              name="gender"
-              value={form.gender}
-              onChange={handleChange}
-              className="w-full rounded-2xl border border-slate-800/70 bg-slate-950/60 px-4 py-3 text-sm text-slate-100"
+      {isEditing ? (
+        <form
+          className="grid gap-4 rounded-3xl border border-slate-900/60 bg-slate-950/70 p-6"
+          onSubmit={handleSave}
+        >
+          <div className="grid gap-4 sm:grid-cols-2">
+            <label className="flex flex-col gap-2">
+              <span className="text-xs font-semibold capitalize tracking-[0.05em] text-slate-300">
+                First name
+              </span>
+              <input
+                name="firstName"
+                value={form.firstName}
+                onChange={handleChange}
+                className="w-full rounded-2xl border border-slate-800/70 bg-slate-950/60 px-4 py-3 text-sm text-slate-100"
+              />
+            </label>
+            <label className="flex flex-col gap-2">
+              <span className="text-xs font-semibold capitalize tracking-[0.05em] text-slate-300">
+                Last name
+              </span>
+              <input
+                name="lastName"
+                value={form.lastName}
+                onChange={handleChange}
+                className="w-full rounded-2xl border border-slate-800/70 bg-slate-950/60 px-4 py-3 text-sm text-slate-100"
+              />
+            </label>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <label className="flex flex-col gap-2">
+              <span className="text-xs font-semibold capitalize tracking-[0.05em] text-slate-300">
+                Phone
+              </span>
+              <input
+                name="phone"
+                value={form.phone}
+                onChange={handleChange}
+                className="w-full rounded-2xl border border-slate-800/70 bg-slate-950/60 px-4 py-3 text-sm text-slate-100"
+              />
+            </label>
+            <label className="flex flex-col gap-2">
+              <span className="text-xs font-semibold capitalize tracking-[0.05em] text-slate-300">
+                Gender
+              </span>
+              <select
+                name="gender"
+                value={form.gender}
+                onChange={handleChange}
+                className="w-full rounded-2xl border border-slate-800/70 bg-slate-950/60 px-4 py-3 text-sm text-slate-100"
+              >
+                <option value="">Select</option>
+                <option value="female">Female</option>
+                <option value="male">Male</option>
+                <option value="non-binary">Non-binary</option>
+                <option value="other">Other</option>
+                <option value="prefer-not-to-say">Prefer not to say</option>
+              </select>
+            </label>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            <button
+              type="submit"
+              className="flex items-center gap-2 rounded-full bg-sky-400 px-5 py-2 text-sm font-semibold text-slate-950 transition hover:bg-sky-300"
+              disabled={isSaving}
             >
-              <option value="">Select</option>
-              <option value="female">Female</option>
-              <option value="male">Male</option>
-              <option value="non-binary">Non-binary</option>
-              <option value="other">Other</option>
-              <option value="prefer-not-to-say">Prefer not to say</option>
-            </select>
-          </label>
-        </div>
-        <div className="flex flex-wrap gap-3">
-          <button
-            type="submit"
-            className="flex items-center gap-2 rounded-full bg-sky-400 px-5 py-2 text-sm font-semibold text-slate-950 transition hover:bg-sky-300"
-            disabled={isSaving}
-          >
-            Save profile
-          </button>
-          <button
-            type="button"
-            className="flex items-center gap-2 rounded-full border border-slate-700/70 px-5 py-2 text-sm font-semibold text-slate-200"
-            onClick={handleResetPassword}
-            disabled={isSaving}
-          >
-            Reset password
-          </button>
-        </div>
-      </form>
+              Save profile
+            </button>
+            <button
+              type="button"
+              className="flex items-center gap-2 rounded-full border border-slate-700/70 px-5 py-2 text-sm font-semibold text-slate-200"
+              onClick={handleResetPassword}
+              disabled={isSaving}
+            >
+              Reset password
+            </button>
+          </div>
+        </form>
+      ) : null}
       {isSaving ? <OverlayLoader /> : null}
       {snackbar ? (
         <Snackbar
