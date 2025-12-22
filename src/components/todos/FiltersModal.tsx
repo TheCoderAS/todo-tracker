@@ -8,6 +8,7 @@ import type { Todo, TodoPriority } from "@/lib/types";
 export type FilterDraft = {
   status: "all" | Todo["status"];
   priority: "all" | TodoPriority;
+  sortBy: "scheduled" | "completed";
   sortOrder: "asc" | "desc";
 };
 
@@ -53,10 +54,16 @@ export default function FiltersModal({
             <select
               value={filterDraft.status}
               onChange={(event) =>
-                onDraftChange({
-                  ...filterDraft,
-                  status: event.target.value as "all" | Todo["status"]
-                })
+                onDraftChange((() => {
+                  const nextStatus = event.target.value as "all" | Todo["status"];
+                  const nextSortBy =
+                    nextStatus === "completed" ? filterDraft.sortBy : "scheduled";
+                  return {
+                    ...filterDraft,
+                    status: nextStatus,
+                    sortBy: nextSortBy
+                  };
+                })())
               }
               className="rounded-2xl border border-slate-800/70 bg-slate-950/60 px-3 py-2 text-sm text-slate-100"
             >
@@ -85,6 +92,24 @@ export default function FiltersModal({
           </label>
           <label className="grid gap-1 text-xs font-semibold text-slate-400">
             Sort by date
+            <select
+              value={filterDraft.sortBy}
+              onChange={(event) =>
+                onDraftChange({
+                  ...filterDraft,
+                  sortBy: event.target.value as "scheduled" | "completed"
+                })
+              }
+              className="rounded-2xl border border-slate-800/70 bg-slate-950/60 px-3 py-2 text-sm text-slate-100"
+            >
+              <option value="scheduled">Scheduled date</option>
+              {filterDraft.status === "completed" ? (
+                <option value="completed">Completion date</option>
+              ) : null}
+            </select>
+          </label>
+          <label className="grid gap-1 text-xs font-semibold text-slate-400">
+            Sort order
             <select
               value={filterDraft.sortOrder}
               onChange={(event) =>

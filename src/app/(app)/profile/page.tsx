@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { usePathname } from "next/navigation";
 import { sendPasswordResetEmail, updateProfile } from "firebase/auth";
 import { FiEdit2, FiX } from "react-icons/fi";
 import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
@@ -32,6 +33,7 @@ const deriveNameParts = (displayName?: string | null) => {
 
 export default function ProfilePage() {
   const { user } = useAuth();
+  const pathname = usePathname();
   const [form, setForm] = useState<ProfileFormState>(defaultProfile);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -44,6 +46,7 @@ export default function ProfilePage() {
   useEffect(() => {
     if (!user) return;
     let isMounted = true;
+    setIsLoading(true);
     const fetchProfile = async () => {
       try {
         const snapshot = await getDoc(doc(db, "users", user.uid));
@@ -76,7 +79,7 @@ export default function ProfilePage() {
     return () => {
       isMounted = false;
     };
-  }, [user]);
+  }, [pathname, user]);
 
   const displayName = useMemo(() => {
     if (!user) return "Profile";

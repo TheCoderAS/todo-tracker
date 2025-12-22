@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { usePathname } from "next/navigation";
 import {
   addDoc,
   collection,
@@ -44,6 +45,7 @@ const defaultForm: TodoInput = {
 
 export default function TodosPage() {
   const { user, loading } = useAuth();
+  const pathname = usePathname();
   const [todos, setTodos] = useState<Todo[]>([]);
   const [form, setForm] = useState<TodoInput>(defaultForm);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -57,6 +59,7 @@ export default function TodosPage() {
   const defaultFilters: FilterDraft = {
     status: "pending",
     priority: "all",
+    sortBy: "scheduled",
     sortOrder: "asc"
   };
   const [statusFilter, setStatusFilter] = useState<"all" | Todo["status"]>(
@@ -66,6 +69,7 @@ export default function TodosPage() {
     defaultFilters.priority
   );
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">(defaultFilters.sortOrder);
+  const [sortBy, setSortBy] = useState<FilterDraft["sortBy"]>(defaultFilters.sortBy);
   const [filterDraft, setFilterDraft] = useState<FilterDraft>(defaultFilters);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -80,6 +84,7 @@ export default function TodosPage() {
       return;
     }
 
+    setIsInitialLoad(true);
     const todosQuery = query(
       collection(db, "users", user.uid, "todos"),
       orderBy("createdAt", "desc")
@@ -99,7 +104,7 @@ export default function TodosPage() {
     });
 
     return () => unsubscribe();
-  }, [user]);
+  }, [pathname, user]);
 
   const isEditing = useMemo(() => Boolean(editingId), [editingId]);
 
@@ -122,7 +127,7 @@ export default function TodosPage() {
       if (name === "scheduledDate" || name === "scheduledTime") {
         const hasScheduledDate = Boolean(nextForm.scheduledDate.trim());
         const hasScheduledTime = Boolean(nextForm.scheduledTime.trim());
-        if (hasScheduledDate === hasScheduledTime) {
+        if (hasScheduledDate && hasScheduledTime) {
           setScheduleHasError(false);
         }
       }
@@ -150,6 +155,7 @@ export default function TodosPage() {
     setFilterDraft({
       status: statusFilter,
       priority: priorityFilter,
+      sortBy,
       sortOrder
     });
     setIsFilterOpen(true);
@@ -163,6 +169,9 @@ export default function TodosPage() {
   const handleApplyFilters = () => {
     setStatusFilter(filterDraft.status);
     setPriorityFilter(filterDraft.priority);
+    setSortBy(
+      filterDraft.status === "completed" ? filterDraft.sortBy : defaultFilters.sortBy
+    );
     setSortOrder(filterDraft.sortOrder);
     setIsFilterOpen(false);
   };
@@ -171,6 +180,7 @@ export default function TodosPage() {
     setFilterDraft(defaultFilters);
     setStatusFilter(defaultFilters.status);
     setPriorityFilter(defaultFilters.priority);
+    setSortBy(defaultFilters.sortBy);
     setSortOrder(defaultFilters.sortOrder);
   };
 
@@ -252,16 +262,15 @@ export default function TodosPage() {
     const hasScheduledDate = Boolean(form.scheduledDate);
     const hasScheduledTime = Boolean(form.scheduledTime);
 
-    if (hasScheduledDate !== hasScheduledTime) {
+    if (!hasScheduledDate || !hasScheduledTime) {
       setScheduleHasError(true);
       setActionLoading(false);
       return;
     }
 
-    const scheduledDate =
-      hasScheduledDate && hasScheduledTime
-        ? Timestamp.fromDate(new Date(`${form.scheduledDate}T${form.scheduledTime}`))
-        : null;
+    const scheduledDate = Timestamp.fromDate(
+      new Date(`${form.scheduledDate}T${form.scheduledTime}`)
+    );
 
     try {
       if (editingId) {
@@ -324,14 +333,21 @@ export default function TodosPage() {
     const sortDirection = sortOrder === "asc" ? 1 : -1;
 
     filteredTodos.forEach((todo) => {
-      if (!todo.scheduledDate) {
+      const activeDate =
+        sortBy === "completed"
+          ? todo.completedDate?.toDate()
+          : todo.scheduledDate?.toDate();
+      if (!activeDate) {
         unscheduled.push(todo);
         return;
       }
 
-      const date = todo.scheduledDate.toDate();
-      const dateKey = formatGroupTitle(date);
-      const midnight = new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
+      const dateKey = formatGroupTitle(activeDate);
+      const midnight = new Date(
+        activeDate.getFullYear(),
+        activeDate.getMonth(),
+        activeDate.getDate()
+      ).getTime();
       const existing = groups.get(dateKey);
       if (existing) {
         existing.items.push(todo);
@@ -345,18 +361,29 @@ export default function TodosPage() {
       .map((group) => ({
         title: group.title,
         items: group.items.sort((a, b) => {
-          if (!a.scheduledDate || !b.scheduledDate) return 0;
-          return (a.scheduledDate.toMillis() - b.scheduledDate.toMillis()) * sortDirection;
+          const aMillis =
+            sortBy === "completed"
+              ? a.completedDate?.toMillis()
+              : a.scheduledDate?.toMillis();
+          const bMillis =
+            sortBy === "completed"
+              ? b.completedDate?.toMillis()
+              : b.scheduledDate?.toMillis();
+          if (!aMillis || !bMillis) return 0;
+          return (aMillis - bMillis) * sortDirection;
         })
       }));
 
     if (unscheduled.length) {
       unscheduled.sort((a, b) => a.title.localeCompare(b.title));
-      orderedGroups.push({ title: "Unscheduled", items: unscheduled });
+      orderedGroups.push({
+        title: sortBy === "completed" ? "No completion date" : "Unscheduled",
+        items: unscheduled
+      });
     }
 
     return orderedGroups;
-  }, [todos, statusFilter, priorityFilter, sortOrder]);
+  }, [todos, statusFilter, priorityFilter, sortBy, sortOrder]);
 
   if (loading || isInitialLoad) {
     return (
