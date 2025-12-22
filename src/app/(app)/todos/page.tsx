@@ -43,6 +43,31 @@ const defaultForm: TodoInput = {
   description: ""
 };
 
+const formatDateValue = (date: Date) => {
+  const year = date.getFullYear();
+  const month = `${date.getMonth() + 1}`.padStart(2, "0");
+  const day = `${date.getDate()}`.padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
+const formatTimeValue = (date: Date) => {
+  const hours = `${date.getHours()}`.padStart(2, "0");
+  const minutes = `${date.getMinutes()}`.padStart(2, "0");
+  return `${hours}:${minutes}`;
+};
+
+const getDefaultSchedule = () => {
+  const now = new Date();
+  const minutes = now.getMinutes();
+  const remainder = minutes % 30;
+  const addMinutes = remainder === 0 ? 30 : 30 - remainder;
+  const slot = new Date(now.getTime() + addMinutes * 60000);
+  return {
+    scheduledDate: formatDateValue(slot),
+    scheduledTime: formatTimeValue(slot)
+  };
+};
+
 export default function TodosPage() {
   const { user, loading } = useAuth();
   const pathname = usePathname();
@@ -147,7 +172,7 @@ export default function TodosPage() {
   };
 
   const resetForm = () => {
-    setForm(defaultForm);
+    setForm({ ...defaultForm, ...getDefaultSchedule() });
     setEditingId(null);
     setTitleHasError(false);
     setScheduleHasError(false);

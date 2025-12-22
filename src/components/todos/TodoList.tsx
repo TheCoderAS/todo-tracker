@@ -175,7 +175,7 @@ export default function TodoList({
 
   const renderGroup = (group: { title: string; items: Todo[] }) => (
     <div key={group.title} className="grid gap-3">
-      <h3 className="flex items-center gap-2 text-sm font-semibold capitalize tracking-[0.18em] text-slate-300">
+      <h3 className="flex items-center gap-2 text-sm font-semibold capitalize tracking-[0.1em] text-slate-300">
         <FiCalendar aria-hidden className="text-slate-400" />
         <span>{group.title}</span>
       </h3>
@@ -276,9 +276,9 @@ export default function TodoList({
                     }
                   >
                     {todo.status === "completed" ? (
-                      <FiCheckCircle aria-hidden />
-                    ) : (
                       <FiCircle aria-hidden />
+                    ) : (
+                      <FiCheckCircle aria-hidden />
                     )}
                   </button>
                 </div>
