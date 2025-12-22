@@ -81,7 +81,8 @@ export default function FiltersModal({
               onChange={(event) =>
                 onDraftChange({
                   ...filterDraft,
-                  datePreset: event.target.value as FilterDraft["datePreset"]
+                  datePreset: event.target.value as FilterDraft["datePreset"],
+                  selectedDate: ""
                 })
               }
               className="rounded-2xl border border-slate-800/70 bg-slate-950/60 px-3 py-2 text-sm text-slate-100"
@@ -93,7 +94,7 @@ export default function FiltersModal({
               <option value="custom">Select date</option>
             </select>
           </label>
-          <label className="grid gap-1 text-xs font-semibold text-slate-400">
+          <label className="grid gap-1 text-xs font-semibold text-slate-400 sm:col-span-2">
             Choose date
             <input
               type="date"
