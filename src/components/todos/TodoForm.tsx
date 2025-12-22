@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { FormEvent } from "react";
+import { BsListOl, BsListUl, BsTypeBold, BsTypeItalic } from "react-icons/bs";
 import { FiPlus, FiSave, FiX } from "react-icons/fi";
 
 import type { TodoInput, TodoPriority } from "@/lib/types";
@@ -40,6 +41,7 @@ export default function TodoForm({
   const [isDescriptionOpen, setIsDescriptionOpen] = useState(
     Boolean(form.description)
   );
+  const descriptionRef = useRef<HTMLTextAreaElement | null>(null);
   const tagSuggestions = useMemo(
     () => ["focus", "design", "deep-work", "review", "research", "follow-up"],
     []
@@ -86,6 +88,56 @@ export default function TodoForm({
     }
   }, [form.description, isDescriptionOpen]);
 
+  const applyInlineFormat = (wrapper: string, placeholder: string) => {
+    const textarea = descriptionRef.current;
+    if (!textarea) return;
+    const start = textarea.selectionStart ?? 0;
+    const end = textarea.selectionEnd ?? 0;
+    const selection = form.description.slice(start, end);
+    const content = selection || placeholder;
+    const nextValue =
+      form.description.slice(0, start) +
+      wrapper +
+      content +
+      wrapper +
+      form.description.slice(end);
+    onDescriptionChange(nextValue);
+    window.setTimeout(() => {
+      textarea.focus();
+      const nextStart = start + wrapper.length;
+      const nextEnd = nextStart + content.length;
+      textarea.setSelectionRange(nextStart, nextEnd);
+    }, 0);
+  };
+
+  const applyListFormat = (type: "ordered" | "unordered") => {
+    const textarea = descriptionRef.current;
+    if (!textarea) return;
+    const start = textarea.selectionStart ?? 0;
+    const end = textarea.selectionEnd ?? 0;
+    const text = form.description;
+    const lineStart = text.lastIndexOf("\n", start - 1) + 1;
+    const lineEnd = text.indexOf("\n", end);
+    const blockEnd = lineEnd === -1 ? text.length : lineEnd;
+    const block = text.slice(lineStart, blockEnd);
+    const lines = block.split("\n");
+    const nextLines = lines.map((line, index) => {
+      if (!line.trim()) return line;
+      if (type === "ordered") {
+        const stripped = line.replace(/^\s*\d+\.\s+/, "");
+        return `${index + 1}. ${stripped}`;
+      }
+      const stripped = line.replace(/^\s*[-*]\s+/, "");
+      return `- ${stripped}`;
+    });
+    const nextValue = text.slice(0, lineStart) + nextLines.join("\n") + text.slice(blockEnd);
+    onDescriptionChange(nextValue);
+    window.setTimeout(() => {
+      textarea.focus();
+      textarea.setSelectionRange(lineStart, lineStart + nextLines.join("\n").length);
+    }, 0);
+  };
+
   return (
     <form
       className="grid gap-5"
@@ -96,9 +148,7 @@ export default function TodoForm({
       </h2>
       <div className="rounded-3xl border border-white/10 bg-gradient-to-br from-slate-950/80 via-slate-950/60 to-emerald-950/30 p-5 shadow-[0_0_35px_rgba(16,185,129,0.08)]">
         <label className={labelClasses}>
-          <span className="text-xs font-semibold uppercase tracking-[0.1em] text-emerald-200/80">
-            Todo title
-          </span>
+          <span className={labelTextClasses}>Todo Title</span>
           <input
             name="title"
             placeholder="What would you like to complete today?"
@@ -106,7 +156,7 @@ export default function TodoForm({
             onChange={onChange}
             maxLength={24}
             required
-            className={`w-full rounded-3xl border border-slate-800/70 bg-slate-950/60 px-5 py-4 text-lg text-slate-100 shadow-[0_0_20px_rgba(15,23,42,0.4)] transition focus:border-emerald-400/70 focus:outline-none focus:ring-2 focus:ring-emerald-400/30 ${
+            className={`${inputClasses} ${
               titleHasError ? "border-rose-500/80 text-rose-100" : ""
             }`}
             aria-invalid={titleHasError}
@@ -232,13 +282,48 @@ export default function TodoForm({
           ) : (
             <label className={labelClasses}>
               <span className={labelTextClasses}>Description</span>
+              <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-slate-800/70 bg-slate-950/60 px-3 py-2">
+                <button
+                  type="button"
+                  className="flex items-center gap-2 rounded-full border border-slate-700/70 px-3 py-1 text-xs font-semibold text-slate-200 transition hover:border-emerald-400/70 hover:text-emerald-100"
+                  onClick={() => applyInlineFormat("**", "bold text")}
+                  aria-label="Bold"
+                >
+                  <BsTypeBold aria-hidden />
+                </button>
+                <button
+                  type="button"
+                  className="flex items-center gap-2 rounded-full border border-slate-700/70 px-3 py-1 text-xs font-semibold text-slate-200 transition hover:border-emerald-400/70 hover:text-emerald-100"
+                  onClick={() => applyInlineFormat("*", "italic text")}
+                  aria-label="Italic"
+                >
+                  <BsTypeItalic aria-hidden />
+                </button>
+                <button
+                  type="button"
+                  className="flex items-center gap-2 rounded-full border border-slate-700/70 px-3 py-1 text-xs font-semibold text-slate-200 transition hover:border-emerald-400/70 hover:text-emerald-100"
+                  onClick={() => applyListFormat("unordered")}
+                  aria-label="Bulleted list"
+                >
+                  <BsListUl aria-hidden />
+                </button>
+                <button
+                  type="button"
+                  className="flex items-center gap-2 rounded-full border border-slate-700/70 px-3 py-1 text-xs font-semibold text-slate-200 transition hover:border-emerald-400/70 hover:text-emerald-100"
+                  onClick={() => applyListFormat("ordered")}
+                  aria-label="Numbered list"
+                >
+                  <BsListOl aria-hidden />
+                </button>
+              </div>
               <textarea
                 name="description"
                 placeholder="Add helpful context (optional)"
                 value={form.description}
                 onChange={(event) => onDescriptionChange(event.target.value)}
                 rows={4}
-                className={`${inputClasses} resize-none`}
+                ref={descriptionRef}
+                className={`${inputClasses} max-h-36 resize-none overflow-y-auto`}
               />
             </label>
           )}

@@ -67,7 +67,7 @@ export default function Modal({
 
   return (
     <div
-      className={`fixed inset-0 z-40 flex bg-gradient-to-b from-slate-950/80 via-slate-950/70 to-slate-950/90 px-4 py-10 backdrop-blur-sm transition-opacity duration-200 ${layoutClass} ${
+      className={`fixed inset-0 z-[1000] flex bg-gradient-to-b from-slate-950/80 via-slate-950/70 to-slate-950/90 px-4 py-10 backdrop-blur-sm transition-opacity duration-200 ${layoutClass} ${
         isClosing ? "opacity-0" : "opacity-100"
       }`}
       role="dialog"
