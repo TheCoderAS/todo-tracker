@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Image from "next/image";
 import {
   createUserWithEmailAndPassword,
   GoogleAuthProvider,
@@ -25,15 +24,22 @@ import {
   setDoc
 } from "firebase/firestore";
 
-import AuthForm, { type AuthFormState, type AuthMode } from "@/components/auth/AuthForm";
-import AuthIntro from "@/components/auth/AuthIntro";
+import AuthSection from "@/components/auth/AuthSection";
+import AppHeader from "@/components/layout/AppHeader";
+import FiltersModal, { type FilterDraft } from "@/components/todos/FiltersModal";
 import TodoForm from "@/components/todos/TodoForm";
-import TodoList from "@/components/todos/TodoList";
+import TodoSection from "@/components/todos/TodoSection";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import Modal from "@/components/ui/Modal";
 import OverlayLoader from "@/components/ui/OverlayLoader";
 import Snackbar, { type SnackbarVariant } from "@/components/ui/Snackbar";
 import { auth, db } from "@/lib/firebase";
+import {
+  formatDateDisplay,
+  formatDateInput,
+  formatGroupTitle,
+  formatTimeInput
+} from "@/lib/todoFormatters";
 import type { Todo, TodoInput, TodoPriority } from "@/lib/types";
 
 const priorities: TodoPriority[] = ["low", "medium", "high"];
@@ -56,35 +62,6 @@ const defaultAuthForm: AuthFormState = {
   password: ""
 };
 
-const formatDateInput = (timestamp: Timestamp | null) =>
-  timestamp ? timestamp.toDate().toISOString().split("T")[0] : "";
-
-const formatTimeInput = (timestamp: Timestamp | null) => {
-  if (!timestamp) return "";
-  const date = timestamp.toDate();
-  const hours = String(date.getHours()).padStart(2, "0");
-  const minutes = String(date.getMinutes()).padStart(2, "0");
-  return `${hours}:${minutes}`;
-};
-
-const formatDateDisplay = (timestamp: Timestamp | null) =>
-  timestamp
-    ? timestamp.toDate().toLocaleString([], {
-        dateStyle: "medium",
-        timeStyle: "short"
-      })
-    : "Not scheduled";
-
-const formatGroupTitle = (date: Date) => {
-  const datePart = date.toLocaleDateString("en-GB", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric"
-  });
-  const dayPart = date.toLocaleDateString("en-US", { weekday: "short" });
-  return `${datePart} - ${dayPart}`;
-};
-
 export default function HomePage() {
   const [user, setUser] = useState<User | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
@@ -104,13 +81,24 @@ export default function HomePage() {
     message: string;
     variant: SnackbarVariant;
   } | null>(null);
-  const [statusFilter, setStatusFilter] = useState<"all" | Todo["status"]>("all");
-  const [priorityFilter, setPriorityFilter] = useState<"all" | TodoPriority>("all");
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const defaultFilters: FilterDraft = {
+    status: "pending",
+    priority: "all",
+    sortOrder: "asc"
+  };
+  const [statusFilter, setStatusFilter] = useState<"all" | Todo["status"]>(
+    defaultFilters.status
+  );
+  const [priorityFilter, setPriorityFilter] = useState<"all" | TodoPriority>(
+    defaultFilters.priority
+  );
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">(defaultFilters.sortOrder);
+  const [filterDraft, setFilterDraft] = useState<FilterDraft>(defaultFilters);
   const [confirmAction, setConfirmAction] = useState<
     { type: "signout" } | { type: "delete"; todoId: string } | null
   >(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [selectedTodo, setSelectedTodo] = useState<Todo | null>(null);
 
@@ -220,6 +208,25 @@ export default function HomePage() {
     resetForm();
     setSelectedTodo(null);
     setIsFormOpen(true);
+  };
+
+  const openFilterModal = () => {
+    setFilterDraft({ status: statusFilter, priority: priorityFilter, sortOrder });
+    setIsFilterOpen(true);
+  };
+
+  const handleApplyFilters = () => {
+    setStatusFilter(filterDraft.status);
+    setPriorityFilter(filterDraft.priority);
+    setSortOrder(filterDraft.sortOrder);
+    setIsFilterOpen(false);
+  };
+
+  const handleResetFilters = () => {
+    setFilterDraft(defaultFilters);
+    setStatusFilter(defaultFilters.status);
+    setPriorityFilter(defaultFilters.priority);
+    setSortOrder(defaultFilters.sortOrder);
   };
 
   const closeFormModal = () => {
@@ -558,123 +565,41 @@ export default function HomePage() {
 
   if (authLoading || isInitialLoad) {
     return (
-      <main className="mx-auto flex min-h-screen max-w-6xl flex-col gap-10 px-6 pb-20 pt-6 text-slate-100">
-        <OverlayLoader />
-      </main>
-    );
-  }
+    <main className="relative z-10 mx-auto flex min-h-screen max-w-6xl flex-col gap-10 px-6 pb-20 pt-6 text-slate-100">
+      <OverlayLoader />
+    </main>
+  );
+}
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-6xl flex-col gap-10 px-6 pb-20 pt-4 text-slate-100">
-      <header className="sticky top-0 z-30 -mx-6 flex items-center justify-between gap-4 border-b border-slate-900/60 bg-slate-950/85 px-6 py-3 backdrop-blur">
-        <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10 shadow-xl shadow-slate-900/40">
-            <Image
-              src="/aura-pulse.png"
-              alt="Aura Pulse logo"
-              width={40}
-              height={40}
-              sizes="40px"
-              className="h-10 w-10 rounded-xl object-contain"
-              priority
-              unoptimized
-            />
-          </div>
-          <span className="text-sm font-semibold tracking-[0.2em] text-slate-200">
-            Aura Pulse
-          </span>
-        </div>
-        {user ? (
-          <button
-            className="rounded-full border border-slate-700/70 px-5 py-2 text-sm font-semibold text-slate-200 transition hover:border-slate-500"
-            onClick={handleSignOutRequest}
-          >
-            Sign out
-          </button>
-        ) : null}
-      </header>
+    <main className="relative z-10 mx-auto flex min-h-screen max-w-6xl flex-col gap-10 px-6 pb-20 pt-4 text-slate-100">
+      <AppHeader showSignOut={Boolean(user)} onSignOut={handleSignOutRequest} />
 
       {!user ? (
-        <section className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
-          <AuthIntro />
-          <AuthForm
-            mode={authMode}
-            form={authForm}
-            fieldErrors={authFieldErrors}
-            error={authError}
-            isLoading={authLoading}
-            onModeChange={setAuthMode}
-            onChange={handleAuthChange}
-            onEmailSignIn={handleEmailSignIn}
-            onEmailSignUp={handleEmailSignUp}
-            onGoogleSignIn={handleGoogleSignIn}
-          />
-        </section>
+        <AuthSection
+          mode={authMode}
+          form={authForm}
+          fieldErrors={authFieldErrors}
+          error={authError}
+          isLoading={authLoading}
+          onModeChange={setAuthMode}
+          onChange={handleAuthChange}
+          onEmailSignIn={handleEmailSignIn}
+          onEmailSignUp={handleEmailSignUp}
+          onGoogleSignIn={handleGoogleSignIn}
+        />
       ) : (
-        <section className="grid gap-6">
-          <section className="grid gap-4">
-            <h2 className="text-xl font-semibold text-white">Your todos</h2>
-            <div className="grid gap-3 sm:grid-cols-3">
-              <label className="grid gap-1 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
-                Status
-                <select
-                  value={statusFilter}
-                  onChange={(event) =>
-                    setStatusFilter(event.target.value as "all" | Todo["status"])
-                  }
-                  className="rounded-2xl border border-slate-800/70 bg-slate-950/60 px-3 py-2 text-sm text-slate-100"
-                >
-                  <option value="all">All</option>
-                  <option value="pending">Pending</option>
-                  <option value="completed">Completed</option>
-                </select>
-              </label>
-              <label className="grid gap-1 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
-                Priority
-                <select
-                  value={priorityFilter}
-                  onChange={(event) =>
-                    setPriorityFilter(event.target.value as "all" | TodoPriority)
-                  }
-                  className="rounded-2xl border border-slate-800/70 bg-slate-950/60 px-3 py-2 text-sm text-slate-100"
-                >
-                  <option value="all">All</option>
-                  <option value="low">Low</option>
-                  <option value="medium">Medium</option>
-                  <option value="high">High</option>
-                </select>
-              </label>
-              <label className="grid gap-1 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
-                Sort by date
-                <select
-                  value={sortOrder}
-                  onChange={(event) => setSortOrder(event.target.value as "asc" | "desc")}
-                  className="rounded-2xl border border-slate-800/70 bg-slate-950/60 px-3 py-2 text-sm text-slate-100"
-                >
-                  <option value="asc">Ascending</option>
-                  <option value="desc">Descending</option>
-                </select>
-              </label>
-            </div>
-            <TodoList
-              groups={groupedTodos}
-              formatDate={formatDateDisplay}
-              onEdit={handleEditTodo}
-              onToggleStatus={handleToggleStatus}
-              onDelete={handleDeleteRequest}
-              selectedTodo={selectedTodo}
-              onSelectTodo={setSelectedTodo}
-            />
-          </section>
-          <button
-            type="button"
-            className="fixed bottom-6 right-6 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-400 text-3xl font-semibold text-slate-950 shadow-xl shadow-slate-950/40 transition hover:bg-emerald-300"
-            onClick={openCreateModal}
-            aria-label="Add todo"
-          >
-            +
-          </button>
-        </section>
+        <TodoSection
+          groups={groupedTodos}
+          formatDate={formatDateDisplay}
+          onEdit={handleEditTodo}
+          onToggleStatus={handleToggleStatus}
+          onDelete={handleDeleteRequest}
+          selectedTodo={selectedTodo}
+          onSelectTodo={setSelectedTodo}
+          onOpenFilter={openFilterModal}
+          onOpenCreate={openCreateModal}
+        />
       )}
       <Modal isOpen={isFormOpen} onClose={closeFormModal} ariaLabel="Todo form">
         <TodoForm
@@ -689,6 +614,14 @@ export default function HomePage() {
           onCancelEdit={closeFormModal}
         />
       </Modal>
+      <FiltersModal
+        isOpen={isFilterOpen}
+        filterDraft={filterDraft}
+        onClose={() => setIsFilterOpen(false)}
+        onApply={handleApplyFilters}
+        onReset={handleResetFilters}
+        onDraftChange={setFilterDraft}
+      />
       <ConfirmDialog
         isOpen={Boolean(confirmAction)}
         title={

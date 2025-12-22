@@ -5,7 +5,9 @@
 @layer base {
   body {
     @apply bg-slate-950 text-slate-100;
+    position: relative;
     background-image: radial-gradient(circle at top, #1e293b 0%, #0b1120 55%);
+    overflow-x: hidden;
   }
 
   * {
@@ -15,6 +17,99 @@
   *::-webkit-scrollbar {
     width: 0;
     height: 0;
+  }
+}
+
+.ambient-background {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at 10% 20%, rgba(56, 189, 248, 0.18), transparent 55%),
+    radial-gradient(circle at 80% 10%, rgba(168, 85, 247, 0.2), transparent 50%),
+    radial-gradient(circle at 30% 80%, rgba(34, 211, 238, 0.16), transparent 55%),
+    radial-gradient(circle at 70% 70%, rgba(14, 116, 144, 0.25), transparent 65%);
+  animation: pulse-drift 18s ease-in-out infinite;
+  transform: translateZ(0);
+}
+
+.ambient-background::before,
+.ambient-background::after {
+  content: "";
+  position: absolute;
+  inset: -20%;
+  background-repeat: repeat;
+  opacity: 0.45;
+  mix-blend-mode: screen;
+}
+
+.ambient-background::before {
+  background-image: radial-gradient(
+      circle,
+      rgba(226, 232, 240, 0.6) 1px,
+      transparent 2px
+    ),
+    linear-gradient(
+      120deg,
+      rgba(56, 189, 248, 0.12) 0%,
+      transparent 45%,
+      rgba(129, 140, 248, 0.18) 100%
+    );
+  background-size: 90px 90px, 380px 380px;
+  animation: dot-float 22s linear infinite;
+  transform: rotateX(55deg) rotateZ(20deg) scale(1.2);
+  filter: blur(0.2px);
+}
+
+.ambient-background::after {
+  background-image: linear-gradient(
+      90deg,
+      rgba(148, 163, 184, 0.08) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      180deg,
+      rgba(148, 163, 184, 0.08) 1px,
+      transparent 1px
+    ),
+    radial-gradient(circle, rgba(56, 189, 248, 0.2) 0%, transparent 60%);
+  background-size: 120px 120px, 120px 120px, 420px 420px;
+  animation: mesh-shift 26s ease-in-out infinite;
+  transform: rotateX(70deg) rotateZ(-10deg) scale(1.1);
+  opacity: 0.35;
+}
+
+@keyframes pulse-drift {
+  0%,
+  100% {
+    filter: brightness(1);
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    filter: brightness(1.15);
+    transform: translateY(-2%) scale(1.04);
+  }
+}
+
+@keyframes dot-float {
+  0% {
+    background-position: 0 0, 0 0;
+  }
+  50% {
+    background-position: 120px 60px, -120px -80px;
+  }
+  100% {
+    background-position: 240px 120px, 0 0;
+  }
+}
+
+@keyframes mesh-shift {
+  0%,
+  100% {
+    background-position: 0 0, 0 0, 0 0;
+  }
+  50% {
+    background-position: 80px -40px, -60px 60px, 120px 80px;
   }
 }
 
