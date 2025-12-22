@@ -34,7 +34,7 @@ export default function CompletedTargetCard({
   return (
     <div className="group relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-slate-950/90 via-slate-950/70 to-emerald-950/30 p-6 shadow-[0_0_40px_rgba(16,185,129,0.12)] transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_0_55px_rgba(16,185,129,0.2)] lg:col-span-2">
       <div className="absolute -right-12 -top-10 h-32 w-32 rounded-full bg-emerald-400/20 blur-3xl transition-opacity duration-500 group-hover:opacity-90" />
-      <p className="text-xs uppercase tracking-[0.2em] text-emerald-200/70">
+      <p className="text-xs uppercase tracking-[0.1em] text-emerald-200/70">
         Completed vs Target
       </p>
       <div className="mt-4 flex flex-wrap items-end justify-between gap-6">
@@ -62,7 +62,7 @@ export default function CompletedTargetCard({
         </div>
       </div>
       <div className="mt-5">
-        <div className="flex items-center justify-between text-xs uppercase tracking-[0.2em] text-slate-400">
+        <div className="flex items-center justify-between text-xs uppercase tracking-[0.1em] text-slate-400">
           <span>Progress</span>
           <span>{completed} done</span>
         </div>
