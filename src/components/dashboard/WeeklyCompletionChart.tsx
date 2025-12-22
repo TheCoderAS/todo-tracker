@@ -41,9 +41,6 @@ export default function WeeklyCompletionChart({
           );
         })}
       </div>
-      <p className="mt-4 text-sm text-slate-400">
-        On-time versus spillover completions for today.
-      </p>
     </div>
   );
 }

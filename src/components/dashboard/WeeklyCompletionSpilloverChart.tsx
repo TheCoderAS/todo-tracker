@@ -69,9 +69,6 @@ export default function WeeklyCompletionSpilloverChart({
           );
         })}
       </div>
-      <p className="mt-4 text-sm text-slate-400">
-        Daily breakdown of completions for the last 7 days.
-      </p>
     </div>
   );
 }
