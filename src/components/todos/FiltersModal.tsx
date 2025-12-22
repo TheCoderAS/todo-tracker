@@ -7,7 +7,7 @@ import {
   FiCheck,
   FiFilter,
   FiRotateCcw,
-  FiSparkles,
+  FiZap,
   FiX
 } from "react-icons/fi";
 
@@ -139,7 +139,7 @@ export default function FiltersModal({
 
         <div className="grid gap-3 rounded-2xl border border-slate-800/60 bg-slate-950/70 p-4">
           <div className="flex items-center gap-2 text-xs font-semibold text-slate-300">
-            <FiSparkles aria-hidden className="text-emerald-300" />
+            <FiZap aria-hidden className="text-emerald-300" />
             Smart filters
           </div>
           <div className="flex flex-wrap gap-2">
