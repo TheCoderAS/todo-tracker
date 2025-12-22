@@ -4,6 +4,10 @@ import { useEffect, useMemo, useState } from "react";
 import { doc, getDoc } from "firebase/firestore";
 
 import { useAuth } from "@/components/auth/AuthProvider";
+import CompletedTargetCard from "@/components/dashboard/CompletedTargetCard";
+import SpilloverSummaryCard from "@/components/dashboard/SpilloverSummaryCard";
+import WeeklyCompletionChart from "@/components/dashboard/WeeklyCompletionChart";
+import { useCompletionAnalytics } from "@/components/dashboard/useCompletionAnalytics";
 import { db } from "@/lib/firebase";
 
 type ProfileData = {
@@ -15,6 +19,14 @@ type ProfileData = {
 export default function DashboardPage() {
   const { user } = useAuth();
   const [profile, setProfile] = useState<ProfileData | null>(null);
+  const {
+    dailyCompletions,
+    todayTarget,
+    todayCompleted,
+    onTimeCompletions,
+    spilloverCompletions,
+    loading: analyticsLoading
+  } = useCompletionAnalytics(user);
 
   useEffect(() => {
     if (!user) return;
@@ -79,6 +91,15 @@ export default function DashboardPage() {
             Use the bottom bar to switch to the Todos view.
           </p>
         </div>
+      </div>
+      <div className="grid gap-4 lg:grid-cols-3">
+        <CompletedTargetCard
+          completed={todayCompleted}
+          target={todayTarget}
+          loading={analyticsLoading}
+        />
+        <SpilloverSummaryCard onTime={onTimeCompletions} spillover={spilloverCompletions} />
+        <WeeklyCompletionChart days={dailyCompletions} />
       </div>
     </section>
   );
