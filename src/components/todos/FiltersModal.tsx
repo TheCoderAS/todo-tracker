@@ -8,7 +8,7 @@ import type { Todo, TodoPriority } from "@/lib/types";
 export type FilterDraft = {
   status: "all" | Todo["status"];
   priority: "all" | TodoPriority;
-  sortBy: "scheduled" | "completed";
+  sortBy: "scheduled" | "completed" | "priority";
   sortOrder: "asc" | "desc";
   datePreset: "all" | "today" | "spillover" | "upcoming" | "custom";
   selectedDate: string;
@@ -128,13 +128,13 @@ export default function FiltersModal({
             </select>
           </label>
           <label className="grid gap-1 text-xs font-semibold text-slate-400">
-            Sort by date
+            Sort by
             <select
               value={filterDraft.sortBy}
               onChange={(event) =>
                 onDraftChange({
                   ...filterDraft,
-                  sortBy: event.target.value as "scheduled" | "completed"
+                  sortBy: event.target.value as FilterDraft["sortBy"]
                 })
               }
               className="rounded-2xl border border-slate-800/70 bg-slate-950/60 px-3 py-2 text-sm text-slate-100"
@@ -143,6 +143,7 @@ export default function FiltersModal({
               {filterDraft.status === "completed" ? (
                 <option value="completed">Completion date</option>
               ) : null}
+              <option value="priority">Priority</option>
             </select>
           </label>
           <label className="grid gap-1 text-xs font-semibold text-slate-400">

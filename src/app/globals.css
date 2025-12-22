@@ -11,6 +11,10 @@
     overflow-x: hidden;
   }
 
+  html {
+    scroll-behavior: smooth;
+  }
+
   * {
     scrollbar-width: none;
   }
@@ -50,6 +54,84 @@
     );
   background-size: 70px 70px, 260px 260px;
   opacity: 0.5;
+}
+
+.amber-pulse {
+  animation: amberPulse 2.4s ease-in-out infinite;
+}
+
+.celebrate-pop {
+  animation: celebratePop 900ms ease-out;
+}
+
+.nav-icon-pop {
+  animation: navIconPop 450ms ease-out;
+}
+
+.floating-menu {
+  animation: floatMenu 240ms ease-out;
+}
+
+.status-ring {
+  box-shadow: 0 0 0 1px rgba(148, 163, 184, 0.25), 0 12px 30px rgba(15, 23, 42, 0.4);
+}
+
+.glow-emerald {
+  box-shadow: 0 0 18px rgba(52, 211, 153, 0.35);
+}
+
+.glow-amber {
+  box-shadow: 0 0 16px rgba(251, 191, 36, 0.35);
+}
+
+.glow-rose {
+  box-shadow: 0 0 16px rgba(251, 113, 133, 0.3);
+}
+
+@keyframes amberPulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.1);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(251, 191, 36, 0.08);
+  }
+}
+
+@keyframes celebratePop {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.1;
+  }
+  60% {
+    transform: scale(1.08);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes navIconPop {
+  0% {
+    transform: translateY(4px) scale(0.85);
+    opacity: 0.6;
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes floatMenu {
+  0% {
+    opacity: 0;
+    transform: translateY(12px) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 @layer utilities {
