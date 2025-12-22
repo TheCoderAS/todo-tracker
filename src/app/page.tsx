@@ -25,6 +25,7 @@ import {
 } from "firebase/firestore";
 
 import AuthSection from "@/components/auth/AuthSection";
+import type { AuthFormState, AuthMode } from "@/components/auth/AuthForm";
 import AppHeader from "@/components/layout/AppHeader";
 import FiltersModal, { type FilterDraft } from "@/components/todos/FiltersModal";
 import TodoForm from "@/components/todos/TodoForm";
