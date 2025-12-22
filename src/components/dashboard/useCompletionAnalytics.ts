@@ -37,7 +37,10 @@ const buildDayRange = (date: Date) => {
   return { start, end };
 };
 
-export function useCompletionAnalytics(user: User | null): CompletionAnalytics {
+export function useCompletionAnalytics(
+  user: User | null,
+  refreshKey?: string | null
+): CompletionAnalytics {
   const [analytics, setAnalytics] = useState<CompletionAnalytics>({
     ...emptyAnalytics,
     loading: true
@@ -125,7 +128,7 @@ export function useCompletionAnalytics(user: User | null): CompletionAnalytics {
         unsubscribe();
       }
     };
-  }, [user]);
+  }, [refreshKey, user]);
 
   return analytics;
 }

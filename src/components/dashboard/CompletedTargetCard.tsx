@@ -20,7 +20,7 @@ export default function CompletedTargetCard({
 
   return (
     <div className="rounded-3xl border border-slate-900/60 bg-slate-950/70 p-6">
-      <p className="text-xs uppercase tracking-[0.12em] text-slate-400">
+      <p className="text-xs tracking-[0.04em] text-slate-400">
         Completed vs Target
       </p>
       <div className="mt-4 flex items-end justify-between">

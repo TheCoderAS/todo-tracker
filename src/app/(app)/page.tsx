@@ -1,5 +1,7 @@
 "use client";
 
+import { usePathname } from "next/navigation";
+
 import { useAuth } from "@/components/auth/AuthProvider";
 import CompletedTargetCard from "@/components/dashboard/CompletedTargetCard";
 import SpilloverSummaryCard from "@/components/dashboard/SpilloverSummaryCard";
@@ -8,6 +10,7 @@ import { useCompletionAnalytics } from "@/components/dashboard/useCompletionAnal
 
 export default function DashboardPage() {
   const { user } = useAuth();
+  const pathname = usePathname();
   const {
     dailyCompletions,
     todayTarget,
@@ -15,7 +18,7 @@ export default function DashboardPage() {
     onTimeCompletions,
     spilloverCompletions,
     loading: analyticsLoading
-  } = useCompletionAnalytics(user);
+  } = useCompletionAnalytics(user, pathname);
 
   return (
     <section className="grid gap-6">

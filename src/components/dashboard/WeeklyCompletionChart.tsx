@@ -15,7 +15,7 @@ export default function WeeklyCompletionChart({ days }: WeeklyCompletionChartPro
 
   return (
     <div className="rounded-3xl border border-slate-900/60 bg-slate-950/70 p-6 lg:col-span-1 lg:row-span-2">
-      <p className="text-xs uppercase tracking-[0.12em] text-slate-400">
+      <p className="text-xs tracking-[0.04em] text-slate-400">
         7-day completion trend
       </p>
       <div className="mt-6 flex h-40 items-end justify-between gap-3">
