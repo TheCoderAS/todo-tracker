@@ -117,6 +117,7 @@ export default function ProfilePage() {
           lastName: form.lastName.trim(),
           phone: form.phone.trim(),
           gender: form.gender,
+          author_uid: user.uid,
           updatedAt: serverTimestamp()
         },
         { merge: true }

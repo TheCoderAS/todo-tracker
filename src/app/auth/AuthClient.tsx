@@ -115,6 +115,7 @@ export default function AuthClient() {
         email: authForm.email.trim(),
         phone: authForm.phone.trim(),
         gender: authForm.gender,
+        author_uid: credential.user.uid,
         createdAt: serverTimestamp()
       });
       setSnackbar({ message: "Account created! Welcome to Aura Pulse.", variant: "success" });
