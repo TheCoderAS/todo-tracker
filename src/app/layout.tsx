@@ -2,6 +2,7 @@ import "./globals.css";
 import type { Metadata } from "next";
 
 import { AuthProvider } from "@/components/auth/AuthProvider";
+import PwaManager from "@/components/pwa/PwaManager";
 
 export const metadata: Metadata = {
   title: "Aura Pulse",
@@ -33,7 +34,9 @@ export const metadata: Metadata = {
   icons: {
     icon: "/aura-pulse.png",
     apple: "/aura-pulse.png"
-  }
+  },
+  manifest: "/manifest.json",
+  themeColor: "#020617"
 };
 
 export default function RootLayout({
@@ -44,7 +47,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="min-h-screen bg-slate-950 text-slate-100">
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          {children}
+          <PwaManager />
+        </AuthProvider>
       </body>
     </html>
   );
