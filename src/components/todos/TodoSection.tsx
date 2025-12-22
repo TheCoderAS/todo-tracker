@@ -54,7 +54,7 @@ export default function TodoSection({
       </section>
       <button
         type="button"
-        className="fixed bottom-6 right-6 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-400 text-3xl font-semibold text-slate-950 shadow-xl shadow-slate-950/40 transition hover:bg-emerald-300"
+        className="fixed bottom-24 right-6 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-400 text-3xl font-semibold text-slate-950 shadow-xl shadow-slate-950/40 transition hover:bg-emerald-300 sm:bottom-8"
         onClick={onOpenCreate}
         aria-label="Add todo"
       >

@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { sendPasswordResetEmail, updateProfile } from "firebase/auth";
+import { FiEdit2, FiX } from "react-icons/fi";
 import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
 
 import { useAuth } from "@/components/auth/AuthProvider";
@@ -23,6 +24,12 @@ const defaultProfile: ProfileFormState = {
   gender: ""
 };
 
+const deriveNameParts = (displayName?: string | null) => {
+  const parts = displayName?.trim().split(/\s+/).filter(Boolean) ?? [];
+  const [firstName = "", ...rest] = parts;
+  return { firstName, lastName: rest.join(" ") };
+};
+
 export default function ProfilePage() {
   const { user } = useAuth();
   const [form, setForm] = useState<ProfileFormState>(defaultProfile);
@@ -41,16 +48,17 @@ export default function ProfilePage() {
       try {
         const snapshot = await getDoc(doc(db, "users", user.uid));
         if (!isMounted) return;
+        const derivedName = deriveNameParts(user.displayName);
         if (snapshot.exists()) {
           const data = snapshot.data() as Partial<ProfileFormState>;
           setForm({
-            firstName: data.firstName ?? "",
-            lastName: data.lastName ?? "",
+            firstName: data.firstName ?? derivedName.firstName,
+            lastName: data.lastName ?? derivedName.lastName,
             phone: data.phone ?? "",
             gender: data.gender ?? ""
           });
         } else {
-          setForm(defaultProfile);
+          setForm({ ...defaultProfile, ...derivedName });
         }
       } catch (error) {
         console.error(error);
@@ -149,21 +157,24 @@ export default function ProfilePage() {
       <div className="rounded-3xl border border-slate-900/60 bg-slate-950/70 p-6 shadow-2xl shadow-slate-950/60">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-4">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-slate-800/80 bg-slate-900/60 text-lg font-semibold text-slate-100">
-            {initials || "AP"}
-          </div>
-          <div>
-            <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Profile</p>
-            <h2 className="text-xl font-semibold text-white">{displayName}</h2>
-            <p className="text-sm text-slate-400">{user?.email}</p>
-          </div>
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-slate-800/80 bg-slate-900/60 text-lg font-semibold text-slate-100">
+              {initials || "AP"}
+            </div>
+            <div>
+              <p className="text-xs uppercase tracking-[0.3em] text-slate-400">
+                Profile
+              </p>
+              <h2 className="text-xl font-semibold text-white">{displayName}</h2>
+              <p className="text-sm text-slate-400">{user?.email}</p>
+            </div>
           </div>
           <button
             type="button"
-            className="flex items-center gap-2 rounded-full border border-slate-700/70 px-4 py-2 text-sm font-semibold text-slate-200"
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-700/70 text-slate-200 transition hover:border-slate-500"
             onClick={() => setIsEditing((prev) => !prev)}
+            aria-label={isEditing ? "Close profile editor" : "Edit profile"}
           >
-            {isEditing ? "Close" : "Edit profile"}
+            {isEditing ? <FiX className="h-4 w-4" /> : <FiEdit2 className="h-4 w-4" />}
           </button>
         </div>
       </div>
