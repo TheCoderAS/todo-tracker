@@ -8,7 +8,7 @@ import { FiPlus, FiSave, FiX } from "react-icons/fi";
 import type { TodoInput, TodoPriority } from "@/lib/types";
 
 const inputClasses =
-  "rounded-2xl border border-slate-800/70 bg-slate-950/60 px-4 py-3 text-sm text-slate-100";
+  "w-full rounded-2xl border border-slate-800/70 bg-slate-950/60 px-4 py-3 text-sm text-slate-100";
 
 const labelClasses = "flex flex-col gap-2";
 const labelTextClasses =
@@ -149,7 +149,7 @@ export default function TodoForm({
               name="priority"
               value={form.priority}
               onChange={onChange}
-              className={`${inputClasses} pr-10`}
+              className={`${inputClasses} pr-12`}
             >
               {priorities.map((priority) => (
                 <option key={priority} value={priority}>
