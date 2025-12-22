@@ -315,17 +315,17 @@ export default function TodoForm({
           )}
         </div>
       </div>
-      <div className="sticky bottom-0 -mx-5 mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-slate-900/60 bg-slate-950/80 px-5 py-4 backdrop-blur">
+      <div className="sticky bottom-0 -mx-5 mt-6 grid grid-cols-1 gap-3 border-t border-slate-900/60 bg-slate-950/80 px-5 py-4 backdrop-blur sm:grid-cols-2">
         <button
           type="submit"
-          className="flex items-center justify-center gap-2 rounded-full bg-emerald-400 px-5 py-3 text-sm font-semibold text-slate-950 shadow-[0_0_25px_rgba(16,185,129,0.45)] transition hover:bg-emerald-300 active:scale-[0.98]"
+          className="flex w-full items-center justify-center gap-2 rounded-full bg-emerald-400 px-5 py-3 text-sm font-semibold text-slate-950 shadow-[0_0_25px_rgba(16,185,129,0.45)] transition hover:bg-emerald-300 active:scale-[0.98]"
         >
           {isEditing ? <FiSave aria-hidden /> : <FiPlus aria-hidden />}
           <span>{isEditing ? "Save changes" : "Add todo"}</span>
         </button>
         <button
           type="button"
-          className="flex items-center justify-center gap-2 rounded-full border border-slate-700/70 px-5 py-3 text-sm font-semibold text-slate-200 transition hover:border-slate-500/80 hover:text-white active:scale-[0.98]"
+          className="flex w-full items-center justify-center gap-2 rounded-full border border-slate-700/70 px-5 py-3 text-sm font-semibold text-slate-200 transition hover:border-slate-500/80 hover:text-white active:scale-[0.98]"
           onClick={onCancelEdit}
         >
           <FiX aria-hidden />

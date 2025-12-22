@@ -145,7 +145,7 @@ export default function TodoSection({
                 <button
                   key={id}
                   type="button"
-                  className={`flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[0.65rem] font-semibold transition sm:px-3 sm:text-[0.7rem] ${
+                  className={`flex items-center gap-0 rounded-full border px-2.5 py-1 text-[0.65rem] font-semibold transition sm:px-3 sm:text-[0.7rem] ${
                     isActive
                       ? "border-sky-400/60 bg-sky-400/15 text-sky-100 shadow-lg shadow-sky-500/20"
                       : "border-slate-800/70 bg-slate-950/40 text-slate-300 hover:border-slate-600/70 hover:text-white"
