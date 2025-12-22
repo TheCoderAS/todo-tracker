@@ -137,29 +137,29 @@ export default function TodoSection({
           </button>
         </div>
 
-        <div className="flex flex-nowrap items-center justify-between gap-2">
-          <div className="flex flex-nowrap items-center gap-2 overflow-x-auto">
+        <div className="grid gap-2 sm:gap-3">
+          <div className="flex flex-wrap items-center gap-2">
             {quickFilters.map(({ id, label, icon: Icon }) => {
               const isActive = activeQuickFilter === id;
               return (
                 <button
                   key={id}
                   type="button"
-                  className={`flex items-center gap-1.5 rounded-full border px-3 py-1 text-[0.7rem] font-semibold transition ${
+                  className={`flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[0.65rem] font-semibold transition sm:px-3 sm:text-[0.7rem] ${
                     isActive
                       ? "border-sky-400/60 bg-sky-400/15 text-sky-100 shadow-lg shadow-sky-500/20"
                       : "border-slate-800/70 bg-slate-950/40 text-slate-300 hover:border-slate-600/70 hover:text-white"
                   }`}
                   onClick={() => onQuickFilter(id as "all" | "today" | "completed" | "flagged")}
                 >
-                  <Icon aria-hidden className="text-[0.7rem]" />
+                  <Icon aria-hidden className="text-[0.65rem] sm:text-[0.7rem]" />
                   {label}
                 </button>
               );
             })}
           </div>
-          <div className="flex flex-nowrap items-center gap-2">
-            <div className="flex items-center rounded-full border border-slate-800/70 bg-slate-950/40 p-1 text-[0.7rem] font-semibold text-slate-200">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex flex-wrap items-center rounded-full border border-slate-800/70 bg-slate-950/40 p-1 text-[0.65rem] font-semibold text-slate-200 sm:text-[0.7rem]">
               <button
                 type="button"
                 className={`rounded-full px-2.5 py-1 transition ${
@@ -187,7 +187,7 @@ export default function TodoSection({
             </div>
             <button
               type="button"
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-800/70 bg-slate-950/40 text-slate-200 transition hover:border-slate-600/70"
+              className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-800/70 bg-slate-950/40 text-slate-200 transition hover:border-slate-600/70 sm:h-9 sm:w-9"
               onClick={() => onSortOrderChange(sortOrder === "asc" ? "desc" : "asc")}
               aria-label="Toggle sort order"
             >
