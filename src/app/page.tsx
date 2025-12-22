@@ -81,7 +81,7 @@ const formatGroupTitle = (date: Date) => {
     month: "2-digit",
     year: "numeric"
   });
-  const dayPart = date.toLocaleDateString("en-US", { weekday: "long" });
+  const dayPart = date.toLocaleDateString("en-US", { weekday: "short" });
   return `${datePart} - ${dayPart}`;
 };
 
@@ -99,6 +99,7 @@ export default function HomePage() {
   const [authError, setAuthError] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
   const [titleHasError, setTitleHasError] = useState(false);
+  const [scheduleHasError, setScheduleHasError] = useState(false);
   const [snackbar, setSnackbar] = useState<{
     message: string;
     variant: SnackbarVariant;
@@ -108,6 +109,7 @@ export default function HomePage() {
   >(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const [selectedTodo, setSelectedTodo] = useState<Todo | null>(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -182,10 +184,22 @@ export default function HomePage() {
     event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = event.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
-    if (name === "title" && value.trim()) {
-      setTitleHasError(false);
+    let nextValue = value;
+    if (name === "tags") {
+      nextValue = value.toLowerCase();
     }
+    if (name === "title") {
+      nextValue = value.slice(0, 24);
+      if (nextValue.trim() && nextValue.trim().length <= 24) {
+        setTitleHasError(false);
+      }
+    }
+    if (name === "scheduledDate" || name === "scheduledTime") {
+      if (nextValue.trim()) {
+        setScheduleHasError(false);
+      }
+    }
+    setForm((prev) => ({ ...prev, [name]: nextValue }));
   };
 
   const handleDescriptionChange = (value: string) => {
@@ -196,10 +210,12 @@ export default function HomePage() {
     setForm(defaultForm);
     setEditingId(null);
     setTitleHasError(false);
+    setScheduleHasError(false);
   };
 
   const openCreateModal = () => {
     resetForm();
+    setSelectedTodo(null);
     setIsFormOpen(true);
   };
 
@@ -311,8 +327,22 @@ export default function HomePage() {
       return;
     }
 
-    if (!form.title.trim()) {
+    const trimmedTitle = form.title.trim();
+    if (!trimmedTitle) {
       setTitleHasError(true);
+      setActionLoading(false);
+      return;
+    }
+    if (trimmedTitle.length > 24) {
+      setTitleHasError(true);
+      setSnackbar({ message: "Title must be less than 25 characters.", variant: "error" });
+      setActionLoading(false);
+      return;
+    }
+
+    if (!form.scheduledDate || !form.scheduledTime) {
+      setScheduleHasError(true);
+      setSnackbar({ message: "Please add a due date and time.", variant: "error" });
       setActionLoading(false);
       return;
     }
@@ -322,37 +352,80 @@ export default function HomePage() {
       .map((tag) => tag.trim())
       .filter(Boolean);
 
-    const scheduledDate = form.scheduledDate
-      ? Timestamp.fromDate(
-          new Date(
-            `${form.scheduledDate}T${form.scheduledTime ? form.scheduledTime : "00:00"}`
-          )
-        )
-      : null;
+    const scheduledDate = Timestamp.fromDate(
+      new Date(`${form.scheduledDate}T${form.scheduledTime}`)
+    );
+    const scheduledDateValue = scheduledDate.toDate();
+    const now = new Date();
+    const oneYearFromNow = new Date(
+      now.getFullYear() + 1,
+      now.getMonth(),
+      now.getDate(),
+      now.getHours(),
+      now.getMinutes()
+    );
+
+    if (scheduledDateValue.getTime() <= now.getTime()) {
+      setScheduleHasError(true);
+      setSnackbar({ message: "Due date must be in the future.", variant: "error" });
+      setActionLoading(false);
+      return;
+    }
+
+    if (scheduledDateValue.getTime() >= oneYearFromNow.getTime()) {
+      setScheduleHasError(true);
+      setSnackbar({
+        message: "Due date must be within the next year.",
+        variant: "error"
+      });
+      setActionLoading(false);
+      return;
+    }
 
     try {
+      const normalizedTags = tags.map((tag) => tag.toLowerCase());
+      const savedTodoBase = {
+        title: trimmedTitle,
+        scheduledDate,
+        priority: form.priority,
+        tags: normalizedTags,
+        description: form.description.trim()
+      };
       if (editingId) {
         const todoRef = doc(db, "users", user.uid, "todos", editingId);
         await updateDoc(todoRef, {
-          title: form.title.trim(),
-          scheduledDate,
-          priority: form.priority,
-          tags,
-          description: form.description.trim(),
+          ...savedTodoBase,
           updatedAt: serverTimestamp()
         });
+        const existing = todos.find((todo) => todo.id === editingId);
+        setSelectedTodo(
+          existing
+            ? { ...existing, ...savedTodoBase }
+            : {
+                id: editingId,
+                status: "pending",
+                completedDate: null,
+                ...savedTodoBase
+              }
+        );
       } else {
-        await addDoc(collection(db, "users", user.uid, "todos"), {
+        const docRef = await addDoc(collection(db, "users", user.uid, "todos"), {
           author_uid: user.uid,
-          title: form.title.trim(),
+          title: trimmedTitle,
           status: "pending",
           scheduledDate,
           completedDate: null,
           priority: form.priority,
-          tags,
+          tags: normalizedTags,
           description: form.description.trim(),
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp()
+        });
+        setSelectedTodo({
+          id: docRef.id,
+          status: "pending",
+          completedDate: null,
+          ...savedTodoBase
         });
       }
 
@@ -380,6 +453,7 @@ export default function HomePage() {
       tags: todo.tags.join(", "),
       description: todo.description ?? ""
     });
+    setSelectedTodo(null);
     setIsFormOpen(true);
   };
 
@@ -480,19 +554,24 @@ export default function HomePage() {
   }
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-6xl flex-col gap-10 px-6 pb-20 pt-6 text-slate-100">
-      <header className="sticky top-0 z-30 -mx-6 flex items-center justify-between gap-6 border-b border-slate-900/60 bg-slate-950/85 px-6 py-4 backdrop-blur">
-        <div className="flex items-center gap-4">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 shadow-xl shadow-slate-900/40">
+    <main className="mx-auto flex min-h-screen max-w-6xl flex-col gap-10 px-6 pb-20 pt-4 text-slate-100">
+      <header className="sticky top-0 z-30 -mx-6 flex items-center justify-between gap-4 border-b border-slate-900/60 bg-slate-950/85 px-6 py-3 backdrop-blur">
+        <div className="flex items-center gap-3">
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10 shadow-xl shadow-slate-900/40">
             <Image
               src="/aura-pulse.png"
               alt="Aura Pulse logo"
               width={40}
               height={40}
-              className="h-10 w-10 rounded-xl object-cover"
+              sizes="40px"
+              className="h-10 w-10 rounded-xl object-contain"
               priority
+              unoptimized
             />
           </div>
+          <span className="text-sm font-semibold tracking-[0.2em] text-slate-200">
+            Aura Pulse
+          </span>
         </div>
         {user ? (
           <button
@@ -530,6 +609,8 @@ export default function HomePage() {
               onEdit={handleEditTodo}
               onToggleStatus={handleToggleStatus}
               onDelete={handleDeleteRequest}
+              selectedTodo={selectedTodo}
+              onSelectTodo={setSelectedTodo}
             />
           </section>
           <button
@@ -548,6 +629,7 @@ export default function HomePage() {
           priorities={priorities}
           isEditing={isEditing}
           titleHasError={titleHasError}
+          scheduleHasError={scheduleHasError}
           onChange={handleFormChange}
           onDescriptionChange={handleDescriptionChange}
           onSubmit={handleSubmitTodo}
