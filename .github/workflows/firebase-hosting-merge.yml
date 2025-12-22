@@ -4,15 +4,45 @@
 name: Deploy to Firebase Hosting
 run-name: Deploy to Firebase Hosting
 on:
-  push:
-    branches:
-      - main
+  workflow_run:
+    workflows: ["Build PR"]
+    types:
+      - completed
 jobs:
+  guard:
+    name: Guard
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    outputs:
+      should_deploy: ${{ steps.check.outputs.should_deploy }}
+    steps:
+      - name: Check merged PR
+        id: check
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prs = context.payload.workflow_run.pull_requests ?? [];
+            if (!prs.length) {
+              core.setOutput("should_deploy", "false");
+              return;
+            }
+            const prNumber = prs[0].number;
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: prNumber
+            });
+            const shouldDeploy = pr.merged && pr.base.ref === "main";
+            core.setOutput("should_deploy", shouldDeploy ? "true" : "false");
   build:
     name: Build
     runs-on: ubuntu-latest
+    needs: guard
+    if: ${{ needs.guard.outputs.should_deploy == 'true' }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main
       - name: Cache npm
         uses: actions/cache@v4
         with:
@@ -35,8 +65,11 @@ jobs:
     name: Deploy
     runs-on: ubuntu-latest
     needs: build
+    if: ${{ needs.guard.outputs.should_deploy == 'true' }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main
       - name: Cache npm
         uses: actions/cache@v4
         with:
