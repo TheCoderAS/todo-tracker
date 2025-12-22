@@ -241,7 +241,7 @@ export default function TodoList({
                 )}
               </div>
             </div>
-            <div className="flex min-w-[3.5rem] flex-col items-center gap-2 text-slate-200">
+            <div className="flex min-w-0 flex-row flex-nowrap items-center gap-2 text-slate-200">
               <button
                 type="button"
                 className="flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-700/70 text-slate-200 transition hover:border-slate-500"
