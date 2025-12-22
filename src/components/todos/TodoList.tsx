@@ -10,6 +10,7 @@ import {
   FiFlag,
   FiTag,
   FiTrash2,
+  FiWatch,
   FiX
 } from "react-icons/fi";
 
@@ -35,7 +36,7 @@ export default function TodoList({
   selectedTodo,
   onSelectTodo
 }: TodoListProps) {
-  const [countdown, setCountdown] = useState("00:00:00:00");
+  const [countdown, setCountdown] = useState("00:00:00");
   const isEmpty = groups.length === 0 || groups.every((group) => group.items.length === 0);
 
   const priorityIconStyles: Record<Todo["priority"], string> = {
@@ -53,10 +54,12 @@ export default function TodoList({
     value ? value.charAt(0).toUpperCase() + value.slice(1) : value;
 
   const formatCountdown = (target: Date | null) => {
-    if (!target) return "00:00:00:00";
+    if (!target) return "00:00:00";
     const diffMs = target.getTime() - Date.now();
-    if (diffMs <= 0) return "00:00:00:00";
-    const totalMinutes = Math.floor(diffMs / 60000);
+    if (diffMs <= 0) return "00:00:00";
+    const totalSeconds = Math.floor(diffMs / 1000);
+    const seconds = totalSeconds % 60;
+    const totalMinutes = Math.floor(totalSeconds / 60);
     const minutes = totalMinutes % 60;
     const totalHours = Math.floor(totalMinutes / 60);
     const hours = totalHours % 24;
@@ -64,18 +67,24 @@ export default function TodoList({
     const days = totalDays % 30;
     const months = Math.floor(totalDays / 30);
     const pad = (value: number) => String(value).padStart(2, "0");
-    return `${pad(months)}:${pad(days)}:${pad(hours)}:${pad(minutes)}`;
+    if (months > 0) {
+      return `${pad(months)}:${pad(days)}:${pad(hours)}`;
+    }
+    if (totalDays > 0) {
+      return `${pad(totalDays)}:${pad(hours)}:${pad(minutes)}`;
+    }
+    return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
   };
 
   useEffect(() => {
     if (!selectedTodo?.scheduledDate) {
-      setCountdown("00:00:00:00");
+      setCountdown("00:00:00");
       return;
     }
     const targetDate = selectedTodo.scheduledDate.toDate();
     const updateCountdown = () => setCountdown(formatCountdown(targetDate));
     updateCountdown();
-    const interval = window.setInterval(updateCountdown, 60000);
+    const interval = window.setInterval(updateCountdown, 1000);
     return () => window.clearInterval(interval);
   }, [selectedTodo]);
 
@@ -84,6 +93,9 @@ export default function TodoList({
   }
 
   const getDueMeta = (todo: Todo) => {
+    if (todo.status === "completed") {
+      return { label: "Completed", className: "text-emerald-300" };
+    }
     if (!todo.scheduledDate) {
       return { label: "No due time", className: "text-slate-500" };
     }
@@ -165,7 +177,7 @@ export default function TodoList({
       <Modal isOpen={Boolean(selectedTodo)} onClose={() => onSelectTodo(null)} ariaLabel="Todo details">
         {selectedTodo ? (
           <div className="grid gap-6 sm:grid-cols-[1fr_auto]">
-            <div className="grid gap-5">
+          <div className="grid gap-5">
               <div className="flex items-start justify-between gap-4">
                 <div className="grid gap-2">
                   <h3 className="text-lg font-semibold text-white">{selectedTodo.title}</h3>
@@ -203,7 +215,7 @@ export default function TodoList({
                   <span>{formatDate(selectedTodo.scheduledDate)}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <FiClock aria-hidden className="text-slate-400" />
+                  <FiWatch aria-hidden className="text-slate-400" />
                   <span>{countdown}</span>
                 </div>
                 <div className="flex items-center gap-2">
@@ -225,10 +237,10 @@ export default function TodoList({
                 )}
               </div>
             </div>
-            <div className="flex flex-col items-end gap-2 text-[10px] text-slate-200">
+            <div className="flex flex-col items-center gap-2 text-slate-200">
               <button
                 type="button"
-                className="flex flex-col items-center gap-1 rounded-2xl border border-slate-700/70 px-3 py-2 text-slate-200 transition hover:border-slate-500"
+                className="flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-700/70 text-slate-200 transition hover:border-slate-500"
                 onClick={() => {
                   onEdit(selectedTodo);
                   onSelectTodo(null);
@@ -236,14 +248,12 @@ export default function TodoList({
                 aria-label="Edit todo"
               >
                 <FiEdit2 aria-hidden />
-                <span>Edit</span>
               </button>
               <button
                 type="button"
-                className="flex flex-col items-center gap-1 rounded-2xl border border-slate-700/70 px-3 py-2 text-slate-200 transition hover:border-slate-500"
+                className="flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-700/70 text-slate-200 transition hover:border-slate-500"
                 onClick={() => {
                   onToggleStatus(selectedTodo);
-                  onSelectTodo(null);
                 }}
                 aria-label={
                   selectedTodo.status === "completed"
@@ -256,11 +266,10 @@ export default function TodoList({
                 ) : (
                   <FiCheckCircle aria-hidden />
                 )}
-                <span>{selectedTodo.status === "completed" ? "Reopen" : "Done"}</span>
               </button>
               <button
                 type="button"
-                className="flex flex-col items-center gap-1 rounded-2xl border border-rose-400/40 px-3 py-2 text-rose-100 transition hover:border-rose-300"
+                className="flex h-11 w-11 items-center justify-center rounded-2xl border border-rose-400/40 text-rose-100 transition hover:border-rose-300"
                 onClick={() => {
                   onDelete(selectedTodo.id);
                   onSelectTodo(null);
@@ -268,7 +277,6 @@ export default function TodoList({
                 aria-label="Delete todo"
               >
                 <FiTrash2 aria-hidden />
-                <span>Delete</span>
               </button>
             </div>
           </div>

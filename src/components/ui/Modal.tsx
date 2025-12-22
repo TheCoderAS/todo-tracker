@@ -47,27 +47,77 @@ export default function Modal({ isOpen, onClose, ariaLabel, children }: ModalPro
     const container = canvasRef.current;
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
-    camera.position.z = 6;
+    camera.position.z = 7;
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setPixelRatio(window.devicePixelRatio || 1);
     container.appendChild(renderer.domElement);
 
-    const geometry = new THREE.TorusKnotGeometry(1.2, 0.35, 140, 20);
-    const material = new THREE.MeshStandardMaterial({
-      color: 0x38bdf8,
-      metalness: 0.6,
-      roughness: 0.25,
-      emissive: 0x0f172a
+    const group = new THREE.Group();
+    scene.add(group);
+
+    const geometries = [
+      new THREE.IcosahedronGeometry(1.1, 0),
+      new THREE.BoxGeometry(0.9, 0.9, 0.9),
+      new THREE.OctahedronGeometry(0.7, 0)
+    ];
+    const materials = [
+      new THREE.MeshStandardMaterial({
+        color: 0x38bdf8,
+        metalness: 0.5,
+        roughness: 0.2,
+        emissive: 0x0f172a
+      }),
+      new THREE.MeshStandardMaterial({
+        color: 0xa855f7,
+        metalness: 0.35,
+        roughness: 0.35,
+        emissive: 0x1e1b4b
+      }),
+      new THREE.MeshStandardMaterial({
+        color: 0x22d3ee,
+        metalness: 0.4,
+        roughness: 0.3,
+        emissive: 0x082f49
+      })
+    ];
+
+    const meshes = geometries.map((geometry, index) => {
+      const mesh = new THREE.Mesh(geometry, materials[index]);
+      group.add(mesh);
+      return mesh;
     });
-    const mesh = new THREE.Mesh(geometry, material);
-    scene.add(mesh);
+
+    meshes[0].position.set(-1.6, 0.6, 0);
+    meshes[1].position.set(1.4, -0.4, -0.6);
+    meshes[2].position.set(0.2, 1.6, 0.8);
+
+    const starGeometry = new THREE.BufferGeometry();
+    const starCount = 160;
+    const starPositions = new Float32Array(starCount * 3);
+    for (let i = 0; i < starCount; i += 1) {
+      starPositions[i * 3] = (Math.random() - 0.5) * 12;
+      starPositions[i * 3 + 1] = (Math.random() - 0.5) * 12;
+      starPositions[i * 3 + 2] = (Math.random() - 0.5) * 12;
+    }
+    starGeometry.setAttribute("position", new THREE.BufferAttribute(starPositions, 3));
+    const starMaterial = new THREE.PointsMaterial({
+      color: 0x38bdf8,
+      size: 0.05,
+      transparent: true,
+      opacity: 0.8
+    });
+    const stars = new THREE.Points(starGeometry, starMaterial);
+    scene.add(stars);
+
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.45);
+    scene.add(ambientLight);
 
     const keyLight = new THREE.DirectionalLight(0xffffff, 1);
     keyLight.position.set(4, 4, 6);
     scene.add(keyLight);
 
-    const fillLight = new THREE.PointLight(0x22d3ee, 0.7);
+    const fillLight = new THREE.PointLight(0x22d3ee, 0.9);
     fillLight.position.set(-3, -3, 5);
     scene.add(fillLight);
 
@@ -85,9 +135,17 @@ export default function Modal({ isOpen, onClose, ariaLabel, children }: ModalPro
     const animate = () => {
       frameId = window.requestAnimationFrame(animate);
       const targetScale = closingRef.current ? 0.2 : 1;
-      mesh.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.08);
-      mesh.rotation.x += 0.01;
-      mesh.rotation.y += 0.015;
+      group.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.08);
+      group.rotation.x += 0.004;
+      group.rotation.y += 0.006;
+      meshes[0].rotation.y += 0.01;
+      meshes[1].rotation.x -= 0.008;
+      meshes[2].rotation.z += 0.012;
+      const time = Date.now() * 0.0004;
+      camera.position.x = Math.sin(time) * 2.6;
+      camera.position.y = Math.cos(time * 0.9) * 1.6;
+      camera.position.z = 6.5 + Math.cos(time * 0.6) * 1.2;
+      camera.lookAt(0, 0, 0);
       renderer.render(scene, camera);
     };
 
@@ -96,8 +154,10 @@ export default function Modal({ isOpen, onClose, ariaLabel, children }: ModalPro
     return () => {
       window.cancelAnimationFrame(frameId);
       window.removeEventListener("resize", resize);
-      geometry.dispose();
-      material.dispose();
+      geometries.forEach((geometry) => geometry.dispose());
+      materials.forEach((material) => material.dispose());
+      starGeometry.dispose();
+      starMaterial.dispose();
       renderer.dispose();
       if (renderer.domElement.parentNode) {
         renderer.domElement.parentNode.removeChild(renderer.domElement);
