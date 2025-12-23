@@ -49,6 +49,12 @@ export default function AuthClient() {
 
   const nextPath = useMemo(() => searchParams.get("next") ?? "/", [searchParams]);
 
+  const resetAuthForm = () => {
+    setAuthForm(defaultAuthForm);
+    setAuthFieldErrors({});
+    setAuthError(null);
+  };
+
   useEffect(() => {
     if (loading) return;
     if (user) {
@@ -91,7 +97,7 @@ export default function AuthClient() {
     try {
       await signInWithEmailAndPassword(auth, authForm.email, authForm.password);
       setSnackbar({ message: "Welcome back! You are signed in.", variant: "success" });
-      setAuthForm(defaultAuthForm);
+      resetAuthForm();
       router.replace(nextPath);
     } catch (error) {
       try {
@@ -105,7 +111,7 @@ export default function AuthClient() {
           const result = await signInWithPopup(auth, provider);
           await linkWithCredential(result.user, credential);
           setSnackbar({ message: "Signed in with Google.", variant: "success" });
-          setAuthForm(defaultAuthForm);
+          resetAuthForm();
           router.replace(nextPath);
           return;
         }
@@ -142,7 +148,7 @@ export default function AuthClient() {
         createdAt: serverTimestamp()
       });
       setSnackbar({ message: "Account created! Welcome to Aura Pulse.", variant: "success" });
-      setAuthForm(defaultAuthForm);
+      resetAuthForm();
       router.replace(nextPath);
     } catch (error) {
       setAuthError("Unable to create account.");
@@ -160,6 +166,7 @@ export default function AuthClient() {
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
       setSnackbar({ message: "Signed in with Google.", variant: "success" });
+      resetAuthForm();
       router.replace(nextPath);
     } catch (error) {
       console.error(error);
@@ -186,13 +193,14 @@ export default function AuthClient() {
               await linkWithCredential(result.user, pendingCredential);
             }
             setSnackbar({ message: "Signed in with Google.", variant: "success" });
-            setAuthForm(defaultAuthForm);
+            resetAuthForm();
             router.replace(nextPath);
             return;
           }
           if (methods.includes("google.com")) {
             await signInWithPopup(auth, provider);
             setSnackbar({ message: "Signed in with Google.", variant: "success" });
+            resetAuthForm();
             router.replace(nextPath);
             return;
           }
@@ -218,6 +226,7 @@ export default function AuthClient() {
     try {
       await sendPasswordResetEmail(auth, authForm.email.trim());
       setSnackbar({ message: "Password reset email sent.", variant: "success" });
+      resetAuthForm();
     } catch (error) {
       console.error(error);
       setAuthError("Unable to send reset email.");
