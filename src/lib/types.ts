@@ -2,6 +2,7 @@ import type { Timestamp } from "firebase/firestore";
 
 export type TodoStatus = "pending" | "completed";
 export type TodoPriority = "low" | "medium" | "high";
+export type HabitFrequency = "daily";
 
 export interface Todo {
   id: string;
@@ -22,4 +23,24 @@ export interface TodoInput {
   priority: TodoPriority;
   tags: string;
   description: string;
+}
+
+export interface Habit {
+  id: string;
+  title: string;
+  reminderTime: string;
+  reminderDays: number[];
+  completionDates: string[];
+  timezone: string | null;
+  frequency: HabitFrequency;
+  createdAt?: Timestamp | null;
+  updatedAt?: Timestamp | null;
+  lastNotifiedDate?: string | null;
+}
+
+export interface HabitInput {
+  title: string;
+  reminderTime: string;
+  reminderDays: number[];
+  frequency: HabitFrequency;
 }

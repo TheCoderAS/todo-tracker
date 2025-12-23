@@ -26,6 +26,7 @@ type TodoSectionProps = {
   onSelectTodo: (todo: Todo | null) => void;
   onOpenFilter: () => void;
   onOpenCreate: () => void;
+  onOpenHabit: () => void;
   statusFilter: "all" | Todo["status"];
   priorityFilter: "all" | Todo["priority"];
   datePreset: "all" | "today" | "spillover" | "upcoming" | "custom" | "tomorrow" | "week";
@@ -52,6 +53,7 @@ export default function TodoSection({
   onSelectTodo,
   onOpenFilter,
   onOpenCreate,
+  onOpenHabit,
   statusFilter,
   priorityFilter,
   datePreset,
@@ -236,9 +238,11 @@ export default function TodoSection({
             </button>
             <button
               type="button"
-              className="flex w-full items-center gap-3 rounded-2xl px-3 py-2 text-sm font-semibold text-slate-400"
-              aria-disabled="true"
-              disabled
+              className="flex w-full items-center gap-3 rounded-2xl px-3 py-2 text-sm font-semibold text-slate-100 transition hover:bg-slate-900/70"
+              onClick={() => {
+                onOpenHabit();
+                setIsFabOpen(false);
+              }}
             >
               <FiTarget aria-hidden className="text-sky-300" />
               Habit

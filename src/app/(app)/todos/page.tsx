@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   addDoc,
   collection,
@@ -18,19 +18,22 @@ import {
 import FiltersModal, { type FilterDraft } from "@/components/todos/FiltersModal";
 import TodoForm from "@/components/todos/TodoForm";
 import TodoSection from "@/components/todos/TodoSection";
+import HabitForm from "@/components/habits/HabitForm";
+import HabitSection from "@/components/habits/HabitSection";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import Modal from "@/components/ui/Modal";
 import OverlayLoader from "@/components/ui/OverlayLoader";
 import Snackbar, { type SnackbarVariant } from "@/components/ui/Snackbar";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { db } from "@/lib/firebase";
+import { getDateKey, getLocalTimeZone } from "@/lib/habitUtils";
 import {
   formatDateDisplay,
   formatDateInput,
   formatGroupTitle,
   formatTimeInput
 } from "@/lib/todoFormatters";
-import type { Todo, TodoInput, TodoPriority } from "@/lib/types";
+import type { Habit, HabitInput, Todo, TodoInput, TodoPriority } from "@/lib/types";
 
 const priorities: TodoPriority[] = ["low", "medium", "high"];
 
@@ -70,10 +73,20 @@ const getDefaultSchedule = () => {
 
 export default function TodosPage() {
   const { user, loading } = useAuth();
+  const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [todos, setTodos] = useState<Todo[]>([]);
+  const [habits, setHabits] = useState<Habit[]>([]);
   const [form, setForm] = useState<TodoInput>(defaultForm);
+  const [habitForm, setHabitForm] = useState<HabitInput>({
+    title: "",
+    reminderTime: "",
+    reminderDays: [0, 1, 2, 3, 4, 5, 6],
+    frequency: "daily"
+  });
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [isHabitFormOpen, setIsHabitFormOpen] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
   const [titleHasError, setTitleHasError] = useState(false);
   const [scheduleHasError, setScheduleHasError] = useState(false);
@@ -106,8 +119,12 @@ export default function TodosPage() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const [isHabitInitialLoad, setIsHabitInitialLoad] = useState(true);
   const [selectedTodo, setSelectedTodo] = useState<Todo | null>(null);
   const [lastCompletedId, setLastCompletedId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<"todos" | "habits">(() =>
+    searchParams.get("tab") === "habits" ? "habits" : "todos"
+  );
 
   useEffect(() => {
     if (!user) {
@@ -137,6 +154,40 @@ export default function TodosPage() {
 
     return () => unsubscribe();
   }, [pathname, user]);
+
+  useEffect(() => {
+    if (!user) {
+      setHabits([]);
+      setIsHabitInitialLoad(false);
+      return;
+    }
+
+    setIsHabitInitialLoad(true);
+    const habitsQuery = query(
+      collection(db, "users", user.uid, "habits"),
+      orderBy("createdAt", "desc")
+    );
+
+    let isFirstSnapshot = true;
+    const unsubscribe = onSnapshot(habitsQuery, (snapshot) => {
+      const data = snapshot.docs.map((docSnapshot) => ({
+        id: docSnapshot.id,
+        ...(docSnapshot.data() as Omit<Habit, "id">)
+      }));
+      setHabits(data);
+      if (isFirstSnapshot) {
+        setIsHabitInitialLoad(false);
+        isFirstSnapshot = false;
+      }
+    });
+
+    return () => unsubscribe();
+  }, [pathname, user]);
+
+  useEffect(() => {
+    const nextTab = searchParams.get("tab") === "habits" ? "habits" : "todos";
+    setActiveTab((prev) => (prev === nextTab ? prev : nextTab));
+  }, [searchParams]);
 
   const isEditing = useMemo(() => Boolean(editingId), [editingId]);
 
@@ -178,9 +229,39 @@ export default function TodosPage() {
     setScheduleHasError(false);
   };
 
+  const resetHabitForm = () => {
+    const now = new Date();
+    setHabitForm({
+      title: "",
+      reminderTime: formatTimeValue(now),
+      reminderDays: [0, 1, 2, 3, 4, 5, 6],
+      frequency: "daily"
+    });
+  };
+
+  const setTab = (tab: "todos" | "habits") => {
+    setActiveTab(tab);
+    const params = new URLSearchParams(searchParams.toString());
+    if (tab === "habits") {
+      params.set("tab", "habits");
+    } else {
+      params.delete("tab");
+    }
+    const queryString = params.toString();
+    router.replace(queryString ? `${pathname}?${queryString}` : pathname, {
+      scroll: false
+    });
+  };
+
   const openCreateModal = () => {
     resetForm();
     setIsFormOpen(true);
+  };
+
+  const openHabitModal = () => {
+    resetHabitForm();
+    setTab("habits");
+    setIsHabitFormOpen(true);
   };
 
   const openFilterModal = () => {
@@ -198,6 +279,11 @@ export default function TodosPage() {
   const closeFormModal = () => {
     resetForm();
     setIsFormOpen(false);
+  };
+
+  const closeHabitModal = () => {
+    resetHabitForm();
+    setIsHabitFormOpen(false);
   };
 
   const handleApplyFilters = () => {
@@ -394,6 +480,90 @@ export default function TodosPage() {
     } catch (error) {
       setSnackbar({ message: "Unable to save todo.", variant: "error" });
       console.error(error);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleHabitFormChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = event.target;
+    setHabitForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleHabitDayToggle = (dayIndex: number) => {
+    setHabitForm((prev) => {
+      const hasDay = prev.reminderDays.includes(dayIndex);
+      const nextDays = hasDay
+        ? prev.reminderDays.filter((day) => day !== dayIndex)
+        : [...prev.reminderDays, dayIndex];
+      return {
+        ...prev,
+        reminderDays: nextDays.length ? nextDays : prev.reminderDays
+      };
+    });
+  };
+
+  const handleSubmitHabit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!habitForm.title.trim()) {
+      setSnackbar({ message: "Add a habit title to continue.", variant: "error" });
+      return;
+    }
+    if (!habitForm.reminderTime.trim()) {
+      setSnackbar({ message: "Choose a reminder time.", variant: "error" });
+      return;
+    }
+    if (!user) {
+      setSnackbar({ message: "Sign in to manage habits.", variant: "error" });
+      return;
+    }
+    setActionLoading(true);
+    try {
+      await addDoc(collection(db, "users", user.uid, "habits"), {
+        title: habitForm.title.trim(),
+        reminderTime: habitForm.reminderTime,
+        reminderDays: habitForm.reminderDays,
+        frequency: habitForm.frequency,
+        completionDates: [],
+        timezone: getLocalTimeZone(),
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+        lastNotifiedDate: null
+      });
+      setSnackbar({ message: "Habit added to your list.", variant: "success" });
+      closeHabitModal();
+    } catch (error) {
+      console.error(error);
+      setSnackbar({ message: "Unable to save habit.", variant: "error" });
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleToggleHabitCompletion = async (habit: Habit) => {
+    if (!user) {
+      setSnackbar({ message: "Sign in to update habits.", variant: "error" });
+      return;
+    }
+    const todayKey = getDateKey(new Date(), habit.timezone);
+    const completionDates = habit.completionDates ?? [];
+    const isCompleted = completionDates.includes(todayKey);
+    const nextDates = isCompleted
+      ? completionDates.filter((date) => date !== todayKey)
+      : [...completionDates, todayKey];
+    setActionLoading(true);
+    try {
+      await updateDoc(doc(db, "users", user.uid, "habits", habit.id), {
+        completionDates: nextDates,
+        updatedAt: serverTimestamp()
+      });
+      setSnackbar({
+        message: isCompleted ? "Habit reset for today." : "Nice work! Habit completed.",
+        variant: "success"
+      });
+    } catch (error) {
+      console.error(error);
+      setSnackbar({ message: "Unable to update habit.", variant: "error" });
     } finally {
       setActionLoading(false);
     }
@@ -624,70 +794,119 @@ export default function TodosPage() {
   };
 
   const isLoading = loading || isInitialLoad;
+  const isHabitLoading = loading || isHabitInitialLoad;
 
   return (
     <section className="flex flex-col gap-6">
-      <TodoSection
-        groups={groupedTodos}
-        formatDate={formatDateDisplay}
-        onEdit={handleEditTodo}
-        onToggleStatus={handleToggleStatus}
-        onToggleFlag={handleToggleFlag}
-        onDelete={handleDeleteRequest}
-        selectedTodo={selectedTodo}
-        onSelectTodo={setSelectedTodo}
-        onOpenFilter={openFilterModal}
-        onOpenCreate={openCreateModal}
-        statusFilter={statusFilter}
-        priorityFilter={priorityFilter}
-        datePreset={datePreset}
-        sortBy={sortBy}
-        sortOrder={sortOrder}
-        onQuickFilter={handleQuickFilter}
-        onSortByChange={setSortBy}
-        onSortOrderChange={setSortOrder}
-        emptyStateLabel={emptyStateLabel}
-        todayStats={todayStats}
-        streakCount={streakCount}
-        lastCompletedId={lastCompletedId}
-        isLoading={isLoading}
-      />
-      <Modal isOpen={isFormOpen} onClose={closeFormModal} ariaLabel="Todo form">
-        <TodoForm
-          form={form}
-          priorities={priorities}
-          isEditing={isEditing}
-          titleHasError={titleHasError}
-          scheduleHasError={scheduleHasError}
-          onChange={handleFormChange}
-          onDescriptionChange={handleDescriptionChange}
-          onSubmit={handleSubmitTodo}
-          onCancelEdit={closeFormModal}
-        />
-      </Modal>
-      <FiltersModal
-        isOpen={isFilterOpen}
-        filterDraft={filterDraft}
-        onClose={() => setIsFilterOpen(false)}
-        onApply={handleApplyFilters}
-        onReset={handleResetFilters}
-        onDraftChange={setFilterDraft}
-      />
-      <ConfirmDialog
-        isOpen={Boolean(confirmDeleteId)}
-        title="Delete this todo?"
-        description="This action cannot be undone."
-        confirmLabel="Delete todo"
-        cancelLabel="Cancel"
-        isLoading={actionLoading}
-        onConfirm={() => {
-          if (confirmDeleteId) {
-            handleDeleteTodo(confirmDeleteId);
-          }
-          setConfirmDeleteId(null);
-        }}
-        onCancel={() => setConfirmDeleteId(null)}
-      />
+      <div className="flex w-full rounded-full border border-slate-800/70 bg-slate-900/60 p-1 text-xs font-semibold">
+        <button
+          type="button"
+          className={`flex-1 rounded-full px-4 py-2 text-center transition sm:flex-none ${
+            activeTab === "todos" ? "bg-sky-500/20 text-sky-200" : "text-slate-400"
+          }`}
+          onClick={() => setTab("todos")}
+        >
+          Todos
+        </button>
+        <button
+          type="button"
+          className={`flex-1 rounded-full px-4 py-2 text-center transition sm:flex-none ${
+            activeTab === "habits" ? "bg-sky-500/20 text-sky-200" : "text-slate-400"
+          }`}
+          onClick={() => setTab("habits")}
+        >
+          Habits
+        </button>
+      </div>
+
+      {activeTab === "todos" ? (
+        <>
+          <TodoSection
+            groups={groupedTodos}
+            formatDate={formatDateDisplay}
+            onEdit={handleEditTodo}
+            onToggleStatus={handleToggleStatus}
+            onToggleFlag={handleToggleFlag}
+            onDelete={handleDeleteRequest}
+            selectedTodo={selectedTodo}
+            onSelectTodo={setSelectedTodo}
+            onOpenFilter={openFilterModal}
+            onOpenCreate={openCreateModal}
+            onOpenHabit={openHabitModal}
+            statusFilter={statusFilter}
+            priorityFilter={priorityFilter}
+            datePreset={datePreset}
+            sortBy={sortBy}
+            sortOrder={sortOrder}
+            onQuickFilter={handleQuickFilter}
+            onSortByChange={setSortBy}
+            onSortOrderChange={setSortOrder}
+            emptyStateLabel={emptyStateLabel}
+            todayStats={todayStats}
+            streakCount={streakCount}
+            lastCompletedId={lastCompletedId}
+            isLoading={isLoading}
+          />
+          <Modal isOpen={isFormOpen} onClose={closeFormModal} ariaLabel="Todo form">
+            <TodoForm
+              form={form}
+              priorities={priorities}
+              isEditing={isEditing}
+              titleHasError={titleHasError}
+              scheduleHasError={scheduleHasError}
+              onChange={handleFormChange}
+              onDescriptionChange={handleDescriptionChange}
+              onSubmit={handleSubmitTodo}
+              onCancelEdit={closeFormModal}
+            />
+          </Modal>
+          <FiltersModal
+            isOpen={isFilterOpen}
+            filterDraft={filterDraft}
+            onClose={() => setIsFilterOpen(false)}
+            onApply={handleApplyFilters}
+            onReset={handleResetFilters}
+            onDraftChange={setFilterDraft}
+          />
+          <ConfirmDialog
+            isOpen={Boolean(confirmDeleteId)}
+            title="Delete this todo?"
+            description="This action cannot be undone."
+            confirmLabel="Delete todo"
+            cancelLabel="Cancel"
+            isLoading={actionLoading}
+            onConfirm={() => {
+              if (confirmDeleteId) {
+                handleDeleteTodo(confirmDeleteId);
+              }
+              setConfirmDeleteId(null);
+            }}
+            onCancel={() => setConfirmDeleteId(null)}
+          />
+        </>
+      ) : (
+        <>
+          <HabitSection
+            habits={habits}
+            onToggleComplete={handleToggleHabitCompletion}
+            onOpenCreate={openHabitModal}
+            isLoading={isHabitLoading}
+          />
+          <Modal
+            isOpen={isHabitFormOpen}
+            onClose={closeHabitModal}
+            ariaLabel="Habit form"
+          >
+            <HabitForm
+              form={habitForm}
+              onChange={handleHabitFormChange}
+              onToggleDay={handleHabitDayToggle}
+              onSubmit={handleSubmitHabit}
+              onCancel={closeHabitModal}
+            />
+          </Modal>
+        </>
+      )}
       {actionLoading ? <OverlayLoader /> : null}
       {snackbar ? (
         <Snackbar
