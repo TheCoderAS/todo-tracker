@@ -72,6 +72,55 @@ const buildDateRange = () => {
   return { start, end };
 };
 
+const getZonedParts = (date, timeZone) => {
+  const formatter = new Intl.DateTimeFormat("en-US", {
+    timeZone: timeZone || "UTC",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    weekday: "short",
+    hour12: false
+  });
+  const parts = formatter.formatToParts(date);
+  const getPart = (type) => parts.find((part) => part.type === type)?.value;
+  return {
+    year: getPart("year"),
+    month: getPart("month"),
+    day: getPart("day"),
+    hour: getPart("hour"),
+    minute: getPart("minute"),
+    weekday: getPart("weekday")
+  };
+};
+
+const getZonedDateKey = (date, timeZone) => {
+  const { year, month, day } = getZonedParts(date, timeZone);
+  if (!year || !month || !day) return null;
+  return `${year}-${month}-${day}`;
+};
+
+const getZonedMinutes = (date, timeZone) => {
+  const { hour, minute } = getZonedParts(date, timeZone);
+  if (!hour || !minute) return null;
+  return Number(hour) * 60 + Number(minute);
+};
+
+const getZonedWeekdayIndex = (date, timeZone) => {
+  const { weekday } = getZonedParts(date, timeZone);
+  const indexMap = {
+    Sun: 0,
+    Mon: 1,
+    Tue: 2,
+    Wed: 3,
+    Thu: 4,
+    Fri: 5,
+    Sat: 6
+  };
+  return typeof weekday === "string" ? indexMap[weekday] : null;
+};
+
 const sendDueTodayNotifications = async () => {
   const usersSnapshot = await adminDb.collection("users").get();
   const { start, end } = buildDateRange();
@@ -127,6 +176,100 @@ const sendDueTodayNotifications = async () => {
             .set({ disabledAt: FieldValue.serverTimestamp() }, { merge: true });
         }
       });
+    }
+  }
+
+  return sendResults;
+};
+
+const sendHabitReminders = async () => {
+  const usersSnapshot = await adminDb.collection("users").get();
+  const now = new Date();
+  const sendResults = [];
+
+  for (const userDoc of usersSnapshot.docs) {
+    const uid = userDoc.id;
+    const habitsSnapshot = await adminDb
+      .collection("users")
+      .doc(uid)
+      .collection("habits")
+      .get();
+
+    if (habitsSnapshot.empty) continue;
+
+    const tokenSnapshot = await adminDb
+      .collection("users")
+      .doc(uid)
+      .collection("fcmTokens")
+      .get();
+
+    const tokens = tokenSnapshot.docs.map((doc) => doc.id).filter(Boolean);
+    if (!tokens.length) continue;
+
+    for (const habitDoc of habitsSnapshot.docs) {
+      const habit = habitDoc.data();
+      const reminderTime = habit.reminderTime;
+      const reminderDays = habit.reminderDays || [];
+      const timezone = habit.timezone || "UTC";
+
+      if (!reminderTime || !reminderDays.length) continue;
+
+      const dateKey = getZonedDateKey(now, timezone);
+      const weekdayIndex = getZonedWeekdayIndex(now, timezone);
+      const nowMinutes = getZonedMinutes(now, timezone);
+      if (!dateKey || weekdayIndex === null || nowMinutes === null) continue;
+      if (!reminderDays.includes(weekdayIndex)) continue;
+      if (habit.lastNotifiedDate === dateKey) continue;
+      if (habit.completionDates?.includes(dateKey)) continue;
+
+      const [hour, minute] = reminderTime.split(":").map((value) => Number(value));
+      if (Number.isNaN(hour) || Number.isNaN(minute)) continue;
+      const reminderMinutes = hour * 60 + minute;
+      const diff = nowMinutes - reminderMinutes;
+      if (diff < 0 || diff > INTERVAL_MINUTES) continue;
+
+      const notificationId = `${habitDoc.id}-${dateKey}`;
+      const message = {
+        data: {
+          title: "Habit reminder",
+          body: `Time for ${habit.title || "your habit"}.`,
+          url: "/todos?tab=habits",
+          notificationId
+        },
+        tokens
+      };
+
+      const response = await adminMessaging.sendEachForMulticast(message);
+      sendResults.push({ uid, habitId: habitDoc.id, sent: response.successCount });
+
+      if (response.failureCount > 0) {
+        response.responses.forEach((res, index) => {
+          if (!res.success) {
+            const token = tokens[index];
+            adminDb
+              .collection("users")
+              .doc(uid)
+              .collection("fcmTokens")
+              .doc(token)
+              .set({ disabledAt: FieldValue.serverTimestamp() }, { merge: true });
+          }
+        });
+      }
+
+      if (response.successCount > 0) {
+        await adminDb
+          .collection("users")
+          .doc(uid)
+          .collection("habits")
+          .doc(habitDoc.id)
+          .set(
+            {
+              lastNotifiedDate: dateKey,
+              updatedAt: FieldValue.serverTimestamp()
+            },
+            { merge: true }
+          );
+      }
     }
   }
 
@@ -326,9 +469,13 @@ const startScheduler = () => {
   const intervalMs = Math.max(INTERVAL_MINUTES, 1) * 60 * 1000;
   const run = () => {
     lastRunAt = new Date().toISOString();
-    sendDueTodayNotifications()
-      .then((results) => {
-        lastResult = { status: "ok", usersNotified: results.length };
+    Promise.all([sendDueTodayNotifications(), sendHabitReminders()])
+      .then(([todoResults, habitResults]) => {
+        lastResult = {
+          status: "ok",
+          todosNotified: todoResults.length,
+          habitsNotified: habitResults.length
+        };
       })
       .catch((error) => {
         lastResult = { status: "error", message: String(error) };
