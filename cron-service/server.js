@@ -135,7 +135,8 @@ app.get("/", (_req, res) => {
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Aura Pulse Cron</title>
+    <title>Aura Pulse Service</title>
+    <link rel="icon" href="/favicon.ico" />
     <style>
       :root {
         color-scheme: dark;
@@ -234,10 +235,9 @@ app.get("/", (_req, res) => {
     <div class="orb one"></div>
     <div class="orb two"></div>
     <div class="card">
-      <h1>Aura Pulse Notifications</h1>
-      <p>Background scheduler is running. Jump back to the main app anytime.</p>
+      <h1>Aura Pulse Health</h1>
+      <p>Aura Pulse is running. Jump back to the main app anytime.</p>
       <div class="meta">
-        <div>Target: ${TARGET_URL}</div>
         <div>Interval: ${INTERVAL_MINUTES} minutes</div>
         <div>Last run: ${lastRunAt ?? "—"}</div>
         <div>Last status: ${lastResult?.status ?? "—"}</div>
@@ -248,6 +248,10 @@ app.get("/", (_req, res) => {
     </div>
   </body>
 </html>`);
+});
+
+app.get("/favicon.ico", (_req, res) => {
+  res.redirect(`${TARGET_URL}/favicon.ico`);
 });
 
 app.post("/register", async (req, res) => {
@@ -307,13 +311,12 @@ app.post("/send-due-today", async (req, res) => {
 const startScheduler = () => {
   const intervalMs = Math.max(INTERVAL_MINUTES, 1) * 60 * 1000;
   const run = () => {
+    lastRunAt = new Date().toISOString();
     sendDueTodayNotifications()
       .then((results) => {
-        lastRunAt = new Date().toISOString();
         lastResult = { status: "ok", usersNotified: results.length };
       })
       .catch((error) => {
-        lastRunAt = new Date().toISOString();
         lastResult = { status: "error", message: String(error) };
       });
   };
