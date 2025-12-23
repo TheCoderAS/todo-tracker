@@ -2,9 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import { collection, onSnapshot, query, Timestamp, where } from "firebase/firestore";
+import { getToken } from "firebase/messaging";
 
 import { useAuth } from "@/components/auth/AuthProvider";
 import { db } from "@/lib/firebase";
+import { getFirebaseMessaging } from "@/lib/firebaseMessaging";
 import type { Todo } from "@/lib/types";
 
 type BeforeInstallPromptEvent = Event & {
@@ -36,6 +38,47 @@ export default function PwaManager() {
     return () =>
       window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
   }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!user) return;
+    if (!("Notification" in window)) return;
+
+    const registerToken = async () => {
+      if (Notification.permission === "default") {
+        await Notification.requestPermission().catch(() => undefined);
+      }
+      if (Notification.permission !== "granted") return;
+
+      const messaging = await getFirebaseMessaging();
+      if (!messaging) return;
+
+      const registration = await navigator.serviceWorker.ready;
+      const token = await getToken(messaging, {
+        vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY,
+        serviceWorkerRegistration: registration
+      });
+      if (!token) return;
+
+      const idToken = await user.getIdToken();
+      const endpoint =
+        process.env.NEXT_PUBLIC_NOTIFICATION_SERVICE_URL ||
+        "https://next-gen-track.web.app";
+      await fetch(`${endpoint}/register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${idToken}`
+        },
+        body: JSON.stringify({
+          token,
+          userAgent: navigator.userAgent
+        })
+      });
+    };
+
+    registerToken().catch(() => undefined);
+  }, [user]);
 
   useEffect(() => {
     if (!user) {
