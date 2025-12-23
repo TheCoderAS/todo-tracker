@@ -229,14 +229,14 @@ export default function AuthClient() {
 
   if (loading || user) {
     return (
-      <main className="relative mx-auto flex min-h-screen max-w-3xl flex-col justify-center px-6 pb-20 pt-24 text-slate-100">
+      <main className="relative mx-auto flex min-h-screen max-w-6xl flex-col justify-center px-6 pb-20 pt-24 text-slate-100">
         <OverlayLoader />
       </main>
     );
   }
 
   return (
-    <main className="relative mx-auto flex min-h-screen max-w-3xl flex-col justify-center px-6 pb-20 pt-24 text-slate-100">
+    <main className="relative mx-auto flex min-h-screen max-w-6xl flex-col justify-center px-6 pb-20 pt-24 text-slate-100">
       <AuthSection
         mode={authMode}
         form={authForm}
