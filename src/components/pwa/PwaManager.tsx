@@ -122,6 +122,20 @@ export default function PwaManager() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
+    const endpoint = process.env.NEXT_PUBLIC_NOTIFICATION_SERVICE_URL;
+    if (!endpoint) return;
+
+    const ping = () => {
+      fetch(`${endpoint}/health`).catch(() => undefined);
+    };
+
+    ping();
+    const pingInterval = window.setInterval(ping, 30 * 60 * 1000);
+    return () => window.clearInterval(pingInterval);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
     if (!user) return;
     if (!("Notification" in window)) return;
 

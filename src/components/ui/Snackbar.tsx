@@ -11,9 +11,9 @@ type SnackbarProps = {
 };
 
 const variantStyles: Record<SnackbarVariant, string> = {
-  success: "border-emerald-500/30 bg-emerald-500/10 text-emerald-100",
-  error: "border-rose-500/30 bg-rose-500/10 text-rose-100",
-  info: "border-sky-500/30 bg-sky-500/10 text-sky-100"
+  success: "border-emerald-500 bg-emerald-500 text-emerald-950",
+  error: "border-rose-500 bg-rose-500 text-rose-950",
+  info: "border-sky-500 bg-sky-500 text-sky-950"
 };
 
 export default function Snackbar({
