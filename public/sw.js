@@ -15,9 +15,20 @@ messaging.onBackgroundMessage((payload) => {
   const title = payload?.data?.title || "Aura Pulse";
   const body = payload?.data?.body || "You have updates waiting.";
   const url = payload?.data?.url || "/todos";
+  const notificationId =
+    payload?.data?.notificationId ||
+    (self.crypto && "randomUUID" in self.crypto
+      ? self.crypto.randomUUID()
+      : String(Date.now()));
+  const notificationData = { url, notificationId, title, body };
+  self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clients) => {
+    clients.forEach((client) => {
+      client.postMessage({ type: "notification-received", payload: notificationData });
+    });
+  });
   self.registration.showNotification(title, {
     body,
-    data: { url }
+    data: notificationData
   });
 });
 
@@ -60,17 +71,28 @@ self.addEventListener("fetch", (event) => {
 
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
-  const targetUrl = event.notification?.data?.url ?? "/todos";
+  const notificationData = event.notification?.data ?? {};
+  const targetUrl = notificationData.url ?? "/todos";
   event.waitUntil(
     self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clients) => {
       for (const client of clients) {
         if ("focus" in client) {
+          client.postMessage({
+            type: "notification-clicked",
+            payload: notificationData
+          });
           client.navigate(targetUrl);
           return client.focus();
         }
       }
       if (self.clients.openWindow) {
-        return self.clients.openWindow(targetUrl);
+        return self.clients.openWindow(targetUrl).then((client) => {
+          client?.postMessage({
+            type: "notification-clicked",
+            payload: notificationData
+          });
+          return client;
+        });
       }
       return undefined;
     })
