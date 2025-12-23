@@ -12,8 +12,8 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 messaging.onBackgroundMessage((payload) => {
-  const title = payload?.notification?.title || "Aura Pulse";
-  const body = payload?.notification?.body || "You have updates waiting.";
+  const title = payload?.data?.title || "Aura Pulse";
+  const body = payload?.data?.body || "You have updates waiting.";
   const url = payload?.data?.url || "/todos";
   self.registration.showNotification(title, {
     body,
