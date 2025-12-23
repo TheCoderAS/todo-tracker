@@ -1,8 +1,17 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { collection, onSnapshot, query, Timestamp, where } from "firebase/firestore";
-import { getToken } from "firebase/messaging";
+import {
+  collection,
+  doc,
+  onSnapshot,
+  query,
+  serverTimestamp,
+  setDoc,
+  Timestamp,
+  where
+} from "firebase/firestore";
+import { getToken, onMessage } from "firebase/messaging";
 
 import { useAuth } from "@/components/auth/AuthProvider";
 import { db } from "@/lib/firebase";
@@ -18,6 +27,7 @@ export default function PwaManager() {
   const [dueTodayTodos, setDueTodayTodos] = useState<Todo[]>([]);
   const [dayKey, setDayKey] = useState(() => new Date().toDateString());
   const notificationIntervalRef = useRef<number | null>(null);
+  const storedNotificationIdsRef = useRef<Set<string>>(new Set());
   useEffect(() => {
     if (typeof window === "undefined") return;
 
@@ -43,6 +53,65 @@ export default function PwaManager() {
     if (typeof window === "undefined") return;
     if (!user) return;
     if (!("Notification" in window)) return;
+
+    const saveNotification = async ({
+      notificationId,
+      title,
+      body,
+      url,
+      markRead
+    }: {
+      notificationId: string;
+      title: string;
+      body: string;
+      url: string;
+      markRead?: boolean;
+    }) => {
+      if (storedNotificationIdsRef.current.has(notificationId)) {
+        if (!markRead) return;
+      }
+      storedNotificationIdsRef.current.add(notificationId);
+      const docRef = doc(db, "users", user.uid, "notifications", notificationId);
+      await setDoc(
+        docRef,
+        {
+          title,
+          body,
+          url,
+          read: Boolean(markRead),
+          readAt: markRead ? serverTimestamp() : null,
+          createdAt: serverTimestamp(),
+          author_uid: user.uid
+        },
+        { merge: true }
+      );
+    };
+
+    const handleServiceWorkerMessage = (event: MessageEvent) => {
+      const { type, payload } = event.data ?? {};
+      if (!payload?.notificationId) return;
+      if (type === "notification-received") {
+        saveNotification({
+          notificationId: payload.notificationId,
+          title: payload.title,
+          body: payload.body,
+          url: payload.url
+        }).catch(() => undefined);
+      }
+      if (type === "notification-clicked") {
+        saveNotification({
+          notificationId: payload.notificationId,
+          title: payload.title,
+          body: payload.body,
+          url: payload.url,
+          markRead: true
+        }).catch(() => undefined);
+      }
+    };
+
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.addEventListener("message", handleServiceWorkerMessage);
+    }
 
     const registerToken = async () => {
       if (Notification.permission === "default") {
@@ -77,7 +146,31 @@ export default function PwaManager() {
       });
     };
 
+    const registerForegroundListener = async () => {
+      const messaging = await getFirebaseMessaging();
+      if (!messaging) return;
+      return onMessage(messaging, (payload) => {
+        const notificationId =
+          payload?.data?.notificationId ||
+          (window.crypto?.randomUUID ? window.crypto.randomUUID() : String(Date.now()));
+        saveNotification({
+          notificationId,
+          title: payload?.data?.title || "Aura Pulse",
+          body: payload?.data?.body || "You have updates waiting.",
+          url: payload?.data?.url || "/todos"
+        }).catch(() => undefined);
+      });
+    };
+
     registerToken().catch(() => undefined);
+    const unsubscribeForeground = registerForegroundListener();
+
+    return () => {
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.removeEventListener("message", handleServiceWorkerMessage);
+      }
+      Promise.resolve(unsubscribeForeground).then((unsubscribe) => unsubscribe?.());
+    };
   }, [user]);
 
   useEffect(() => {
