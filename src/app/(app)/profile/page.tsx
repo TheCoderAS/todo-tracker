@@ -246,7 +246,7 @@ export default function ProfilePage() {
               </select>
             </label>
           </div>
-          <div className="sticky bottom-0 -mx-6 mt-4 grid gap-2 border-t border-slate-900/60 bg-slate-950/80 px-6 py-4 backdrop-blur sm:grid-cols-3">
+          <div className="sticky bottom-0 -mx-6 mt-4 grid gap-2 border-t border-slate-900/60 bg-slate-950/80 px-6 py-4 backdrop-blur sm:grid-cols-2">
             <button
               type="submit"
               className="flex w-full items-center justify-center gap-2 rounded-full bg-emerald-400 px-5 py-3 text-sm font-semibold text-slate-950 shadow-[0_0_25px_rgba(16,185,129,0.45)] transition hover:bg-emerald-300 active:scale-[0.98]"
@@ -254,14 +254,6 @@ export default function ProfilePage() {
             >
               <FiSave aria-hidden />
               Save profile
-            </button>
-            <button
-              type="button"
-              className="flex w-full items-center justify-center gap-2 rounded-full border border-slate-700/70 px-5 py-3 text-sm font-semibold text-slate-200 transition hover:border-slate-500/80 hover:text-white active:scale-[0.98]"
-              onClick={handleResetPassword}
-              disabled={isSaving}
-            >
-              Reset password
             </button>
             <button
               type="button"
@@ -274,6 +266,16 @@ export default function ProfilePage() {
             </button>
           </div>
         </form>
+      ) : null}
+      {isEditing ? (
+        <button
+          type="button"
+          className="flex w-full items-center justify-center gap-2 rounded-full border border-slate-700/70 px-5 py-3 text-sm font-semibold text-slate-200 transition hover:border-slate-500/80 hover:text-white active:scale-[0.98]"
+          onClick={handleResetPassword}
+          disabled={isSaving}
+        >
+          Reset password
+        </button>
       ) : null}
       {isSaving ? <OverlayLoader /> : null}
       {snackbar ? (
