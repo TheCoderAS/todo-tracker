@@ -14,6 +14,7 @@ type AuthSectionProps = {
   onEmailSignIn: () => void;
   onEmailSignUp: () => void;
   onGoogleSignIn: () => void;
+  onForgotPassword: () => void;
 };
 
 export default function AuthSection({
@@ -26,7 +27,8 @@ export default function AuthSection({
   onChange,
   onEmailSignIn,
   onEmailSignUp,
-  onGoogleSignIn
+  onGoogleSignIn,
+  onForgotPassword
 }: AuthSectionProps) {
   return (
     <section className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
@@ -45,6 +47,7 @@ export default function AuthSection({
           onEmailSignIn={onEmailSignIn}
           onEmailSignUp={onEmailSignUp}
           onGoogleSignIn={onGoogleSignIn}
+          onForgotPassword={onForgotPassword}
         />
       </div>
     </section>

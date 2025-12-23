@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { usePathname } from "next/navigation";
 import { sendPasswordResetEmail, updateProfile } from "firebase/auth";
-import { FiEdit2, FiX } from "react-icons/fi";
+import { FiEdit2, FiSave, FiX } from "react-icons/fi";
 import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
 
 import { useAuth } from "@/components/auth/AuthProvider";
@@ -24,6 +24,12 @@ const defaultProfile: ProfileFormState = {
   phone: "",
   gender: ""
 };
+
+const inputClasses =
+  "w-full rounded-2xl border border-slate-800/70 bg-slate-950/60 px-4 py-3 text-sm text-slate-100 transition focus:border-emerald-400/70 focus:outline-none focus:ring-1 focus:ring-emerald-400/40";
+
+const labelClasses = "flex flex-col gap-2";
+const labelTextClasses = "text-xs font-semibold capitalize text-slate-300";
 
 const deriveNameParts = (displayName?: string | null) => {
   const parts = displayName?.trim().split(/\s+/).filter(Boolean) ?? [];
@@ -186,54 +192,50 @@ export default function ProfilePage() {
 
       {isEditing ? (
         <form
-          className="grid gap-4 rounded-3xl border border-slate-900/60 bg-slate-950/70 p-6"
+          className="grid gap-5 rounded-3xl border border-slate-900/60 bg-slate-950/70 p-6"
           onSubmit={handleSave}
         >
+          <h3 className="text-lg font-semibold text-white">Update profile</h3>
           <div className="grid gap-4 sm:grid-cols-2">
-            <label className="flex flex-col gap-2">
-              <span className="text-xs font-semibold capitalize text-slate-300">
-                First name
-              </span>
+            <label className={labelClasses}>
+              <span className={labelTextClasses}>First name</span>
               <input
                 name="firstName"
+                placeholder="Jane"
                 value={form.firstName}
                 onChange={handleChange}
-                className="w-full rounded-2xl border border-slate-800/70 bg-slate-950/60 px-4 py-3 text-sm text-slate-100"
+                className={inputClasses}
               />
             </label>
-            <label className="flex flex-col gap-2">
-              <span className="text-xs font-semibold capitalize text-slate-300">
-                Last name
-              </span>
+            <label className={labelClasses}>
+              <span className={labelTextClasses}>Last name</span>
               <input
                 name="lastName"
+                placeholder="Doe"
                 value={form.lastName}
                 onChange={handleChange}
-                className="w-full rounded-2xl border border-slate-800/70 bg-slate-950/60 px-4 py-3 text-sm text-slate-100"
+                className={inputClasses}
               />
             </label>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
-            <label className="flex flex-col gap-2">
-              <span className="text-xs font-semibold capitalize text-slate-300">
-                Phone
-              </span>
+            <label className={labelClasses}>
+              <span className={labelTextClasses}>Phone</span>
               <input
                 name="phone"
+                placeholder="+1 (555) 123-4567"
                 value={form.phone}
                 onChange={handleChange}
-                className="w-full rounded-2xl border border-slate-800/70 bg-slate-950/60 px-4 py-3 text-sm text-slate-100"
+                className={inputClasses}
               />
             </label>
-            <label className="flex flex-col gap-2">
-              <span className="text-xs font-semibold capitalize text-slate-300">
-                Gender
-              </span>
+            <label className={labelClasses}>
+              <span className={labelTextClasses}>Gender</span>
               <select
                 name="gender"
                 value={form.gender}
                 onChange={handleChange}
-                className="w-full rounded-2xl border border-slate-800/70 bg-slate-950/60 px-4 py-3 text-sm text-slate-100"
+                className={inputClasses}
               >
                 <option value="">Select</option>
                 <option value="female">Female</option>
@@ -244,21 +246,31 @@ export default function ProfilePage() {
               </select>
             </label>
           </div>
-          <div className="flex flex-wrap gap-3">
+          <div className="sticky bottom-0 -mx-6 mt-4 grid gap-2 border-t border-slate-900/60 bg-slate-950/80 px-6 py-4 backdrop-blur sm:grid-cols-3">
             <button
               type="submit"
-              className="flex items-center gap-2 rounded-full bg-sky-400 px-5 py-2 text-sm font-semibold text-slate-950 transition hover:bg-sky-300"
+              className="flex w-full items-center justify-center gap-2 rounded-full bg-emerald-400 px-5 py-3 text-sm font-semibold text-slate-950 shadow-[0_0_25px_rgba(16,185,129,0.45)] transition hover:bg-emerald-300 active:scale-[0.98]"
               disabled={isSaving}
             >
+              <FiSave aria-hidden />
               Save profile
             </button>
             <button
               type="button"
-              className="flex items-center gap-2 rounded-full border border-slate-700/70 px-5 py-2 text-sm font-semibold text-slate-200"
+              className="flex w-full items-center justify-center gap-2 rounded-full border border-slate-700/70 px-5 py-3 text-sm font-semibold text-slate-200 transition hover:border-slate-500/80 hover:text-white active:scale-[0.98]"
               onClick={handleResetPassword}
               disabled={isSaving}
             >
               Reset password
+            </button>
+            <button
+              type="button"
+              className="flex w-full items-center justify-center gap-2 rounded-full border border-slate-700/70 px-5 py-3 text-sm font-semibold text-slate-200 transition hover:border-slate-500/80 hover:text-white active:scale-[0.98]"
+              onClick={() => setIsEditing(false)}
+              disabled={isSaving}
+            >
+              <FiX aria-hidden />
+              Cancel
             </button>
           </div>
         </form>

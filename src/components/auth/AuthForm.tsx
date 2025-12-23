@@ -28,6 +28,7 @@ type AuthFormProps = {
   onEmailSignIn: () => void;
   onEmailSignUp: () => void;
   onGoogleSignIn: () => void;
+  onForgotPassword: () => void;
 };
 
 export default function AuthForm({
@@ -40,7 +41,8 @@ export default function AuthForm({
   onChange,
   onEmailSignIn,
   onEmailSignUp,
-  onGoogleSignIn
+  onGoogleSignIn,
+  onForgotPassword
 }: AuthFormProps) {
   return (
     <div className="rounded-3xl border border-slate-800/60 bg-slate-950/60 p-8 shadow-2xl shadow-slate-950/40">
@@ -161,6 +163,18 @@ export default function AuthForm({
             onChange={onChange}
           />
         </Field>
+        {mode === "signin" ? (
+          <div className="flex justify-end sm:col-span-2">
+            <button
+              type="button"
+              className="text-xs font-semibold text-sky-200 transition hover:text-sky-100"
+              onClick={onForgotPassword}
+              disabled={isLoading}
+            >
+              Forgot password?
+            </button>
+          </div>
+        ) : null}
       </div>
 
       {error ? (

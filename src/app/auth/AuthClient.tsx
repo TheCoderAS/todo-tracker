@@ -4,7 +4,11 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   createUserWithEmailAndPassword,
+  EmailAuthProvider,
+  fetchSignInMethodsForEmail,
   GoogleAuthProvider,
+  linkWithCredential,
+  sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signInWithPopup
 } from "firebase/auth";
@@ -89,6 +93,24 @@ export default function AuthClient() {
       setAuthForm(defaultAuthForm);
       router.replace(nextPath);
     } catch (error) {
+      try {
+        const methods = await fetchSignInMethodsForEmail(auth, authForm.email);
+        if (methods.includes("google.com")) {
+          const provider = new GoogleAuthProvider();
+          const credential = EmailAuthProvider.credential(
+            authForm.email,
+            authForm.password
+          );
+          const result = await signInWithPopup(auth, provider);
+          await linkWithCredential(result.user, credential);
+          setSnackbar({ message: "Signed in with Google.", variant: "success" });
+          setAuthForm(defaultAuthForm);
+          router.replace(nextPath);
+          return;
+        }
+      } catch (secondaryError) {
+        console.error(secondaryError);
+      }
       setAuthError("Unable to sign in with email/password.");
       setSnackbar({ message: "Unable to sign in with email/password.", variant: "error" });
       console.error(error);
@@ -139,9 +161,65 @@ export default function AuthClient() {
       setSnackbar({ message: "Signed in with Google.", variant: "success" });
       router.replace(nextPath);
     } catch (error) {
+      console.error(error);
+      const provider = new GoogleAuthProvider();
+      const pendingCredential = GoogleAuthProvider.credentialFromError(error);
+      const email =
+        (error as { customData?: { email?: string } })?.customData?.email ??
+        authForm.email;
+      try {
+        if (email) {
+          const methods = await fetchSignInMethodsForEmail(auth, email);
+          if (methods.includes("password")) {
+            if (!authForm.password) {
+              setAuthError("Enter your password to link Google sign-in.");
+              setSnackbar({
+                message: "Enter your password to connect Google sign-in.",
+                variant: "error"
+              });
+              return;
+            }
+            const result = await signInWithEmailAndPassword(auth, email, authForm.password);
+            if (pendingCredential) {
+              await linkWithCredential(result.user, pendingCredential);
+            }
+            setSnackbar({ message: "Signed in with Google.", variant: "success" });
+            setAuthForm(defaultAuthForm);
+            router.replace(nextPath);
+            return;
+          }
+          if (methods.includes("google.com")) {
+            await signInWithPopup(auth, provider);
+            setSnackbar({ message: "Signed in with Google.", variant: "success" });
+            router.replace(nextPath);
+            return;
+          }
+        }
+      } catch (secondaryError) {
+        console.error(secondaryError);
+      }
       setAuthError("Unable to sign in with Google.");
       setSnackbar({ message: "Unable to sign in with Google.", variant: "error" });
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async () => {
+    setAuthError(null);
+    if (!authForm.email.trim()) {
+      setAuthError("Enter your email to reset your password.");
+      setSnackbar({ message: "Enter your email to reset your password.", variant: "error" });
+      return;
+    }
+    setActionLoading(true);
+    try {
+      await sendPasswordResetEmail(auth, authForm.email.trim());
+      setSnackbar({ message: "Password reset email sent.", variant: "success" });
+    } catch (error) {
       console.error(error);
+      setAuthError("Unable to send reset email.");
+      setSnackbar({ message: "Unable to send reset email.", variant: "error" });
     } finally {
       setActionLoading(false);
     }
@@ -168,6 +246,7 @@ export default function AuthClient() {
         onEmailSignIn={handleEmailSignIn}
         onEmailSignUp={handleEmailSignUp}
         onGoogleSignIn={handleGoogleSignIn}
+        onForgotPassword={handleForgotPassword}
       />
       {actionLoading ? <OverlayLoader /> : null}
       {snackbar ? (
