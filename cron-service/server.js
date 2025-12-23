@@ -129,6 +129,127 @@ app.get("/health", (_req, res) => {
   });
 });
 
+app.get("/", (_req, res) => {
+  res.send(`<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Aura Pulse Cron</title>
+    <style>
+      :root {
+        color-scheme: dark;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        font-family: "Space Grotesk", "Segoe UI", sans-serif;
+        background: radial-gradient(circle at 20% 20%, #1f2937 0%, #0b1120 45%, #020617 100%);
+        color: #e2e8f0;
+        position: relative;
+        overflow: hidden;
+      }
+      .orb {
+        position: absolute;
+        width: 360px;
+        height: 360px;
+        border-radius: 50%;
+        filter: blur(30px);
+        opacity: 0.35;
+        animation: float 18s ease-in-out infinite;
+      }
+      .orb.one {
+        background: radial-gradient(circle, rgba(34, 211, 238, 0.5), transparent 70%);
+        top: -120px;
+        left: -60px;
+      }
+      .orb.two {
+        background: radial-gradient(circle, rgba(16, 185, 129, 0.45), transparent 70%);
+        bottom: -140px;
+        right: -80px;
+        animation-delay: -6s;
+      }
+      @keyframes float {
+        0%, 100% {
+          transform: translateY(0) translateX(0) scale(1);
+        }
+        50% {
+          transform: translateY(20px) translateX(10px) scale(1.05);
+        }
+      }
+      .card {
+        width: min(560px, 90vw);
+        padding: 32px;
+        border-radius: 24px;
+        background: rgba(15, 23, 42, 0.75);
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        box-shadow: 0 20px 60px rgba(2, 6, 23, 0.6);
+        backdrop-filter: blur(16px);
+      }
+      h1 {
+        margin: 0 0 12px;
+        font-size: 28px;
+        font-weight: 600;
+      }
+      p {
+        margin: 0 0 24px;
+        font-size: 14px;
+        color: #94a3b8;
+      }
+      .meta {
+        display: grid;
+        gap: 8px;
+        font-size: 12px;
+        color: #cbd5f5;
+        margin-bottom: 24px;
+      }
+      .button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        padding: 12px 20px;
+        border-radius: 999px;
+        border: none;
+        background: linear-gradient(135deg, #10b981, #22d3ee);
+        color: #031a17;
+        font-weight: 600;
+        font-size: 14px;
+        cursor: pointer;
+        text-decoration: none;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+      .button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 12px 30px rgba(16, 185, 129, 0.35);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="orb one"></div>
+    <div class="orb two"></div>
+    <div class="card">
+      <h1>Aura Pulse Notifications</h1>
+      <p>Background scheduler is running. Jump back to the main app anytime.</p>
+      <div class="meta">
+        <div>Target: ${TARGET_URL}</div>
+        <div>Interval: ${INTERVAL_MINUTES} minutes</div>
+        <div>Last run: ${lastRunAt ?? "—"}</div>
+        <div>Last status: ${lastResult?.status ?? "—"}</div>
+      </div>
+      <a class="button" href="${TARGET_URL}">
+        Go to Aura Pulse
+      </a>
+    </div>
+  </body>
+</html>`);
+});
+
 app.post("/register", async (req, res) => {
   try {
     const authHeader = req.headers.authorization || "";
