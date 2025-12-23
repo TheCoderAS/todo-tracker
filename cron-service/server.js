@@ -104,11 +104,11 @@ const sendDueTodayNotifications = async () => {
     const detail = remaining > 0 ? `${titles.join(", ")} +${remaining} more` : titles.join(", ");
 
     const message = {
-      notification: {
+      data: {
         title: `Due today: ${todosSnapshot.size} task${todosSnapshot.size === 1 ? "" : "s"}`,
-        body: detail || "Open Aura Pulse to review today's schedule."
+        body: detail || "Open Aura Pulse to review today's schedule.",
+        url: "/todos"
       },
-      data: { url: "/todos" },
       tokens
     };
 
