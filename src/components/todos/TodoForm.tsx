@@ -124,12 +124,12 @@ export default function TodoForm({
       <h2 className="text-xl font-semibold text-white">
         {isEditing ? "Edit todo" : "Add a new todo"}
       </h2>
-      <div className="rounded-3xl border border-white/10 bg-gradient-to-br from-slate-950/80 via-slate-950/60 to-emerald-950/30 p-5 shadow-[0_0_35px_rgba(16,185,129,0.08)]">
+      <div>
         <label className={labelClasses}>
-          <span className={labelTextClasses}>Todo Title</span>
+          <span className={labelTextClasses}>Title</span>
           <input
             name="title"
-            placeholder="What would you like to complete today?"
+            placeholder="What would you like add?"
             value={form.title}
             onChange={onChange}
             maxLength={24}
@@ -315,17 +315,17 @@ export default function TodoForm({
           )}
         </div>
       </div>
-      <div className="sticky bottom-0 -mx-5 mt-6 grid grid-cols-1 gap-3 border-t border-slate-900/60 bg-slate-950/80 px-5 py-4 backdrop-blur sm:grid-cols-2">
+      <div className="sticky bottom-0 -mx-5 mt-6 grid grid-cols-2 gap-2 border-t border-slate-900/60 bg-slate-950/80 px-5 backdrop-blur">
         <button
           type="submit"
-          className="flex w-full items-center justify-center gap-2 rounded-full bg-emerald-400 px-5 py-3 text-sm font-semibold text-slate-950 shadow-[0_0_25px_rgba(16,185,129,0.45)] transition hover:bg-emerald-300 active:scale-[0.98]"
+          className="flex w-full items-center justify-center gap-1 rounded-full bg-emerald-400 px-5 py-3 text-sm font-semibold text-slate-950 shadow-[0_0_25px_rgba(16,185,129,0.45)] transition hover:bg-emerald-300 active:scale-[0.98]"
         >
           {isEditing ? <FiSave aria-hidden /> : <FiPlus aria-hidden />}
-          <span>{isEditing ? "Save changes" : "Add todo"}</span>
+          <span>{isEditing ? "Save" : "Save"}</span>
         </button>
         <button
           type="button"
-          className="flex w-full items-center justify-center gap-2 rounded-full border border-slate-700/70 px-5 py-3 text-sm font-semibold text-slate-200 transition hover:border-slate-500/80 hover:text-white active:scale-[0.98]"
+          className="flex w-full items-center justify-center gap-1 rounded-full border border-slate-700/70 px-5 py-3 text-sm font-semibold text-slate-200 transition hover:border-slate-500/80 hover:text-white active:scale-[0.98]"
           onClick={onCancelEdit}
         >
           <FiX aria-hidden />
