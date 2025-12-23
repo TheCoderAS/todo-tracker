@@ -11,9 +11,9 @@ type SnackbarProps = {
 };
 
 const variantStyles: Record<SnackbarVariant, string> = {
-  success: "border-emerald-500 bg-emerald-500 text-emerald-950",
-  error: "border-rose-500 bg-rose-500 text-rose-950",
-  info: "border-sky-500 bg-sky-500 text-sky-950"
+  success: "border-emerald-500/60 bg-emerald-500/20 text-emerald-100",
+  error: "border-rose-500/60 bg-rose-500/20 text-rose-100",
+  info: "border-sky-500/60 bg-sky-500/20 text-sky-100"
 };
 
 export default function Snackbar({
@@ -31,7 +31,7 @@ export default function Snackbar({
 
   return (
     <div
-      className={`fixed right-6 top-24 z-[9999] flex max-w-sm items-start gap-3 rounded-2xl border px-4 py-3 text-sm shadow-xl ${
+      className={`fixed right-6 top-24 z-[9999] flex max-w-sm items-center gap-3 rounded-2xl border px-4 py-3 text-sm shadow-xl backdrop-blur-lg ${
         variantStyles[variant]
       }`}
       role="status"
