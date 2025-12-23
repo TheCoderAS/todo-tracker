@@ -130,7 +130,13 @@ export default function PwaManager() {
     };
 
     ping();
-    const pingInterval = window.setInterval(ping, 30 * 60 * 1000);
+    const pingIntervalMinutes = Number(
+      process.env.NEXT_PUBLIC_NOTIFICATION_PING_INTERVAL_MINUTES || "30"
+    );
+    const pingInterval = window.setInterval(
+      ping,
+      Math.max(pingIntervalMinutes, 1) * 60 * 1000
+    );
     return () => window.clearInterval(pingInterval);
   }, []);
 
@@ -139,7 +145,10 @@ export default function PwaManager() {
     if (!user) return;
     if (!("Notification" in window)) return;
 
-    const intervalMs = 5 * 60 * 1000;
+    const summaryIntervalMinutes = Number(
+      process.env.NEXT_PUBLIC_NOTIFICATION_SUMMARY_INTERVAL_MINUTES || "5"
+    );
+    const intervalMs = Math.max(summaryIntervalMinutes, 1) * 60 * 1000;
 
     if (Notification.permission === "default") {
       Notification.requestPermission().catch(() => undefined);
