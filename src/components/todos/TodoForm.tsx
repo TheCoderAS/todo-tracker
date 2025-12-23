@@ -2,7 +2,13 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { FormEvent } from "react";
-import { BsListOl, BsListUl, BsTypeBold, BsTypeItalic } from "react-icons/bs";
+import {
+  BsListOl,
+  BsListUl,
+  BsTypeBold,
+  BsTypeItalic,
+  BsTypeStrikethrough
+} from "react-icons/bs";
 import { FiPlus, FiSave, FiX } from "react-icons/fi";
 
 import type { TodoInput, TodoPriority } from "@/lib/types";
@@ -88,7 +94,7 @@ export default function TodoForm({
     }
   }, [form.description, isDescriptionOpen]);
 
-  const applyInlineFormat = (command: "bold" | "italic") => {
+  const applyInlineFormat = (command: "bold" | "italic" | "strikeThrough") => {
     const editor = descriptionRef.current;
     if (!editor) return;
     editor.focus();
@@ -224,12 +230,14 @@ export default function TodoForm({
                   placeholder="Add tag"
                   value={tagInput}
                   onChange={(event) => setTagInput(event.target.value)}
+                  onBlur={() => handleTagAdd(tagInput)}
                   onKeyDown={(event) => {
-                    if (event.key === "Enter") {
+                    if (event.key === "Enter" || event.key === "Tab") {
                       event.preventDefault();
                       handleTagAdd(tagInput);
                     }
                   }}
+                  enterKeyHint="done"
                   className="min-w-[120px] flex-1 bg-transparent text-sm text-slate-100 outline-none"
                 />
               </div>
@@ -280,6 +288,14 @@ export default function TodoForm({
                 <button
                   type="button"
                   className="flex items-center gap-2 rounded-full border border-slate-700/70 px-3 py-1 text-xs font-semibold text-slate-200 transition hover:border-emerald-400/70 hover:text-emerald-100"
+                  onClick={() => applyInlineFormat("strikeThrough")}
+                  aria-label="Strikethrough"
+                >
+                  <BsTypeStrikethrough aria-hidden />
+                </button>
+                <button
+                  type="button"
+                  className="flex items-center gap-2 rounded-full border border-slate-700/70 px-3 py-1 text-xs font-semibold text-slate-200 transition hover:border-emerald-400/70 hover:text-emerald-100"
                   onClick={() => applyListFormat("unordered")}
                   aria-label="Bulleted list"
                 >
@@ -302,7 +318,7 @@ export default function TodoForm({
                 )}
                 <div
                   ref={descriptionRef}
-                  className={`${inputClasses} max-h-36 min-h-[6.5rem] overflow-y-auto [&_em]:text-slate-100 [&_ol]:list-decimal [&_ol]:pl-5 [&_strong]:text-white [&_ul]:list-disc [&_ul]:pl-5`}
+                  className={`${inputClasses} max-h-36 min-h-[6.5rem] overflow-y-auto [&_em]:text-slate-100 [&_ol]:list-decimal [&_ol]:pl-5 [&_s]:line-through [&_strike]:line-through [&_strong]:text-white [&_ul]:list-disc [&_ul]:pl-5`}
                   contentEditable
                   suppressContentEditableWarning
                   role="textbox"

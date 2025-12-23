@@ -460,7 +460,7 @@ export default function TodoList({
                 </p>
                 {selectedTodo.description?.trim() ? (
                   <div
-                    className="space-y-2 text-sm text-slate-200 [&_em]:text-slate-100 [&_ol]:list-decimal [&_ol]:pl-5 [&_strong]:text-white [&_ul]:list-disc [&_ul]:pl-5"
+                    className="space-y-2 text-sm text-slate-200 [&_em]:text-slate-100 [&_ol]:list-decimal [&_ol]:pl-5 [&_s]:line-through [&_strike]:line-through [&_strong]:text-white [&_ul]:list-disc [&_ul]:pl-5"
                     dangerouslySetInnerHTML={{
                       __html: formatDescriptionHtml(selectedTodo.description)
                     }}
