@@ -73,7 +73,7 @@ export default function Modal({
 
   return createPortal(
     <div
-      className={`fixed inset-0 z-[1000] flex bg-slate-950/70 px-4 py-10 backdrop-blur-xl backdrop-saturate-150 transition-opacity duration-200 ${layoutClass} ${
+      className={`fixed inset-0 z-[1000] flex px-4 py-10 backdrop-blur-sm backdrop-saturate-150 transition-opacity duration-200 ${layoutClass} ${
         isClosing ? "opacity-0" : "opacity-100"
       }`}
       role="dialog"
@@ -81,7 +81,7 @@ export default function Modal({
       aria-label={ariaLabel}
       onClick={onClose}
     >
-      <div className="modal-ambient pointer-events-none absolute inset-0" aria-hidden />
+      <div className="pointer-events-none absolute inset-0" aria-hidden />
       <div
         className={`relative overflow-y-auto border border-slate-800/70 bg-slate-950/95 p-6 shadow-2xl shadow-slate-950/60 transition duration-200 ${panelClass} ${
           isClosing ? "translate-y-4 scale-95 opacity-0" : "translate-y-0 scale-100 opacity-100"

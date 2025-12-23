@@ -121,7 +121,7 @@ export default function TodoSection({
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
-          <div className="rounded-2xl border border-slate-800/60 bg-slate-950/70 px-3 py-2 text-xs text-slate-200 shadow-lg shadow-slate-950/40">
+          <div className="rounded-2xl border border-slate-800/60 bg-slate-950/70 px-3 py-3 text-xs text-slate-200 shadow-lg shadow-slate-950/40">
             <span className="text-slate-400">Streak</span>
             <span className="ml-2 text-xs font-semibold text-emerald-200">
               {streakCount} days
@@ -145,7 +145,7 @@ export default function TodoSection({
                 <button
                   key={id}
                   type="button"
-                  className={`flex items-center gap-0 rounded-full border px-2.5 py-1 text-[0.65rem] font-semibold transition sm:px-3 sm:text-[0.7rem] ${
+                  className={`flex items-center gap-1 rounded-full border px-2.5 py-1 text-[0.65rem] font-semibold transition sm:px-3 sm:text-[0.7rem] ${
                     isActive
                       ? "border-sky-400/60 bg-sky-400/15 text-sky-100 shadow-lg shadow-sky-500/20"
                       : "border-slate-800/70 bg-slate-950/40 text-slate-300 hover:border-slate-600/70 hover:text-white"
@@ -158,7 +158,7 @@ export default function TodoSection({
               );
             })}
           </div>
-          <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <div className="flex flex-wrap items-center rounded-full border border-slate-800/70 bg-slate-950/40 p-1 text-[0.65rem] font-semibold text-slate-200 sm:text-[0.7rem]">
               <button
                 type="button"

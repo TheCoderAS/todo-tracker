@@ -270,6 +270,13 @@ export default function TodosPage() {
         status: nextStatus,
         completedDate: nextStatus === "completed" ? serverTimestamp() : null
       });
+      if (selectedTodo?.id === todo.id) {
+        setSelectedTodo({
+          ...selectedTodo,
+          status: nextStatus,
+          completedDate: nextStatus === "completed" ? Timestamp.now() : null
+        });
+      }
       if (nextStatus === "completed") {
         setLastCompletedId(todo.id);
         window.setTimeout(() => setLastCompletedId(null), 1200);
