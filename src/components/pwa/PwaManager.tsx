@@ -106,7 +106,6 @@ export default function PwaManager() {
         registration.showNotification(title, {
           body,
           tag: "due-today-summary",
-          renotify: true,
           data: { url: "/todos" }
         });
         return;
