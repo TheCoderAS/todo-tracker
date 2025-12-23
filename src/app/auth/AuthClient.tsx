@@ -12,6 +12,7 @@ import {
   signInWithEmailAndPassword,
   signInWithPopup
 } from "firebase/auth";
+import type { FirebaseError } from "firebase/app";
 import { doc, serverTimestamp, setDoc } from "firebase/firestore";
 
 import AuthSection from "@/components/auth/AuthSection";
@@ -163,9 +164,10 @@ export default function AuthClient() {
     } catch (error) {
       console.error(error);
       const provider = new GoogleAuthProvider();
-      const pendingCredential = GoogleAuthProvider.credentialFromError(error);
+      const firebaseError = error as FirebaseError;
+      const pendingCredential = GoogleAuthProvider.credentialFromError(firebaseError);
       const email =
-        (error as { customData?: { email?: string } })?.customData?.email ??
+        (firebaseError as { customData?: { email?: string } })?.customData?.email ??
         authForm.email;
       try {
         if (email) {
