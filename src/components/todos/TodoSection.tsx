@@ -8,7 +8,6 @@ import {
   FiFlag,
   FiPlus,
   FiStar,
-  FiTarget,
   FiZap
 } from "react-icons/fi";
 
@@ -26,7 +25,6 @@ type TodoSectionProps = {
   onSelectTodo: (todo: Todo | null) => void;
   onOpenFilter: () => void;
   onOpenCreate: () => void;
-  onOpenHabit: () => void;
   statusFilter: "all" | Todo["status"];
   priorityFilter: "all" | Todo["priority"];
   datePreset: "all" | "today" | "spillover" | "upcoming" | "custom" | "tomorrow" | "week";
@@ -53,7 +51,6 @@ export default function TodoSection({
   onSelectTodo,
   onOpenFilter,
   onOpenCreate,
-  onOpenHabit,
   statusFilter,
   priorityFilter,
   datePreset,
@@ -235,17 +232,6 @@ export default function TodoSection({
             >
               <FiZap aria-hidden className="text-amber-300" />
               Reminder
-            </button>
-            <button
-              type="button"
-              className="flex w-full items-center gap-3 rounded-2xl px-3 py-2 text-sm font-semibold text-slate-100 transition hover:bg-slate-900/70"
-              onClick={() => {
-                onOpenHabit();
-                setIsFabOpen(false);
-              }}
-            >
-              <FiTarget aria-hidden className="text-sky-300" />
-              Habit
             </button>
           </div>
         ) : null}
