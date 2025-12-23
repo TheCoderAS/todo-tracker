@@ -50,6 +50,20 @@ const INTERVAL_MINUTES = Number(process.env.INTERVAL_MINUTES || "5");
 let lastRunAt = null;
 let lastResult = null;
 
+const formatDisplayDate = (isoString) => {
+  if (!isoString) return "—";
+  const date = new Date(isoString);
+  if (Number.isNaN(date.getTime())) return "—";
+  const day = String(date.getDate()).padStart(2, "0");
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const month = months[date.getMonth()];
+  const year = date.getFullYear();
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+  const seconds = String(date.getSeconds()).padStart(2, "0");
+  return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
+};
+
 const buildDateRange = () => {
   const start = new Date();
   start.setHours(0, 0, 0, 0);
@@ -136,7 +150,7 @@ app.get("/", (_req, res) => {
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Aura Pulse Service</title>
-    <link rel="icon" href="/favicon.ico" />
+    <link rel="icon" href="${TARGET_URL}/aura-pulse.png" />
     <style>
       :root {
         color-scheme: dark;
@@ -239,7 +253,7 @@ app.get("/", (_req, res) => {
       <p>Aura Pulse is running. Jump back to the main app anytime.</p>
       <div class="meta">
         <div>Interval: ${INTERVAL_MINUTES} minutes</div>
-        <div>Last run: ${lastRunAt ?? "—"}</div>
+        <div>Last run: ${formatDisplayDate(lastRunAt)}</div>
         <div>Last status: ${lastResult?.status ?? "—"}</div>
       </div>
       <a class="button" href="${TARGET_URL}">
