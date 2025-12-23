@@ -15,7 +15,7 @@ export default function PwaManager() {
   const { user } = useAuth();
   const [dueTodayTodos, setDueTodayTodos] = useState<Todo[]>([]);
   const [dayKey, setDayKey] = useState(() => new Date().toDateString());
-  const notificationIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const notificationIntervalRef = useRef<number | null>(null);
   useEffect(() => {
     if (typeof window === "undefined") return;
 
