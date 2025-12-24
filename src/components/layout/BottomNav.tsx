@@ -1,7 +1,4 @@
-"use client";
-
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { Link, useLocation } from "react-router-dom";
 import { FiGrid, FiList, FiUser } from "react-icons/fi";
 
 const navItems = [
@@ -11,7 +8,8 @@ const navItems = [
 ];
 
 export default function BottomNav() {
-  const pathname = usePathname();
+  const location = useLocation();
+  const pathname = location.pathname;
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-20 border-t border-slate-900/60 bg-gradient-to-r from-slate-950/95 via-slate-950/90 to-slate-950/95 px-6 py-2 backdrop-blur">
@@ -22,7 +20,7 @@ export default function BottomNav() {
           return (
             <Link
               key={href}
-              href={href}
+              to={href}
               className={`group flex flex-1 flex-col items-center gap-1 text-xs font-semibold transition ${
                 isActive ? "text-sky-200" : "text-slate-400"
               }`}

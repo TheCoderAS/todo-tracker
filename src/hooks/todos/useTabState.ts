@@ -1,18 +1,13 @@
-"use client";
-
 import { useEffect, useState } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import type { ReadonlyURLSearchParams } from "next/navigation";
+import { useSearchParams } from "react-router-dom";
 
 type TabState = "todos" | "habits";
 
-const getTabFromParams = (params: URLSearchParams | ReadonlyURLSearchParams) =>
+const getTabFromParams = (params: URLSearchParams) =>
   params.get("tab") === "habits" ? "habits" : "todos";
 
 export const useTabState = () => {
-  const pathname = usePathname();
-  const router = useRouter();
-  const searchParams = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState<TabState>(() =>
     getTabFromParams(searchParams)
   );
@@ -30,9 +25,7 @@ export const useTabState = () => {
     } else {
       params.delete("tab");
     }
-    const queryString = params.toString();
-    const nextUrl = queryString ? `${pathname}?${queryString}` : pathname;
-    router.replace(nextUrl, { scroll: false });
+    setSearchParams(params, { replace: true });
   };
 
   return { activeTab, setTab };
