@@ -21,12 +21,25 @@ const days = [
   { id: 6, label: "Sat" }
 ];
 
+const months = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December"
+];
+
 const frequencyOptions: { value: HabitFrequency; label: string }[] = [
   { value: "daily", label: "Daily" },
   { value: "weekly", label: "Weekly" },
   { value: "monthly", label: "Monthly" },
-  { value: "quarterly", label: "Quarterly" },
-  { value: "half-yearly", label: "Half yearly" },
   { value: "yearly", label: "Yearly" }
 ];
 
@@ -36,6 +49,7 @@ type HabitFormProps = {
   onChange: (event: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
   onToggleDay: (dayIndex: number) => void;
   onDayOfMonthChange: (dayOfMonth: number) => void;
+  onMonthChange: (month: number) => void;
   onSubmit: (event: FormEvent) => void;
   onCancel: () => void;
 };
@@ -46,15 +60,25 @@ export default function HabitForm({
   onChange,
   onToggleDay,
   onDayOfMonthChange,
+  onMonthChange,
   onSubmit,
   onCancel
 }: HabitFormProps) {
   const showWeeklyDays = form.frequency === "weekly";
-  const showMonthlyDay = ["monthly", "quarterly", "half-yearly", "yearly"].includes(
-    form.frequency
-  );
-  const dayOfMonthValue =
-    form.reminderDays.length > 0 ? form.reminderDays[0] : new Date().getDate();
+  const showMonthlyDay = form.frequency === "monthly";
+  const showYearlySchedule = form.frequency === "yearly";
+  const dayOfMonthValue = showYearlySchedule
+    ? form.reminderDays.length >= 2
+      ? form.reminderDays[1]
+      : form.reminderDays[0] ?? new Date().getDate()
+    : form.reminderDays.length > 0
+    ? form.reminderDays[0]
+    : new Date().getDate();
+  const monthValue = showYearlySchedule
+    ? form.reminderDays.length >= 2
+      ? form.reminderDays[0]
+      : new Date().getMonth() + 1
+    : new Date().getMonth() + 1;
 
   return (
     <form className="grid gap-5" onSubmit={onSubmit}>
@@ -148,6 +172,46 @@ export default function HabitForm({
       ) : form.frequency === "daily" ? (
         <div className="rounded-2xl border border-slate-800/70 bg-slate-950/60 px-4 py-3 text-xs text-slate-400">
           Runs every day.
+        </div>
+      ) : null}
+      {showYearlySchedule ? (
+        <div className="grid gap-4 sm:grid-cols-2">
+          <label className={labelClasses}>
+            <span className={labelTextClasses}>Repeat in month</span>
+            <select
+              name="reminderMonth"
+              value={monthValue}
+              onChange={(event) => onMonthChange(Number(event.target.value))}
+              className={inputClasses}
+            >
+              {months.map((month, index) => {
+                const value = index + 1;
+                return (
+                  <option key={month} value={value}>
+                    {month}
+                  </option>
+                );
+              })}
+            </select>
+          </label>
+          <label className={labelClasses}>
+            <span className={labelTextClasses}>Repeat on day</span>
+            <select
+              name="reminderDayOfMonth"
+              value={dayOfMonthValue}
+              onChange={(event) => onDayOfMonthChange(Number(event.target.value))}
+              className={inputClasses}
+            >
+              {Array.from({ length: 31 }).map((_, index) => {
+                const day = index + 1;
+                return (
+                  <option key={day} value={day}>
+                    Day {day}
+                  </option>
+                );
+              })}
+            </select>
+          </label>
         </div>
       ) : null}
       <div className="sticky bottom-0 -mx-5 mt-6 grid grid-cols-2 gap-2 border-t border-slate-900/60 bg-slate-950/80 px-5 backdrop-blur">
