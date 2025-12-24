@@ -161,7 +161,7 @@ export default function HabitSection({
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
-          <div className="flex flex-wrap items-center gap-2 rounded-full border border-slate-800/70 bg-slate-950/40 p-1 text-[0.7rem] font-semibold text-slate-200">
+          <div className="flex w-full flex-wrap items-center gap-2 rounded-full border border-slate-800/70 bg-slate-950/40 p-1 text-[0.7rem] font-semibold text-slate-200">
             {[
               { id: "all", label: "Active" },
               { id: "completed", label: "Done today" },
@@ -186,7 +186,7 @@ export default function HabitSection({
               </button>
             ))}
           </div>
-          <div className="rounded-2xl border border-slate-800/70 bg-slate-950/40 px-3 py-2 text-xs text-slate-200">
+          <div className="rounded-2xl border border-slate-800/70 bg-slate-950/40 px-2 pr-1 py-1 text-xs text-slate-200">
             <label className="flex items-center gap-2">
               <span className="text-slate-400">Frequency</span>
               <select
@@ -314,7 +314,7 @@ export default function HabitSection({
         </div>
       </section>
 
-      <div className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] right-6 z-30 flex flex-col items-end gap-3 sm:bottom-8">
+      <div className="fixed bottom-[calc(6.5rem+env(safe-area-inset-bottom))] right-6 z-30 flex flex-col items-end gap-3 sm:bottom-8 sm:right-10 xl:right-[calc((100vw-72rem)/2+1.5rem)]">
         <button
           type="button"
           className="glow-emerald flex h-14 w-14 items-center justify-center rounded-full bg-sky-400 text-3xl font-semibold text-slate-950 shadow-xl shadow-slate-950/40 transition hover:scale-[1.02] hover:bg-sky-300"

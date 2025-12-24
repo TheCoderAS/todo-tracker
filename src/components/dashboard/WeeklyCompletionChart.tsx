@@ -24,9 +24,9 @@ export default function WeeklyCompletionChart({
   }, [onTime, total]);
 
   return (
-    <div className="group rounded-3xl border border-white/10 bg-slate-950/70 p-6 shadow-[0_0_30px_rgba(15,23,42,0.35)] transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_0_40px_rgba(59,130,246,0.15)]">
+    <div className="group rounded-3xl border border-white/10 bg-slate-950/70 p-6 transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_0_40px_rgba(59,130,246,0.15)]">
       <p className="text-xs uppercase text-slate-400">
-        Today&apos;s completions
+        Today&apos;s tasks
       </p>
       <div className="mt-6 flex flex-wrap items-center justify-between gap-6">
         <div className="relative flex h-32 w-32 items-center justify-center rounded-full border border-white/10 bg-slate-950/70 shadow-[0_0_25px_rgba(59,130,246,0.2)] transition-transform duration-700 group-hover:scale-[1.02]" style={donutStyle}>

@@ -59,9 +59,9 @@ export function useCompletionAnalytics(user: User | null): CompletionAnalytics {
 
     let isMounted = true;
     const today = new Date();
-    const days = Array.from({ length: 7 }).map((_, index) => {
+    const days = Array.from({ length: 30 }).map((_, index) => {
       const date = new Date(today);
-      date.setDate(today.getDate() - (6 - index));
+      date.setDate(today.getDate() - (29 - index));
       return date;
     });
 

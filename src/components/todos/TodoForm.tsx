@@ -14,7 +14,7 @@ import { FiPlus, FiSave, FiX } from "react-icons/fi";
 import type { TodoInput, TodoPriority } from "@/lib/types";
 
 const inputClasses =
-  "w-full rounded-2xl border border-slate-800/70 bg-slate-950/60 px-4 py-3 text-sm text-slate-100 transition focus:border-emerald-400/70 focus:outline-none focus:ring-1 focus:ring-emerald-400/40";
+  "w-full rounded-2xl border border-slate-800/70 bg-slate-950/60 px-4 py-3 text-sm text-slate-100 transition focus:border-emerald-300/50 focus:outline-none focus:ring-1 focus:ring-emerald-300/20";
 
 const labelClasses = "flex flex-col gap-2";
 const labelTextClasses =

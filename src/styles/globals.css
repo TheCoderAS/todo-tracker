@@ -83,8 +83,15 @@
 }
 
 .page-transition {
+  position: relative;
   animation: pageEnter 280ms ease-out both;
-  will-change: transform, opacity;
+  will-change: opacity;
+}
+
+
+.tab-transition {
+  position: relative;
+  animation: tabFade 220ms ease-out both;
 }
 
 .status-ring {
@@ -152,11 +159,19 @@
 @keyframes pageEnter {
   0% {
     opacity: 0;
-    transform: translateY(12px) scale(0.98);
   }
   100% {
     opacity: 1;
-    transform: translateY(0) scale(1);
+  }
+}
+
+
+@keyframes tabFade {
+  0% {
+    opacity: 0.35;
+  }
+  100% {
+    opacity: 1;
   }
 }
 
