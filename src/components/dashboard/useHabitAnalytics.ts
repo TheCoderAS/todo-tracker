@@ -5,7 +5,7 @@ import type { User } from "firebase/auth";
 import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
-import { getDateKey } from "@/lib/habitUtils";
+import { getDateKey, getMonthKey, isHabitScheduledForDate } from "@/lib/habitUtils";
 import type { Habit } from "@/lib/types";
 
 export type HabitTrendDay = {
@@ -18,6 +18,8 @@ type HabitAnalytics = {
   completedToday: number;
   completionRate: number;
   weeklyTrend: HabitTrendDay[];
+  monthlyTrend: HabitTrendDay[];
+  yearlyTrend: HabitTrendDay[];
   loading: boolean;
 };
 
@@ -26,6 +28,8 @@ const emptyAnalytics: HabitAnalytics = {
   completedToday: 0,
   completionRate: 0,
   weeklyTrend: [],
+  monthlyTrend: [],
+  yearlyTrend: [],
   loading: false
 };
 
@@ -48,6 +52,14 @@ export function useHabitAnalytics(user: User | null): HabitAnalytics {
       date.setDate(today.getDate() - (6 - index));
       return date;
     });
+    const last6Months = Array.from({ length: 6 }).map((_, index) => {
+      const date = new Date(today.getFullYear(), today.getMonth() - (5 - index), 1);
+      return date;
+    });
+    const last5Years = Array.from({ length: 5 }).map((_, index) => {
+      const date = new Date(today.getFullYear() - (4 - index), 0, 1);
+      return date;
+    });
 
     setAnalytics((prev) => ({ ...prev, loading: true }));
 
@@ -65,27 +77,65 @@ export function useHabitAnalytics(user: User | null): HabitAnalytics {
         }));
 
         const activeHabits = habits.filter((habit) => !habit.archivedAt);
-        const completedToday = activeHabits.filter((habit) =>
+        const scheduledToday = activeHabits.filter((habit) =>
+          isHabitScheduledForDate(habit, today)
+        );
+        const completedToday = scheduledToday.filter((habit) =>
           habit.completionDates?.includes(getDateKey(today, habit.timezone))
         ).length;
 
-        const trendCounts = last7Days.map((date) => {
-          const count = habits.filter((habit) =>
-            habit.completionDates?.includes(getDateKey(date, habit.timezone))
+        const weeklyTrend = last7Days.map((date) => {
+          const count = activeHabits.filter(
+            (habit) =>
+              isHabitScheduledForDate(habit, date) &&
+              habit.completionDates?.includes(getDateKey(date, habit.timezone))
           ).length;
           return { date, count };
         });
 
-        const completionRate = activeHabits.length
-          ? Math.round((completedToday / activeHabits.length) * 100)
+        const monthMap = new Map(
+          last6Months.map((date) => [getMonthKey(date), { date, count: 0 }])
+        );
+        const yearMap = new Map(
+          last5Years.map((date) => [String(date.getFullYear()), { date, count: 0 }])
+        );
+
+        activeHabits.forEach((habit) => {
+          habit.completionDates?.forEach((dateKey) => {
+            const completionDate = new Date(`${dateKey}T00:00:00`);
+            if (!isHabitScheduledForDate(habit, completionDate)) return;
+            const monthKey = dateKey.slice(0, 7);
+            const yearKey = dateKey.slice(0, 4);
+            const monthEntry = monthMap.get(monthKey);
+            if (monthEntry) {
+              monthEntry.count += 1;
+            }
+            const yearEntry = yearMap.get(yearKey);
+            if (yearEntry) {
+              yearEntry.count += 1;
+            }
+          });
+        });
+
+        const monthlyTrend = last6Months.map(
+          (date) => monthMap.get(getMonthKey(date)) ?? { date, count: 0 }
+        );
+        const yearlyTrend = last5Years.map(
+          (date) => yearMap.get(String(date.getFullYear())) ?? { date, count: 0 }
+        );
+
+        const completionRate = scheduledToday.length
+          ? Math.round((completedToday / scheduledToday.length) * 100)
           : 0;
 
         if (!isMounted) return;
         setAnalytics({
-          activeHabits: activeHabits.length,
+          activeHabits: scheduledToday.length,
           completedToday,
           completionRate,
-          weeklyTrend: trendCounts,
+          weeklyTrend,
+          monthlyTrend,
+          yearlyTrend,
           loading: false
         });
       },

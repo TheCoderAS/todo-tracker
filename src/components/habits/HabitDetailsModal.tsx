@@ -65,6 +65,18 @@ const buildDailyOccurrences = (start: Date, count: number) => {
   });
 };
 
+const buildYearlyOccurrences = (start: Date, count: number, month: number, day: number) => {
+  const occurrences: Date[] = [];
+  for (let index = 0; index < count; index += 1) {
+    const year = start.getFullYear() - index;
+    const date = new Date(year, month - 1, 1);
+    const clamped = clampDay(date.getFullYear(), date.getMonth(), day);
+    date.setDate(clamped);
+    occurrences.push(date);
+  }
+  return occurrences;
+};
+
 const buildWeeklyOccurrences = (start: Date, count: number, days: number[]) => {
   const occurrences: Date[] = [];
   const targetDays = days.length ? days : [start.getDay()];
@@ -81,6 +93,13 @@ const buildWeeklyOccurrences = (start: Date, count: number, days: number[]) => {
 const buildTrendEntries = (habit: Habit): TrendEntry[] => {
   const today = new Date();
   const dayOfMonth = habit.reminderDays?.[0] ?? today.getDate();
+  const hasYearlyMonth = habit.reminderDays && habit.reminderDays.length >= 2;
+  const yearlyMonth = hasYearlyMonth
+    ? habit.reminderDays?.[0]
+    : today.getMonth() + 1;
+  const yearlyDay = hasYearlyMonth
+    ? habit.reminderDays?.[1]
+    : habit.reminderDays?.[0] ?? today.getDate();
   let occurrences: Date[] = [];
   if (habit.frequency === "daily") {
     occurrences = buildDailyOccurrences(today, 7);
@@ -93,7 +112,7 @@ const buildTrendEntries = (habit: Habit): TrendEntry[] => {
   } else if (habit.frequency === "half-yearly") {
     occurrences = buildMonthlyOccurrences(today, 6, 4, dayOfMonth);
   } else {
-    occurrences = buildMonthlyOccurrences(today, 12, 5, dayOfMonth);
+    occurrences = buildYearlyOccurrences(today, 5, yearlyMonth, yearlyDay);
   }
 
   return occurrences

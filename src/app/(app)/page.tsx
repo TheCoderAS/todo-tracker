@@ -1,11 +1,9 @@
 "use client";
 
-import { usePathname } from "next/navigation";
-
 import { useAuth } from "@/components/auth/AuthProvider";
 import CompletedTargetCard from "@/components/dashboard/CompletedTargetCard";
 import HabitAnalyticsCard from "@/components/dashboard/HabitAnalyticsCard";
-import SpilloverSummaryCard from "@/components/dashboard/SpilloverSummaryCard";
+import HabitTrendChart from "@/components/dashboard/HabitTrendChart";
 import WeeklyCompletionChart from "@/components/dashboard/WeeklyCompletionChart";
 import WeeklyCompletionSpilloverChart from "@/components/dashboard/WeeklyCompletionSpilloverChart";
 import { useCompletionAnalytics } from "@/components/dashboard/useCompletionAnalytics";
@@ -13,7 +11,6 @@ import { useHabitAnalytics } from "@/components/dashboard/useHabitAnalytics";
 
 export default function DashboardPage() {
   const { user } = useAuth();
-  const pathname = usePathname();
   const {
     todayTarget,
     todayCompleted,
@@ -21,12 +18,14 @@ export default function DashboardPage() {
     spilloverCompletions,
     weeklyCompletionBreakdown,
     loading: analyticsLoading
-  } = useCompletionAnalytics(user, pathname);
+  } = useCompletionAnalytics(user);
   const {
     activeHabits,
     completedToday: habitsCompletedToday,
     completionRate,
     weeklyTrend,
+    monthlyTrend,
+    yearlyTrend,
     loading: habitLoading
   } = useHabitAnalytics(user);
 
@@ -38,7 +37,6 @@ export default function DashboardPage() {
           target={todayTarget}
           loading={analyticsLoading}
         />
-        <SpilloverSummaryCard onTime={onTimeCompletions} spillover={spilloverCompletions} />
         <WeeklyCompletionChart onTime={onTimeCompletions} spillover={spilloverCompletions} />
         <HabitAnalyticsCard
           activeHabits={activeHabits}
@@ -46,6 +44,11 @@ export default function DashboardPage() {
           completionRate={completionRate}
           weeklyTrend={weeklyTrend}
           loading={habitLoading}
+        />
+        <HabitTrendChart
+          weeklyTrend={weeklyTrend}
+          monthlyTrend={monthlyTrend}
+          yearlyTrend={yearlyTrend}
         />
       </div>
       <WeeklyCompletionSpilloverChart data={weeklyCompletionBreakdown} />

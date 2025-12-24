@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { usePathname } from "next/navigation";
 import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
 import type { User } from "firebase/auth";
 
@@ -9,7 +8,6 @@ import { db } from "@/lib/firebase";
 import type { Habit } from "@/lib/types";
 
 export const useHabitsData = (user: User | null | undefined) => {
-  const pathname = usePathname();
   const [habits, setHabits] = useState<Habit[]>([]);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
 
@@ -40,7 +38,7 @@ export const useHabitsData = (user: User | null | undefined) => {
     });
 
     return () => unsubscribe();
-  }, [pathname, user]);
+  }, [user]);
 
   return { habits, isInitialLoad };
 };

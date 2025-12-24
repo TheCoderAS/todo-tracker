@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { FiCheckCircle, FiCircle, FiEdit2, FiEye, FiPlus, FiTrash2 } from "react-icons/fi";
 
 import type { Habit, HabitFrequency } from "@/lib/types";
-import { getDateKey } from "@/lib/habitUtils";
+import { getDateKey, isHabitScheduledForDate } from "@/lib/habitUtils";
 
 const dayLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
@@ -53,6 +53,14 @@ const formatScheduleSummary = (habit: Habit) => {
   if (habit.frequency === "daily") {
     return "Every day";
   }
+  if (habit.frequency === "yearly") {
+    const hasMonth = habit.reminderDays && habit.reminderDays.length >= 2;
+    const month = hasMonth ? habit.reminderDays?.[0] : new Date().getMonth() + 1;
+    const day = hasMonth ? habit.reminderDays?.[1] : habit.reminderDays?.[0];
+    if (!month || !day) return "Schedule not set";
+    const date = new Date(2000, month - 1, day);
+    return `${date.toLocaleDateString(undefined, { month: "long" })} ${day}`;
+  }
   const dayOfMonth = habit.reminderDays?.[0];
   if (!dayOfMonth) return "Schedule not set";
   return `Day ${dayOfMonth}`;
@@ -79,10 +87,13 @@ export default function HabitSection({
   );
 
   const todayStats = useMemo(() => {
-    const completed = activeHabits.filter((habit) =>
+    const scheduledToday = activeHabits.filter((habit) =>
+      isHabitScheduledForDate(habit, now)
+    );
+    const completed = scheduledToday.filter((habit) =>
       habit.completionDates?.includes(getDateKey(now, habit.timezone))
     ).length;
-    return { total: activeHabits.length, completed };
+    return { total: scheduledToday.length, completed };
   }, [activeHabits, now]);
 
   const filteredHabits = useMemo(() => {
@@ -91,6 +102,7 @@ export default function HabitSection({
       const isCompletedToday = habit.completionDates?.includes(
         getDateKey(now, habit.timezone)
       );
+      const isScheduledToday = isHabitScheduledForDate(habit, now);
 
       if (statusFilter === "archived") {
         if (!isArchived) return false;
@@ -98,6 +110,9 @@ export default function HabitSection({
         if (isArchived) return false;
         if (statusFilter === "completed" && !isCompletedToday) return false;
         if (statusFilter === "pending" && isCompletedToday) return false;
+        if ((statusFilter === "completed" || statusFilter === "pending") && !isScheduledToday) {
+          return false;
+        }
       }
 
       if (frequencyFilter !== "all" && habit.frequency !== frequencyFilter) {
@@ -185,8 +200,6 @@ export default function HabitSection({
                 <option value="daily">Daily</option>
                 <option value="weekly">Weekly</option>
                 <option value="monthly">Monthly</option>
-                <option value="quarterly">Quarterly</option>
-                <option value="half-yearly">Half yearly</option>
                 <option value="yearly">Yearly</option>
               </select>
             </label>
@@ -211,6 +224,7 @@ export default function HabitSection({
               const isCompleted = habit.completionDates?.includes(
                 getDateKey(now, habit.timezone)
               );
+              const isScheduledToday = isHabitScheduledForDate(habit, now);
               const isArchived = Boolean(habit.archivedAt);
               return (
                 <div
@@ -267,25 +281,31 @@ export default function HabitSection({
                   </div>
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <p className="text-xs text-slate-400">
-                      {isCompleted ? "Completed today" : "Not completed today"}
+                      {isCompleted
+                        ? "Completed today"
+                        : isScheduledToday
+                        ? "Scheduled for today"
+                        : "Not scheduled today"}
                     </p>
-                    <button
-                      type="button"
-                      onClick={() => onToggleComplete(habit)}
-                      className={`flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-semibold transition ${
-                        isCompleted
-                          ? "border-emerald-400/70 bg-emerald-400/15 text-emerald-200"
-                          : "border-slate-800/70 text-slate-300 hover:border-slate-600/70 hover:text-white"
-                      }`}
-                      disabled={isArchived}
-                    >
-                      {isCompleted ? (
-                        <FiCheckCircle aria-hidden className="text-emerald-300" />
-                      ) : (
-                        <FiCircle aria-hidden className="text-slate-500" />
-                      )}
-                      {isCompleted ? "Done today" : "Mark done"}
-                    </button>
+                    {isScheduledToday ? (
+                      <button
+                        type="button"
+                        onClick={() => onToggleComplete(habit)}
+                        className={`flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-semibold transition ${
+                          isCompleted
+                            ? "border-emerald-400/70 bg-emerald-400/15 text-emerald-200"
+                            : "border-slate-800/70 text-slate-300 hover:border-slate-600/70 hover:text-white"
+                        }`}
+                        disabled={isArchived}
+                      >
+                        {isCompleted ? (
+                          <FiCheckCircle aria-hidden className="text-emerald-300" />
+                        ) : (
+                          <FiCircle aria-hidden className="text-slate-500" />
+                        )}
+                        {isCompleted ? "Done today" : "Mark done"}
+                      </button>
+                    ) : null}
                   </div>
                 </div>
               );

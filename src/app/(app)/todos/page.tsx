@@ -74,6 +74,9 @@ const getDefaultReminderDays = (frequency: HabitFrequency) => {
   if (frequency === "daily") {
     return [0, 1, 2, 3, 4, 5, 6];
   }
+  if (frequency === "yearly") {
+    return [today.getMonth() + 1, today.getDate()];
+  }
   return [today.getDate()];
 };
 
@@ -426,7 +429,27 @@ export default function TodosPage() {
   const handleHabitDayOfMonthChange = (dayOfMonth: number) => {
     setHabitForm((prev) => ({
       ...prev,
-      reminderDays: [dayOfMonth]
+      reminderDays:
+        prev.frequency === "yearly"
+          ? [
+              prev.reminderDays.length >= 2
+                ? prev.reminderDays[0]
+                : new Date().getMonth() + 1,
+              dayOfMonth
+            ]
+          : [dayOfMonth]
+    }));
+  };
+
+  const handleHabitMonthChange = (month: number) => {
+    setHabitForm((prev) => ({
+      ...prev,
+      reminderDays: [
+        month,
+        prev.reminderDays[1] ??
+          prev.reminderDays[0] ??
+          new Date().getDate()
+      ]
     }));
   };
 
@@ -662,6 +685,7 @@ export default function TodosPage() {
               onChange={handleHabitFormChange}
               onToggleDay={handleHabitDayToggle}
               onDayOfMonthChange={handleHabitDayOfMonthChange}
+              onMonthChange={handleHabitMonthChange}
               onSubmit={handleSubmitHabit}
               onCancel={closeHabitModal}
             />
