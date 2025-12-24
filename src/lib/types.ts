@@ -2,7 +2,13 @@ import type { Timestamp } from "firebase/firestore";
 
 export type TodoStatus = "pending" | "completed";
 export type TodoPriority = "low" | "medium" | "high";
-export type HabitFrequency = "daily";
+export type HabitFrequency =
+  | "daily"
+  | "weekly"
+  | "monthly"
+  | "quarterly"
+  | "half-yearly"
+  | "yearly";
 
 export interface Todo {
   id: string;
@@ -36,6 +42,7 @@ export interface Habit {
   createdAt?: Timestamp | null;
   updatedAt?: Timestamp | null;
   lastNotifiedDate?: string | null;
+  archivedAt?: Timestamp | null;
 }
 
 export interface HabitInput {

@@ -15,6 +15,7 @@ import FiltersModal from "@/components/todos/FiltersModal";
 import TodoForm from "@/components/todos/TodoForm";
 import TodoSection from "@/components/todos/TodoSection";
 import HabitForm from "@/components/habits/HabitForm";
+import HabitDetailsModal from "@/components/habits/HabitDetailsModal";
 import HabitSection from "@/components/habits/HabitSection";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import Modal from "@/components/ui/Modal";
@@ -28,7 +29,14 @@ import {
   formatDateInput,
   formatTimeInput
 } from "@/lib/todoFormatters";
-import type { Habit, HabitInput, Todo, TodoInput, TodoPriority } from "@/lib/types";
+import type {
+  Habit,
+  HabitFrequency,
+  HabitInput,
+  Todo,
+  TodoInput,
+  TodoPriority
+} from "@/lib/types";
 import { useHabitsData } from "@/app/(app)/todos/hooks/useHabitsData";
 import { useTabState } from "@/app/(app)/todos/hooks/useTabState";
 import { useTodoFilters } from "@/app/(app)/todos/hooks/useTodoFilters";
@@ -58,6 +66,17 @@ const formatTimeValue = (date: Date) => {
   return `${hours}:${minutes}`;
 };
 
+const getDefaultReminderDays = (frequency: HabitFrequency) => {
+  const today = new Date();
+  if (frequency === "weekly") {
+    return [today.getDay()];
+  }
+  if (frequency === "daily") {
+    return [0, 1, 2, 3, 4, 5, 6];
+  }
+  return [today.getDate()];
+};
+
 const getDefaultSchedule = () => {
   const now = new Date();
   const minutes = now.getMinutes();
@@ -79,10 +98,11 @@ export default function TodosPage() {
   const [habitForm, setHabitForm] = useState<HabitInput>({
     title: "",
     reminderTime: "",
-    reminderDays: [0, 1, 2, 3, 4, 5, 6],
+    reminderDays: getDefaultReminderDays("daily"),
     frequency: "daily"
   });
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingHabitId, setEditingHabitId] = useState<string | null>(null);
   const [isHabitFormOpen, setIsHabitFormOpen] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
   const [titleHasError, setTitleHasError] = useState(false);
@@ -115,6 +135,8 @@ export default function TodosPage() {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [selectedTodo, setSelectedTodo] = useState<Todo | null>(null);
   const [lastCompletedId, setLastCompletedId] = useState<string | null>(null);
+  const [selectedHabit, setSelectedHabit] = useState<Habit | null>(null);
+  const [confirmHabitDeleteId, setConfirmHabitDeleteId] = useState<string | null>(null);
 
   const isEditing = useMemo(() => Boolean(editingId), [editingId]);
 
@@ -161,9 +183,10 @@ export default function TodosPage() {
     setHabitForm({
       title: "",
       reminderTime: formatTimeValue(now),
-      reminderDays: [0, 1, 2, 3, 4, 5, 6],
+      reminderDays: getDefaultReminderDays("daily"),
       frequency: "daily"
     });
+    setEditingHabitId(null);
   };
 
   const openCreateModal = () => {
@@ -371,8 +394,19 @@ export default function TodosPage() {
     }
   };
 
-  const handleHabitFormChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleHabitFormChange = (
+    event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = event.target;
+    if (name === "frequency") {
+      const nextFrequency = value as HabitFrequency;
+      setHabitForm((prev) => ({
+        ...prev,
+        frequency: nextFrequency,
+        reminderDays: getDefaultReminderDays(nextFrequency)
+      }));
+      return;
+    }
     setHabitForm((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -387,6 +421,13 @@ export default function TodosPage() {
         reminderDays: nextDays.length ? nextDays : prev.reminderDays
       };
     });
+  };
+
+  const handleHabitDayOfMonthChange = (dayOfMonth: number) => {
+    setHabitForm((prev) => ({
+      ...prev,
+      reminderDays: [dayOfMonth]
+    }));
   };
 
   const handleSubmitHabit = async (event: React.FormEvent) => {
@@ -405,19 +446,31 @@ export default function TodosPage() {
     }
     setActionLoading(true);
     try {
-      await addDoc(collection(db, "users", user.uid, "habits"), {
-        title: habitForm.title.trim(),
-        reminderTime: habitForm.reminderTime,
-        reminderDays: habitForm.reminderDays,
-        frequency: habitForm.frequency,
-        completionDates: [],
-        timezone: getLocalTimeZone(),
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-        author_uid: user.uid,
-        lastNotifiedDate: null
-      });
-      setSnackbar({ message: "Habit added to your list.", variant: "success" });
+      if (editingHabitId) {
+        await updateDoc(doc(db, "users", user.uid, "habits", editingHabitId), {
+          title: habitForm.title.trim(),
+          reminderTime: habitForm.reminderTime,
+          reminderDays: habitForm.reminderDays,
+          frequency: habitForm.frequency,
+          updatedAt: serverTimestamp()
+        });
+        setSnackbar({ message: "Habit updated.", variant: "success" });
+      } else {
+        await addDoc(collection(db, "users", user.uid, "habits"), {
+          title: habitForm.title.trim(),
+          reminderTime: habitForm.reminderTime,
+          reminderDays: habitForm.reminderDays,
+          frequency: habitForm.frequency,
+          completionDates: [],
+          timezone: getLocalTimeZone(),
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+          author_uid: user.uid,
+          lastNotifiedDate: null,
+          archivedAt: null
+        });
+        setSnackbar({ message: "Habit added to your list.", variant: "success" });
+      }
       closeHabitModal();
     } catch (error) {
       console.error(error);
@@ -430,6 +483,10 @@ export default function TodosPage() {
   const handleToggleHabitCompletion = async (habit: Habit) => {
     if (!user) {
       setSnackbar({ message: "Sign in to update habits.", variant: "error" });
+      return;
+    }
+    if (habit.archivedAt) {
+      setSnackbar({ message: "Restore the habit to update it.", variant: "error" });
       return;
     }
     const todayKey = getDateKey(new Date(), habit.timezone);
@@ -451,6 +508,40 @@ export default function TodosPage() {
     } catch (error) {
       console.error(error);
       setSnackbar({ message: "Unable to update habit.", variant: "error" });
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleEditHabit = (habit: Habit) => {
+    setEditingHabitId(habit.id);
+    setHabitForm({
+      title: habit.title,
+      reminderTime: habit.reminderTime,
+      reminderDays: habit.reminderDays?.length
+        ? habit.reminderDays
+        : getDefaultReminderDays(habit.frequency),
+      frequency: habit.frequency
+    });
+    setIsHabitFormOpen(true);
+  };
+
+  const handleDeleteHabitRequest = (habit: Habit) => {
+    setConfirmHabitDeleteId(habit.id);
+  };
+
+  const handleDeleteHabit = async (habitId: string) => {
+    if (!user) return;
+    setActionLoading(true);
+    try {
+      await updateDoc(doc(db, "users", user.uid, "habits", habitId), {
+        archivedAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      });
+      setSnackbar({ message: "Habit archived.", variant: "info" });
+    } catch (error) {
+      console.error(error);
+      setSnackbar({ message: "Unable to delete habit.", variant: "error" });
     } finally {
       setActionLoading(false);
     }
@@ -555,6 +646,9 @@ export default function TodosPage() {
             habits={habits}
             onToggleComplete={handleToggleHabitCompletion}
             onOpenCreate={openHabitModal}
+            onEdit={handleEditHabit}
+            onDelete={handleDeleteHabitRequest}
+            onViewDetails={setSelectedHabit}
             isLoading={isHabitLoading}
           />
           <Modal
@@ -564,12 +658,34 @@ export default function TodosPage() {
           >
             <HabitForm
               form={habitForm}
+              isEditing={Boolean(editingHabitId)}
               onChange={handleHabitFormChange}
               onToggleDay={handleHabitDayToggle}
+              onDayOfMonthChange={handleHabitDayOfMonthChange}
               onSubmit={handleSubmitHabit}
               onCancel={closeHabitModal}
             />
           </Modal>
+          <HabitDetailsModal
+            habit={selectedHabit}
+            isOpen={Boolean(selectedHabit)}
+            onClose={() => setSelectedHabit(null)}
+          />
+          <ConfirmDialog
+            isOpen={Boolean(confirmHabitDeleteId)}
+            title="Delete this habit?"
+            description="This will archive the habit and keep its history."
+            confirmLabel="Archive habit"
+            cancelLabel="Cancel"
+            isLoading={actionLoading}
+            onConfirm={() => {
+              if (confirmHabitDeleteId) {
+                handleDeleteHabit(confirmHabitDeleteId);
+              }
+              setConfirmHabitDeleteId(null);
+            }}
+            onCancel={() => setConfirmHabitDeleteId(null)}
+          />
         </>
       )}
       {actionLoading ? <OverlayLoader /> : null}

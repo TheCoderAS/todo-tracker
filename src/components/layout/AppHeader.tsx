@@ -2,8 +2,16 @@
 
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { FiBell, FiLogOut } from "react-icons/fi";
-import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
+import { FiBell, FiCheck, FiLogOut } from "react-icons/fi";
+import {
+  collection,
+  doc,
+  onSnapshot,
+  orderBy,
+  query,
+  updateDoc,
+  writeBatch
+} from "firebase/firestore";
 
 import { useAuth } from "@/components/auth/AuthProvider";
 import { db } from "@/lib/firebase";
@@ -83,6 +91,34 @@ export default function AppHeader({ showSignOut, onSignOut }: AppHeaderProps) {
     [notifications]
   );
 
+  const handleMarkAsRead = async (notificationId: string) => {
+    if (!user) return;
+    try {
+      await updateDoc(doc(db, "users", user.uid, "notifications", notificationId), {
+        read: true
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleMarkAllAsRead = async () => {
+    if (!user) return;
+    const unread = notifications.filter((notification) => !notification.read);
+    if (!unread.length) return;
+    const batch = writeBatch(db);
+    unread.forEach((notification) => {
+      batch.update(doc(db, "users", user.uid, "notifications", notification.id), {
+        read: true
+      });
+    });
+    try {
+      await batch.commit();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <header className="fixed top-0 left-0 right-0 z-20 border-b border-slate-900/60 bg-slate-950/90 px-6 py-2 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4">
@@ -121,9 +157,23 @@ export default function AppHeader({ showSignOut, onSignOut }: AppHeaderProps) {
                   className="absolute right-0 mt-3 w-72 rounded-2xl border border-slate-800/80 bg-slate-950/95 p-3 shadow-2xl shadow-slate-950/70 backdrop-blur"
                   role="menu"
                 >
-                  <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
-                    Notifications
-                  </p>
+                  <div className="mb-2 flex items-center justify-between gap-2">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                      Notifications
+                    </p>
+                    <button
+                      type="button"
+                      className={`text-[0.65rem] font-semibold uppercase transition ${
+                        hasUnread
+                          ? "text-emerald-200/80 hover:text-emerald-100"
+                          : "text-slate-500"
+                      }`}
+                      onClick={handleMarkAllAsRead}
+                      disabled={!hasUnread}
+                    >
+                      Mark all as read
+                    </button>
+                  </div>
                   <div className="max-h-72 space-y-2 overflow-y-auto pr-1">
                     {notifications.length ? (
                       notifications.map((notification) => (
@@ -142,9 +192,27 @@ export default function AppHeader({ showSignOut, onSignOut }: AppHeaderProps) {
                                 </p>
                               ) : null}
                             </div>
-                            {!notification.read ? (
-                              <span className="mt-1 h-2 w-2 flex-shrink-0 rounded-full bg-emerald-400" />
-                            ) : null}
+                            <div className="flex items-center gap-2">
+                              {!notification.read ? (
+                                <span className="mt-1 h-2 w-2 flex-shrink-0 rounded-full bg-emerald-400" />
+                              ) : null}
+                              <button
+                                type="button"
+                                className={`flex h-7 w-7 items-center justify-center rounded-full border text-xs transition ${
+                                  notification.read
+                                    ? "border-slate-800/70 text-slate-500"
+                                    : "border-emerald-400/40 text-emerald-200 hover:border-emerald-300/70 hover:text-emerald-100"
+                                }`}
+                                onClick={(event) => {
+                                  event.stopPropagation();
+                                  handleMarkAsRead(notification.id);
+                                }}
+                                aria-label="Mark notification as read"
+                                disabled={notification.read}
+                              >
+                                <FiCheck aria-hidden />
+                              </button>
+                            </div>
                           </div>
                           {notification.createdAt ? (
                             <p className="mt-2 text-[11px] text-slate-500">

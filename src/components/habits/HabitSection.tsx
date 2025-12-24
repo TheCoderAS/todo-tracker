@@ -1,9 +1,9 @@
 "use client";
 
-import { useMemo } from "react";
-import { FiCheckCircle, FiCircle, FiPlus } from "react-icons/fi";
+import { useMemo, useState } from "react";
+import { FiCheckCircle, FiCircle, FiEdit2, FiEye, FiPlus, FiTrash2 } from "react-icons/fi";
 
-import type { Habit } from "@/lib/types";
+import type { Habit, HabitFrequency } from "@/lib/types";
 import { getDateKey } from "@/lib/habitUtils";
 
 const dayLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -12,6 +12,9 @@ type HabitSectionProps = {
   habits: Habit[];
   onToggleComplete: (habit: Habit) => void;
   onOpenCreate: () => void;
+  onEdit: (habit: Habit) => void;
+  onDelete: (habit: Habit) => void;
+  onViewDetails: (habit: Habit) => void;
   isLoading: boolean;
 };
 
@@ -24,21 +27,85 @@ const formatReminderDays = (days: number[]) => {
     .join(", ");
 };
 
+const formatFrequencyLabel = (frequency: HabitFrequency) => {
+  switch (frequency) {
+    case "daily":
+      return "Daily";
+    case "weekly":
+      return "Weekly";
+    case "monthly":
+      return "Monthly";
+    case "quarterly":
+      return "Quarterly";
+    case "half-yearly":
+      return "Half yearly";
+    case "yearly":
+      return "Yearly";
+    default:
+      return "Daily";
+  }
+};
+
+const formatScheduleSummary = (habit: Habit) => {
+  if (habit.frequency === "weekly") {
+    return formatReminderDays(habit.reminderDays);
+  }
+  if (habit.frequency === "daily") {
+    return "Every day";
+  }
+  const dayOfMonth = habit.reminderDays?.[0];
+  if (!dayOfMonth) return "Schedule not set";
+  return `Day ${dayOfMonth}`;
+};
+
 export default function HabitSection({
   habits,
   onToggleComplete,
   onOpenCreate,
+  onEdit,
+  onDelete,
+  onViewDetails,
   isLoading
 }: HabitSectionProps) {
-  const todayStats = useMemo(() => {
-    const now = new Date();
-    const completed = habits.filter((habit) =>
-      habit.completionDates?.includes(getDateKey(now, habit.timezone))
-    ).length;
-    return { total: habits.length, completed };
-  }, [habits]);
+  const [statusFilter, setStatusFilter] = useState<
+    "all" | "completed" | "pending" | "archived"
+  >("all");
+  const [frequencyFilter, setFrequencyFilter] = useState<"all" | HabitFrequency>("all");
 
   const now = new Date();
+  const activeHabits = useMemo(
+    () => habits.filter((habit) => !habit.archivedAt),
+    [habits]
+  );
+
+  const todayStats = useMemo(() => {
+    const completed = activeHabits.filter((habit) =>
+      habit.completionDates?.includes(getDateKey(now, habit.timezone))
+    ).length;
+    return { total: activeHabits.length, completed };
+  }, [activeHabits, now]);
+
+  const filteredHabits = useMemo(() => {
+    return habits.filter((habit) => {
+      const isArchived = Boolean(habit.archivedAt);
+      const isCompletedToday = habit.completionDates?.includes(
+        getDateKey(now, habit.timezone)
+      );
+
+      if (statusFilter === "archived") {
+        if (!isArchived) return false;
+      } else {
+        if (isArchived) return false;
+        if (statusFilter === "completed" && !isCompletedToday) return false;
+        if (statusFilter === "pending" && isCompletedToday) return false;
+      }
+
+      if (frequencyFilter !== "all" && habit.frequency !== frequencyFilter) {
+        return false;
+      }
+      return true;
+    });
+  }, [frequencyFilter, habits, now, statusFilter]);
 
   return (
     <section className="grid gap-6">
@@ -78,6 +145,54 @@ export default function HabitSection({
           </div>
         </div>
 
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2 rounded-full border border-slate-800/70 bg-slate-950/40 p-1 text-[0.7rem] font-semibold text-slate-200">
+            {[
+              { id: "all", label: "Active" },
+              { id: "completed", label: "Done today" },
+              { id: "pending", label: "Pending today" },
+              { id: "archived", label: "Archived" }
+            ].map((option) => (
+              <button
+                key={option.id}
+                type="button"
+                className={`rounded-full px-3 py-1 transition ${
+                  statusFilter === option.id
+                    ? "bg-sky-400/20 text-sky-100"
+                    : "text-slate-400 hover:text-white"
+                }`}
+                onClick={() =>
+                  setStatusFilter(
+                    option.id as "all" | "completed" | "pending" | "archived"
+                  )
+                }
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+          <div className="rounded-2xl border border-slate-800/70 bg-slate-950/40 px-3 py-2 text-xs text-slate-200">
+            <label className="flex items-center gap-2">
+              <span className="text-slate-400">Frequency</span>
+              <select
+                value={frequencyFilter}
+                onChange={(event) =>
+                  setFrequencyFilter(event.target.value as "all" | HabitFrequency)
+                }
+                className="rounded-full border border-slate-800/70 bg-slate-950/60 px-2 py-1 text-[0.7rem] text-slate-200"
+              >
+                <option value="all">All</option>
+                <option value="daily">Daily</option>
+                <option value="weekly">Weekly</option>
+                <option value="monthly">Monthly</option>
+                <option value="quarterly">Quarterly</option>
+                <option value="half-yearly">Half yearly</option>
+                <option value="yearly">Yearly</option>
+              </select>
+            </label>
+          </div>
+        </div>
+
         <div className="grid gap-3">
           {isLoading ? (
             <div className="rounded-3xl border border-slate-900/60 bg-slate-950/70 p-5 text-sm text-slate-400">
@@ -87,38 +202,91 @@ export default function HabitSection({
             <div className="rounded-3xl border border-slate-900/60 bg-slate-950/70 p-5 text-sm text-slate-400">
               No habits yet. Add one with the + button.
             </div>
+          ) : filteredHabits.length === 0 ? (
+            <div className="rounded-3xl border border-slate-900/60 bg-slate-950/70 p-5 text-sm text-slate-400">
+              No habits match these filters.
+            </div>
           ) : (
-            habits.map((habit) => {
-              const todayKey = getDateKey(now, habit.timezone);
-              const isCompleted = habit.completionDates?.includes(todayKey);
+            filteredHabits.map((habit) => {
+              const isCompleted = habit.completionDates?.includes(
+                getDateKey(now, habit.timezone)
+              );
+              const isArchived = Boolean(habit.archivedAt);
               return (
                 <div
                   key={habit.id}
-                  className="flex flex-wrap items-center justify-between gap-4 rounded-3xl border border-slate-900/60 bg-slate-950/70 p-5 shadow-lg shadow-slate-950/40"
+                  className="flex flex-col gap-4 rounded-3xl border border-slate-900/60 bg-slate-950/70 p-5 shadow-lg shadow-slate-950/40"
                 >
-                  <div className="grid gap-1">
-                    <h3 className="text-base font-semibold text-white">{habit.title}</h3>
-                    <p className="text-xs text-slate-400">
-                      {formatReminderDays(habit.reminderDays)} •{" "}
-                      {habit.reminderTime ? `Reminds at ${habit.reminderTime}` : "No time"}
-                    </p>
+                  <div className="flex flex-wrap items-start justify-between gap-4">
+                    <div className="grid gap-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h3 className="text-base font-semibold text-white">
+                          {habit.title}
+                        </h3>
+                        {isArchived ? (
+                          <span className="rounded-full border border-slate-700/70 px-2 py-0.5 text-[0.6rem] font-semibold uppercase text-slate-400">
+                            Archived
+                          </span>
+                        ) : null}
+                      </div>
+                      <p className="text-xs text-slate-400">
+                        {formatFrequencyLabel(habit.frequency)} •{" "}
+                        {formatScheduleSummary(habit)} •{" "}
+                        {habit.reminderTime
+                          ? `Reminds at ${habit.reminderTime}`
+                          : "No time"}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-800/70 text-slate-300 transition hover:border-slate-600/80 hover:text-white"
+                        onClick={() => onViewDetails(habit)}
+                        aria-label="View habit details"
+                      >
+                        <FiEye aria-hidden />
+                      </button>
+                      <button
+                        type="button"
+                        className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-800/70 text-slate-300 transition hover:border-slate-600/80 hover:text-white"
+                        onClick={() => onEdit(habit)}
+                        aria-label="Edit habit"
+                        disabled={isArchived}
+                      >
+                        <FiEdit2 aria-hidden />
+                      </button>
+                      <button
+                        type="button"
+                        className="flex h-9 w-9 items-center justify-center rounded-full border border-rose-400/30 text-rose-200 transition hover:border-rose-300/70 hover:text-rose-100"
+                        onClick={() => onDelete(habit)}
+                        aria-label="Delete habit"
+                      >
+                        <FiTrash2 aria-hidden />
+                      </button>
+                    </div>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => onToggleComplete(habit)}
-                    className={`flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-semibold transition ${
-                      isCompleted
-                        ? "border-emerald-400/70 bg-emerald-400/15 text-emerald-200"
-                        : "border-slate-800/70 text-slate-300 hover:border-slate-600/70 hover:text-white"
-                    }`}
-                  >
-                    {isCompleted ? (
-                      <FiCheckCircle aria-hidden className="text-emerald-300" />
-                    ) : (
-                      <FiCircle aria-hidden className="text-slate-500" />
-                    )}
-                    {isCompleted ? "Done today" : "Mark done"}
-                  </button>
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <p className="text-xs text-slate-400">
+                      {isCompleted ? "Completed today" : "Not completed today"}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => onToggleComplete(habit)}
+                      className={`flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-semibold transition ${
+                        isCompleted
+                          ? "border-emerald-400/70 bg-emerald-400/15 text-emerald-200"
+                          : "border-slate-800/70 text-slate-300 hover:border-slate-600/70 hover:text-white"
+                      }`}
+                      disabled={isArchived}
+                    >
+                      {isCompleted ? (
+                        <FiCheckCircle aria-hidden className="text-emerald-300" />
+                      ) : (
+                        <FiCircle aria-hidden className="text-slate-500" />
+                      )}
+                      {isCompleted ? "Done today" : "Mark done"}
+                    </button>
+                  </div>
                 </div>
               );
             })

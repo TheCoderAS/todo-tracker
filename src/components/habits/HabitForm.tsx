@@ -1,9 +1,9 @@
 "use client";
 
-import type { FormEvent } from "react";
+import type { ChangeEvent, FormEvent } from "react";
 import { FiPlus, FiX } from "react-icons/fi";
 
-import type { HabitInput } from "@/lib/types";
+import type { HabitFrequency, HabitInput } from "@/lib/types";
 
 const inputClasses =
   "w-full rounded-2xl border border-slate-800/70 bg-slate-950/60 px-4 py-3 text-sm text-slate-100 transition focus:border-emerald-400/70 focus:outline-none focus:ring-1 focus:ring-emerald-400/40";
@@ -21,24 +21,46 @@ const days = [
   { id: 6, label: "Sat" }
 ];
 
+const frequencyOptions: { value: HabitFrequency; label: string }[] = [
+  { value: "daily", label: "Daily" },
+  { value: "weekly", label: "Weekly" },
+  { value: "monthly", label: "Monthly" },
+  { value: "quarterly", label: "Quarterly" },
+  { value: "half-yearly", label: "Half yearly" },
+  { value: "yearly", label: "Yearly" }
+];
+
 type HabitFormProps = {
   form: HabitInput;
-  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  isEditing?: boolean;
+  onChange: (event: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
   onToggleDay: (dayIndex: number) => void;
+  onDayOfMonthChange: (dayOfMonth: number) => void;
   onSubmit: (event: FormEvent) => void;
   onCancel: () => void;
 };
 
 export default function HabitForm({
   form,
+  isEditing = false,
   onChange,
   onToggleDay,
+  onDayOfMonthChange,
   onSubmit,
   onCancel
 }: HabitFormProps) {
+  const showWeeklyDays = form.frequency === "weekly";
+  const showMonthlyDay = ["monthly", "quarterly", "half-yearly", "yearly"].includes(
+    form.frequency
+  );
+  const dayOfMonthValue =
+    form.reminderDays.length > 0 ? form.reminderDays[0] : new Date().getDate();
+
   return (
     <form className="grid gap-5" onSubmit={onSubmit}>
-      <h2 className="text-xl font-semibold text-white">Add a new habit</h2>
+      <h2 className="text-xl font-semibold text-white">
+        {isEditing ? "Edit habit" : "Add a new habit"}
+      </h2>
       <label className={labelClasses}>
         <span className={labelTextClasses}>Title</span>
         <input
@@ -54,9 +76,18 @@ export default function HabitForm({
       <div className="grid gap-4 sm:grid-cols-2">
         <label className={labelClasses}>
           <span className={labelTextClasses}>Frequency</span>
-          <div className="rounded-2xl border border-slate-800/70 bg-slate-950/60 px-4 py-3 text-sm text-slate-200">
-            Daily
-          </div>
+          <select
+            name="frequency"
+            value={form.frequency}
+            onChange={onChange}
+            className={inputClasses}
+          >
+            {frequencyOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
         </label>
         <label className={labelClasses}>
           <span className={labelTextClasses}>Reminder time</span>
@@ -70,36 +101,62 @@ export default function HabitForm({
           />
         </label>
       </div>
-      <div className={labelClasses}>
-        <span className={labelTextClasses}>Repeat days</span>
-        <div className="flex flex-wrap gap-2">
-          {days.map((day) => {
-            const isActive = form.reminderDays.includes(day.id);
-            return (
-              <button
-                key={day.id}
-                type="button"
-                onClick={() => onToggleDay(day.id)}
-                aria-pressed={isActive}
-                className={`rounded-full border px-3 py-2 text-xs font-semibold transition ${
-                  isActive
-                    ? "border-sky-400/70 bg-sky-400/20 text-sky-100"
-                    : "border-slate-800/70 text-slate-400 hover:border-slate-600/70 hover:text-slate-200"
-                }`}
-              >
-                {day.label}
-              </button>
-            );
-          })}
+      {showWeeklyDays ? (
+        <div className={labelClasses}>
+          <span className={labelTextClasses}>Repeat days</span>
+          <div className="flex flex-wrap gap-2">
+            {days.map((day) => {
+              const isActive = form.reminderDays.includes(day.id);
+              return (
+                <button
+                  key={day.id}
+                  type="button"
+                  onClick={() => onToggleDay(day.id)}
+                  aria-pressed={isActive}
+                  className={`rounded-full border px-3 py-2 text-xs font-semibold transition ${
+                    isActive
+                      ? "border-sky-400/70 bg-sky-400/20 text-sky-100"
+                      : "border-slate-800/70 text-slate-400 hover:border-slate-600/70 hover:text-slate-200"
+                  }`}
+                >
+                  {day.label}
+                </button>
+              );
+            })}
+          </div>
         </div>
-      </div>
+      ) : null}
+      {showMonthlyDay ? (
+        <label className={labelClasses}>
+          <span className={labelTextClasses}>Repeat on day</span>
+          <select
+            name="reminderDayOfMonth"
+            value={dayOfMonthValue}
+            onChange={(event) => onDayOfMonthChange(Number(event.target.value))}
+            className={inputClasses}
+          >
+            {Array.from({ length: 31 }).map((_, index) => {
+              const day = index + 1;
+              return (
+                <option key={day} value={day}>
+                  Day {day}
+                </option>
+              );
+            })}
+          </select>
+        </label>
+      ) : form.frequency === "daily" ? (
+        <div className="rounded-2xl border border-slate-800/70 bg-slate-950/60 px-4 py-3 text-xs text-slate-400">
+          Runs every day.
+        </div>
+      ) : null}
       <div className="sticky bottom-0 -mx-5 mt-6 grid grid-cols-2 gap-2 border-t border-slate-900/60 bg-slate-950/80 px-5 backdrop-blur">
         <button
           type="submit"
           className="flex w-full items-center justify-center gap-1 rounded-full bg-emerald-400 px-5 py-3 text-sm font-semibold text-slate-950 shadow-[0_0_25px_rgba(16,185,129,0.45)] transition hover:bg-emerald-300 active:scale-[0.98]"
         >
           <FiPlus aria-hidden />
-          <span>Save</span>
+          <span>{isEditing ? "Update" : "Save"}</span>
         </button>
         <button
           type="button"
