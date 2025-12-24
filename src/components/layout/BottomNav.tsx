@@ -3,7 +3,7 @@ import { FiGrid, FiList, FiUser } from "react-icons/fi";
 
 const navItems = [
   { href: "/", label: "Dashboard", icon: FiGrid },
-  { href: "/todos", label: "Todos", icon: FiList },
+  { href: "/todos", label: "Tasks", icon: FiList },
   { href: "/profile", label: "Profile", icon: FiUser }
 ];
 

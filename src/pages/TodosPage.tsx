@@ -595,7 +595,7 @@ export default function TodosPage() {
       </div>
 
       {activeTab === "todos" ? (
-        <>
+        <div key="todos" className="tab-transition">
           <TodoSection
             groups={groupedTodos}
             formatDate={formatDateDisplay}
@@ -660,9 +660,9 @@ export default function TodosPage() {
             }}
             onCancel={() => setConfirmDeleteId(null)}
           />
-        </>
+        </div>
       ) : (
-        <>
+        <div key="habits" className="tab-transition">
           <HabitSection
             habits={habits}
             onToggleComplete={handleToggleHabitCompletion}
@@ -708,7 +708,7 @@ export default function TodosPage() {
             }}
             onCancel={() => setConfirmHabitDeleteId(null)}
           />
-        </>
+        </div>
       )}
       {actionLoading ? <OverlayLoader /> : null}
       {snackbar ? (

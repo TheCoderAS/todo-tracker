@@ -14,7 +14,7 @@ export default function SpilloverSummaryCard({
   const spilloverPercent = Math.round((spillover / total) * 100);
 
   return (
-    <div className="group rounded-3xl border border-white/10 bg-slate-950/70 p-6 shadow-[0_0_30px_rgba(15,23,42,0.35)] transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_0_40px_rgba(56,189,248,0.15)]">
+    <div className="group rounded-3xl border border-white/10 bg-slate-950/70 p-6 transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_0_40px_rgba(56,189,248,0.15)]">
       <p className="text-xs uppercase text-slate-400">
         On-time vs Spillover
       </p>

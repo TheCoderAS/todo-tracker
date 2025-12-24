@@ -39,7 +39,7 @@ export default function HabitTrendChart({
   const maxCount = useMemo(() => Math.max(1, ...data.map((entry) => entry.count)), [data]);
 
   return (
-    <div className="rounded-3xl border border-white/10 bg-slate-950/70 p-6 shadow-[0_0_40px_rgba(15,23,42,0.35)]">
+    <div className="group rounded-3xl border border-white/10 bg-slate-950/70 p-6 transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_0_45px_rgba(56,189,248,0.15)]">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <p className="text-xs uppercase text-slate-400">Habit trend</p>
@@ -53,7 +53,7 @@ export default function HabitTrendChart({
           <select
             value={period}
             onChange={(event) => setPeriod(event.target.value as TrendPeriod)}
-            className="rounded-full border border-slate-800/70 bg-slate-950/70 px-3 py-2 text-xs text-slate-200"
+            className="rounded-full border border-slate-800/70 bg-slate-950/70 px-3 py-2 text-xs text-slate-200 transition focus:border-slate-600/70 focus:outline-none focus:ring-1 focus:ring-slate-400/20"
           >
             {periodOptions.map((option) => (
               <option key={option.value} value={option.value}>

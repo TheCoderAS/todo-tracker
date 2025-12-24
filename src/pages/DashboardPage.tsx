@@ -29,7 +29,7 @@ export default function DashboardPage() {
 
   return (
     <section className="grid gap-6">
-      <div className="grid gap-4 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <CompletedTargetCard
           completed={todayCompleted}
           target={todayTarget}
@@ -43,12 +43,12 @@ export default function DashboardPage() {
           weeklyTrend={weeklyTrend}
           loading={habitLoading}
         />
-        <HabitTrendChart
-          weeklyTrend={weeklyTrend}
-          monthlyTrend={monthlyTrend}
-          yearlyTrend={yearlyTrend}
-        />
       </div>
+      <HabitTrendChart
+        weeklyTrend={weeklyTrend}
+        monthlyTrend={monthlyTrend}
+        yearlyTrend={yearlyTrend}
+      />
       <WeeklyCompletionSpilloverChart data={weeklyCompletionBreakdown} />
     </section>
   );
