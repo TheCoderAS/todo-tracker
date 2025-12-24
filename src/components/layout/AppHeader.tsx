@@ -136,7 +136,7 @@ export default function AppHeader({ showSignOut, onSignOut }: AppHeaderProps) {
           {user ? (
             <div className="relative" ref={menuRef}>
               <button
-                className="relative flex h-9 w-9 items-center justify-center rounded-full border border-slate-700/70 text-slate-200 transition hover:border-slate-500"
+                className="relative flex h-9 w-9 items-center justify-center rounded-full border border-slate-700/70 text-slate-200 transition-all duration-200 ease-out hover:border-slate-500"
                 onClick={() => setIsNotificationsOpen((prev) => !prev)}
                 aria-label="Open notifications"
                 aria-haspopup="menu"
@@ -149,7 +149,7 @@ export default function AppHeader({ showSignOut, onSignOut }: AppHeaderProps) {
               </button>
               {isNotificationsOpen ? (
                 <div
-                  className="absolute right-0 mt-3 w-72 rounded-2xl border border-slate-800/80 bg-slate-950/95 p-3 shadow-2xl shadow-slate-950/70 backdrop-blur"
+                  className="floating-menu absolute right-0 mt-3 w-72 origin-top-right rounded-2xl border border-slate-800/80 bg-slate-950/95 p-3 shadow-2xl shadow-slate-950/70 backdrop-blur"
                   role="menu"
                 >
                   <div className="mb-2 flex items-center justify-between gap-2">
@@ -158,7 +158,7 @@ export default function AppHeader({ showSignOut, onSignOut }: AppHeaderProps) {
                     </p>
                     <button
                       type="button"
-                      className={`text-[0.65rem] font-semibold uppercase transition ${
+                      className={`text-[0.65rem] font-semibold uppercase transition-colors duration-200 ease-out ${
                         hasUnread
                           ? "text-emerald-200/80 hover:text-emerald-100"
                           : "text-slate-500"
@@ -193,7 +193,7 @@ export default function AppHeader({ showSignOut, onSignOut }: AppHeaderProps) {
                               ) : null}
                               <button
                                 type="button"
-                                className={`flex h-7 w-7 items-center justify-center rounded-full border text-xs transition ${
+                                className={`flex h-7 w-7 items-center justify-center rounded-full border text-xs transition-all duration-200 ease-out ${
                                   notification.read
                                     ? "border-slate-800/70 text-slate-500"
                                     : "border-emerald-400/40 text-emerald-200 hover:border-emerald-300/70 hover:text-emerald-100"
@@ -228,7 +228,7 @@ export default function AppHeader({ showSignOut, onSignOut }: AppHeaderProps) {
           ) : null}
           {showSignOut ? (
             <button
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-700/70 text-slate-200 transition hover:border-slate-500"
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-700/70 text-slate-200 transition-all duration-200 ease-out hover:border-slate-500"
               onClick={onSignOut}
               aria-label="Sign out"
             >
