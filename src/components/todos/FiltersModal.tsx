@@ -320,7 +320,7 @@ export default function FiltersModal({
         <div className="sticky bottom-0 -mx-6 flex flex-wrap items-center justify-between gap-3 border-t border-slate-900/80 bg-slate-950/95 px-6 py-4">
           <button
             type="button"
-            className="inline-flex items-center gap-2 rounded-full border border-slate-700/70 px-4 py-2 text-xs font-semibold text-slate-300 transition hover:border-slate-500 hover:text-white active:scale-95"
+            className="inline-flex h-9 items-center gap-2 rounded-full border border-slate-700/70 px-4 text-xs font-semibold text-slate-300 transition hover:border-slate-500 hover:text-white active:scale-95"
             onClick={onReset}
           >
             <FiRotateCcw aria-hidden />
