@@ -1,5 +1,3 @@
-"use client";
-
 import { useAuth } from "@/components/auth/AuthProvider";
 import CompletedTargetCard from "@/components/dashboard/CompletedTargetCard";
 import HabitAnalyticsCard from "@/components/dashboard/HabitAnalyticsCard";

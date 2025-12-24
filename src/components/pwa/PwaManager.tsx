@@ -1,5 +1,3 @@
-"use client";
-
 import { useEffect, useRef, useState } from "react";
 import {
   collection,
@@ -124,15 +122,14 @@ export default function PwaManager() {
 
       const registration = await navigator.serviceWorker.ready;
       const token = await getToken(messaging, {
-        vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY,
+        vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
         serviceWorkerRegistration: registration
       });
       if (!token) return;
 
       const idToken = await user.getIdToken();
       const endpoint =
-        process.env.NEXT_PUBLIC_NOTIFICATION_SERVICE_URL ||
-        "https://next-gen-track.web.app";
+        import.meta.env.VITE_NOTIFICATION_SERVICE_URL || "https://next-gen-track.web.app";
       await fetch(`${endpoint}/register`, {
         method: "POST",
         headers: {
@@ -215,7 +212,7 @@ export default function PwaManager() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const endpoint = process.env.NEXT_PUBLIC_NOTIFICATION_SERVICE_URL;
+    const endpoint = import.meta.env.VITE_NOTIFICATION_SERVICE_URL;
     if (!endpoint) return;
 
     const ping = () => {
@@ -224,7 +221,7 @@ export default function PwaManager() {
 
     ping();
     const pingIntervalMinutes = Number(
-      process.env.NEXT_PUBLIC_NOTIFICATION_PING_INTERVAL_MINUTES || "30"
+      import.meta.env.VITE_NOTIFICATION_PING_INTERVAL_MINUTES || "30"
     );
     const pingInterval = window.setInterval(
       ping,
@@ -239,7 +236,7 @@ export default function PwaManager() {
     if (!("Notification" in window)) return;
 
     const summaryIntervalMinutes = Number(
-      process.env.NEXT_PUBLIC_NOTIFICATION_SUMMARY_INTERVAL_MINUTES || "5"
+      import.meta.env.VITE_NOTIFICATION_SUMMARY_INTERVAL_MINUTES || "5"
     );
     const intervalMs = Math.max(summaryIntervalMinutes, 1) * 60 * 1000;
 

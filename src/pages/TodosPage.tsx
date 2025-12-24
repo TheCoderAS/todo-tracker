@@ -1,5 +1,3 @@
-"use client";
-
 import { useMemo, useState } from "react";
 import {
   addDoc,
@@ -37,10 +35,10 @@ import type {
   TodoInput,
   TodoPriority
 } from "@/lib/types";
-import { useHabitsData } from "@/app/(app)/todos/hooks/useHabitsData";
-import { useTabState } from "@/app/(app)/todos/hooks/useTabState";
-import { useTodoFilters } from "@/app/(app)/todos/hooks/useTodoFilters";
-import { useTodosData } from "@/app/(app)/todos/hooks/useTodosData";
+import { useHabitsData } from "@/hooks/todos/useHabitsData";
+import { useTabState } from "@/hooks/todos/useTabState";
+import { useTodoFilters } from "@/hooks/todos/useTodoFilters";
+import { useTodosData } from "@/hooks/todos/useTodosData";
 
 const priorities: TodoPriority[] = ["low", "medium", "high"];
 

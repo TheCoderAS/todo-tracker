@@ -1,7 +1,5 @@
-"use client";
-
 import { useEffect, useMemo, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   createUserWithEmailAndPassword,
   EmailAuthProvider,
@@ -32,8 +30,8 @@ const defaultAuthForm: AuthFormState = {
 };
 
 export default function AuthClient() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user, loading } = useAuth();
   const [authMode, setAuthMode] = useState<AuthMode>("signin");
   const [authForm, setAuthForm] = useState<AuthFormState>(defaultAuthForm);
@@ -58,9 +56,9 @@ export default function AuthClient() {
   useEffect(() => {
     if (loading) return;
     if (user) {
-      router.replace(nextPath);
+      navigate(nextPath, { replace: true });
     }
-  }, [loading, user, router, nextPath]);
+  }, [loading, user, navigate, nextPath]);
 
   const handleAuthChange = (
     event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -98,7 +96,7 @@ export default function AuthClient() {
       await signInWithEmailAndPassword(auth, authForm.email, authForm.password);
       setSnackbar({ message: "Welcome back! You are signed in.", variant: "success" });
       resetAuthForm();
-      router.replace(nextPath);
+      navigate(nextPath, { replace: true });
     } catch (error) {
       try {
         const methods = await fetchSignInMethodsForEmail(auth, authForm.email);
@@ -112,7 +110,7 @@ export default function AuthClient() {
           await linkWithCredential(result.user, credential);
           setSnackbar({ message: "Signed in with Google.", variant: "success" });
           resetAuthForm();
-          router.replace(nextPath);
+          navigate(nextPath, { replace: true });
           return;
         }
       } catch (secondaryError) {
@@ -149,7 +147,7 @@ export default function AuthClient() {
       });
       setSnackbar({ message: "Account created! Welcome to Aura Pulse.", variant: "success" });
       resetAuthForm();
-      router.replace(nextPath);
+      navigate(nextPath, { replace: true });
     } catch (error) {
       setAuthError("Unable to create account.");
       setSnackbar({ message: "Unable to create account.", variant: "error" });
@@ -167,7 +165,7 @@ export default function AuthClient() {
       await signInWithPopup(auth, provider);
       setSnackbar({ message: "Signed in with Google.", variant: "success" });
       resetAuthForm();
-      router.replace(nextPath);
+      navigate(nextPath, { replace: true });
     } catch (error) {
       console.error(error);
       const provider = new GoogleAuthProvider();
@@ -194,14 +192,14 @@ export default function AuthClient() {
             }
             setSnackbar({ message: "Signed in with Google.", variant: "success" });
             resetAuthForm();
-            router.replace(nextPath);
+            navigate(nextPath, { replace: true });
             return;
           }
           if (methods.includes("google.com")) {
             await signInWithPopup(auth, provider);
             setSnackbar({ message: "Signed in with Google.", variant: "success" });
             resetAuthForm();
-            router.replace(nextPath);
+            navigate(nextPath, { replace: true });
             return;
           }
         }

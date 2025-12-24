@@ -1,19 +1,16 @@
-"use client";
-
 import { useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import AppHeader from "@/components/layout/AppHeader";
 import BottomNav from "@/components/layout/BottomNav";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import OverlayLoader from "@/components/ui/OverlayLoader";
 import { useAuth } from "@/components/auth/AuthProvider";
-import ProtectedRoute from "@/components/auth/ProtectedRoute";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { loading, signOutUser } = useAuth();
-  const router = useRouter();
-  const pathname = usePathname();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
@@ -22,14 +19,15 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     setIsSigningOut(true);
     try {
       await signOutUser();
-      router.replace(`/auth?next=${encodeURIComponent(pathname ?? "/")}`);
+      const nextPath = location.pathname + location.search;
+      navigate(`/auth?next=${encodeURIComponent(nextPath || "/")}`, { replace: true });
     } finally {
       setIsSigningOut(false);
     }
   };
 
   return (
-    <ProtectedRoute>
+    <>
       <AppHeader showSignOut onSignOut={() => setShowConfirm(true)} />
       <main className="relative mx-auto flex min-h-screen max-w-6xl flex-col gap-10 px-6 pb-24 pt-20 text-slate-100">
         {children}
@@ -46,6 +44,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         onCancel={() => setShowConfirm(false)}
       />
       {loading || isSigningOut ? <OverlayLoader /> : null}
-    </ProtectedRoute>
+    </>
   );
 }
