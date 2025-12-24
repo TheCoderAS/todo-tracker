@@ -211,7 +211,7 @@ export default function TodoSection({
         />
       </section>
 
-      <div className="fixed bottom-24 right-6 z-30 flex flex-col items-end gap-3 sm:bottom-8">
+      <div className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] right-6 z-30 flex flex-col items-end gap-3 sm:bottom-8">
         {isFabOpen ? (
           <div className="floating-menu grid gap-2 rounded-3xl border border-slate-800/70 bg-slate-950/90 p-3 shadow-2xl shadow-slate-950/50">
             <button

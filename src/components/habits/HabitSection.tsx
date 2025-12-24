@@ -314,7 +314,7 @@ export default function HabitSection({
         </div>
       </section>
 
-      <div className="fixed bottom-24 right-6 z-30 flex flex-col items-end gap-3 sm:bottom-8">
+      <div className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] right-6 z-30 flex flex-col items-end gap-3 sm:bottom-8">
         <button
           type="button"
           className="glow-emerald flex h-14 w-14 items-center justify-center rounded-full bg-sky-400 text-3xl font-semibold text-slate-950 shadow-xl shadow-slate-950/40 transition hover:scale-[1.02] hover:bg-sky-300"
