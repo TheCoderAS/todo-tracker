@@ -10,6 +10,14 @@ export type HabitFrequency =
   | "half-yearly"
   | "yearly";
 export type HabitType = "positive" | "avoid";
+export type FocusBlockStatus = "active" | "completed" | "cancelled";
+
+export type FocusBlockMetrics = {
+  totalTodos: number;
+  completedTodos: number;
+  totalHabits: number;
+  completedHabits: number;
+};
 
 export interface Todo {
   id: string;
@@ -55,4 +63,16 @@ export interface HabitInput {
   reminderDays: number[];
   frequency: HabitFrequency;
   graceMisses: number;
+}
+
+export interface FocusBlock {
+  id: string;
+  status: FocusBlockStatus;
+  selectedTodoIds: string[];
+  selectedHabitIds: string[];
+  durationMinutes: number;
+  startedAt: Timestamp | null;
+  endedAt?: Timestamp | null;
+  createdAt?: Timestamp | null;
+  metrics?: FocusBlockMetrics | null;
 }
