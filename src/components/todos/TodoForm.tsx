@@ -26,7 +26,11 @@ type TodoFormProps = {
   isEditing: boolean;
   titleHasError: boolean;
   scheduleHasError: boolean;
-  onChange: (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
+  onChange: (
+    event:
+      | React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+      | { target: { name: string; value: string[] } }
+  ) => void;
   onDescriptionChange: (value: string) => void;
   onSubmit: (event: FormEvent) => void;
   onCancelEdit: () => void;
@@ -44,6 +48,7 @@ export default function TodoForm({
   onCancelEdit
 }: TodoFormProps) {
   const [tagInput, setTagInput] = useState("");
+  const [contextTagInput, setContextTagInput] = useState("");
   const [isDescriptionOpen, setIsDescriptionOpen] = useState(
     Boolean(form.description)
   );
@@ -60,12 +65,23 @@ export default function TodoForm({
         .filter(Boolean),
     [form.tags]
   );
+  const contextTags = useMemo(() => form.contextTags ?? [], [form.contextTags]);
   const suggestedTags = useMemo(() => {
     if (!tagInput.trim()) return tagSuggestions;
     return tagSuggestions.filter((suggestion) =>
       suggestion.toLowerCase().includes(tagInput.toLowerCase())
     );
   }, [tagInput, tagSuggestions]);
+  const contextTagSuggestions = useMemo(
+    () => ["work", "home", "health", "personal", "family", "learning"],
+    []
+  );
+  const suggestedContextTags = useMemo(() => {
+    if (!contextTagInput.trim()) return contextTagSuggestions;
+    return contextTagSuggestions.filter((suggestion) =>
+      suggestion.toLowerCase().includes(contextTagInput.toLowerCase())
+    );
+  }, [contextTagInput, contextTagSuggestions]);
 
   const updateTags = (nextTags: string[]) => {
     onChange({
@@ -86,6 +102,27 @@ export default function TodoForm({
 
   const handleTagRemove = (value: string) => {
     updateTags(tags.filter((tag) => tag !== value));
+  };
+
+  const updateContextTags = (nextTags: string[]) => {
+    onChange({
+      target: {
+        name: "contextTags",
+        value: nextTags
+      }
+    });
+  };
+
+  const handleContextTagAdd = (value: string) => {
+    const trimmed = value.trim().toLowerCase();
+    if (!trimmed) return;
+    if (contextTags.includes(trimmed)) return;
+    updateContextTags([...contextTags, trimmed]);
+    setContextTagInput("");
+  };
+
+  const handleContextTagRemove = (value: string) => {
+    updateContextTags(contextTags.filter((tag) => tag !== value));
   };
 
   useEffect(() => {
@@ -253,6 +290,49 @@ export default function TodoForm({
                   </button>
                 ))}
               </div>
+            </div>
+          </div>
+          <div className={labelClasses}>
+            <span className={labelTextClasses}>Context tags</span>
+            <div className="flex flex-wrap gap-2 rounded-2xl border border-slate-800/70 bg-slate-950/60 px-3 py-3">
+              {contextTags.map((tag) => (
+                <button
+                  key={tag}
+                  type="button"
+                  className="flex items-center gap-2 rounded-full border border-slate-700/80 bg-slate-900/60 px-3 py-1 text-xs text-slate-200 transition hover:border-emerald-300/80 hover:text-emerald-100"
+                  onClick={() => handleContextTagRemove(tag)}
+                >
+                  {tag}
+                  <span className="text-[0.65rem] text-slate-400">×</span>
+                </button>
+              ))}
+              <input
+                name="contextTags"
+                placeholder="Add context tag"
+                value={contextTagInput}
+                onChange={(event) => setContextTagInput(event.target.value)}
+                onBlur={() => handleContextTagAdd(contextTagInput)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === "Tab") {
+                    event.preventDefault();
+                    handleContextTagAdd(contextTagInput);
+                  }
+                }}
+                enterKeyHint="done"
+                className="min-w-[140px] flex-1 bg-transparent text-sm text-slate-100 outline-none"
+              />
+            </div>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {suggestedContextTags.map((tag) => (
+                <button
+                  key={tag}
+                  type="button"
+                  onClick={() => handleContextTagAdd(tag)}
+                  className="rounded-full border border-slate-800/80 px-3 py-1 text-xs text-slate-400 transition hover:border-slate-500/70 hover:text-slate-200"
+                >
+                  {tag}
+                </button>
+              ))}
             </div>
           </div>
         </div>

@@ -20,6 +20,12 @@ type HabitAnalytics = {
   weeklyTrend: HabitTrendDay[];
   monthlyTrend: HabitTrendDay[];
   yearlyTrend: HabitTrendDay[];
+  completionRatesByContextTag: {
+    tag: string;
+    completionRate: number;
+    completed: number;
+    scheduled: number;
+  }[];
   loading: boolean;
 };
 
@@ -36,6 +42,7 @@ const emptyAnalytics: HabitAnalytics = {
   weeklyTrend: [],
   monthlyTrend: [],
   yearlyTrend: [],
+  completionRatesByContextTag: [],
   loading: false
 };
 
@@ -83,7 +90,8 @@ export function useHabitAnalytics(user: User | null): HabitAnalytics {
             id: docSnapshot.id,
             ...habit,
             habitType: habit.habitType ?? "positive",
-            graceMisses: habit.graceMisses ?? 0
+            graceMisses: habit.graceMisses ?? 0,
+            contextTags: habit.contextTags ?? []
           };
         });
 
@@ -136,6 +144,35 @@ export function useHabitAnalytics(user: User | null): HabitAnalytics {
         const completionRate = scheduledToday.length
           ? Math.round((completedToday / scheduledToday.length) * 100)
           : 0;
+        const contextTagMap = new Map<
+          string,
+          { completed: number; scheduled: number }
+        >();
+        scheduledToday.forEach((habit) => {
+          const tagList =
+            habit.contextTags && habit.contextTags.length > 0
+              ? habit.contextTags
+              : ["Uncategorized"];
+          tagList.forEach((tag) => {
+            const entry = contextTagMap.get(tag) ?? { completed: 0, scheduled: 0 };
+            entry.scheduled += 1;
+            if (isHabitOnTrack(habit, today)) {
+              entry.completed += 1;
+            }
+            contextTagMap.set(tag, entry);
+          });
+        });
+
+        const completionRatesByContextTag = Array.from(contextTagMap.entries())
+          .map(([tag, stats]) => ({
+            tag,
+            completionRate: stats.scheduled
+              ? Math.round((stats.completed / stats.scheduled) * 100)
+              : 0,
+            completed: stats.completed,
+            scheduled: stats.scheduled
+          }))
+          .sort((a, b) => a.tag.localeCompare(b.tag));
 
         if (!isMounted) return;
         setAnalytics({
@@ -145,6 +182,7 @@ export function useHabitAnalytics(user: User | null): HabitAnalytics {
           weeklyTrend,
           monthlyTrend,
           yearlyTrend,
+          completionRatesByContextTag,
           loading: false
         });
       },

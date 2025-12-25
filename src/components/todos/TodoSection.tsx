@@ -34,6 +34,9 @@ type TodoSectionProps = {
   onQuickFilter: (value: "all" | "today" | "completed" | "flagged") => void;
   onSortByChange: (value: "scheduled" | "completed" | "priority" | "created" | "manual") => void;
   onSortOrderChange: (value: "asc" | "desc") => void;
+  contextTagFilter: string;
+  contextTagOptions: string[];
+  onContextTagChange: (value: string) => void;
   emptyStateLabel: string;
   todayStats: { total: number; completed: number; percent: number };
   streakCount: number;
@@ -60,6 +63,9 @@ export default function TodoSection({
   onQuickFilter,
   onSortByChange,
   onSortOrderChange,
+  contextTagFilter,
+  contextTagOptions,
+  onContextTagChange,
   emptyStateLabel,
   todayStats,
   streakCount,
@@ -126,6 +132,23 @@ export default function TodoSection({
             <span className="ml-2 text-xs font-semibold text-emerald-200">
               {streakCount} days
             </span>
+          </div>
+          <div className="rounded-2xl border border-slate-800/70 bg-slate-950/40 px-2 pr-1 py-1 text-xs text-slate-200">
+            <label className="flex items-center gap-2">
+              <span className="text-slate-400">Context</span>
+              <select
+                value={contextTagFilter}
+                onChange={(event) => onContextTagChange(event.target.value)}
+                className="rounded-full border border-slate-800/70 bg-slate-950/60 px-2 py-1 text-[0.7rem] text-slate-200"
+              >
+                <option value="all">All</option>
+                {contextTagOptions.map((tag) => (
+                  <option key={tag} value={tag}>
+                    {tag}
+                  </option>
+                ))}
+              </select>
+            </label>
           </div>
           <button
             type="button"
