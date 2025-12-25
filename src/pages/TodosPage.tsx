@@ -192,8 +192,6 @@ export default function TodosPage() {
   } | null>(null);
 
   const isEditing = useMemo(() => Boolean(editingId), [editingId]);
-  const reviewWindowDays = 7;
-
   const overdueTodos = useMemo(() => {
     const now = new Date();
     return todos
@@ -210,6 +208,8 @@ export default function TodosPage() {
       );
   }, [todos]);
 
+  const reviewWindowDays = 7;
+
   const missedHabits = useMemo<MissedHabitEntry[]>(() => {
     const today = new Date();
     const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
@@ -222,7 +222,9 @@ export default function TodosPage() {
     habits
       .filter((habit) => !habit.archivedAt)
       .forEach((habit) => {
+        const createdAtDate = habit.createdAt?.toDate?.();
         dates.forEach((date) => {
+          if (createdAtDate && date < createdAtDate) return;
           if (!isHabitScheduledForDate(habit, date)) return;
           const dateKey = getDateKey(date, habit.timezone);
           const isCompleted = habit.completionDates?.includes(dateKey);
