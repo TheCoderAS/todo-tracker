@@ -1,8 +1,10 @@
 import { useAuth } from "@/components/auth/AuthProvider";
 import CompletedTargetCard from "@/components/dashboard/CompletedTargetCard";
+import DashboardParallax from "@/components/dashboard/DashboardParallax";
 import HabitAnalyticsCard from "@/components/dashboard/HabitAnalyticsCard";
 import HabitConsistencyCard from "@/components/dashboard/HabitConsistencyCard";
 import HabitTrendChart from "@/components/dashboard/HabitTrendChart";
+import ProgressOrbCard from "@/components/dashboard/ProgressOrbCard";
 import WeeklyCompletionChart from "@/components/dashboard/WeeklyCompletionChart";
 import WeeklyCompletionSpilloverChart from "@/components/dashboard/WeeklyCompletionSpilloverChart";
 import { useCompletionAnalytics } from "@/components/dashboard/useCompletionAnalytics";
@@ -33,35 +35,59 @@ export default function DashboardPage() {
   } = useHabitAnalytics(user);
 
   return (
-    <section className="grid gap-6">
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <CompletedTargetCard
-          completed={todayCompleted}
-          target={todayTarget}
-          loading={analyticsLoading}
-        />
-        <WeeklyCompletionChart onTime={onTimeCompletions} spillover={spilloverCompletions} />
-        <HabitAnalyticsCard
-          activeHabits={activeHabits}
-          completedToday={habitsCompletedToday}
-          completionRate={completionRate}
-          weeklyTrend={weeklyTrend}
-          loading={habitLoading}
-        />
-        <HabitConsistencyCard
-          days={rollingWindowDays}
-          completed={rollingWindowCompleted}
-          scheduled={rollingWindowScheduled}
-          completionRate={rollingWindowCompletionRate}
-          loading={habitLoading}
-        />
-      </div>
-      <HabitTrendChart
-        weeklyTrend={weeklyTrend}
-        monthlyTrend={monthlyTrend}
-        yearlyTrend={yearlyTrend}
-      />
-      <WeeklyCompletionSpilloverChart data={weeklyCompletionBreakdown} />
-    </section>
+    <DashboardParallax>
+      <section className="grid gap-6">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <div className="dashboard-card md:col-span-2 lg:col-span-2">
+            <ProgressOrbCard
+              completed={todayCompleted}
+              target={todayTarget}
+              loading={analyticsLoading}
+            />
+          </div>
+          <div className="dashboard-card">
+            <CompletedTargetCard
+              completed={todayCompleted}
+              target={todayTarget}
+              loading={analyticsLoading}
+            />
+          </div>
+          <div className="dashboard-card">
+            <WeeklyCompletionChart
+              onTime={onTimeCompletions}
+              spillover={spilloverCompletions}
+            />
+          </div>
+          <div className="dashboard-card">
+            <HabitAnalyticsCard
+              activeHabits={activeHabits}
+              completedToday={habitsCompletedToday}
+              completionRate={completionRate}
+              weeklyTrend={weeklyTrend}
+              loading={habitLoading}
+            />
+          </div>
+          <div className="dashboard-card">
+            <HabitConsistencyCard
+              days={rollingWindowDays}
+              completed={rollingWindowCompleted}
+              scheduled={rollingWindowScheduled}
+              completionRate={rollingWindowCompletionRate}
+              loading={habitLoading}
+            />
+          </div>
+        </div>
+        <div className="dashboard-card">
+          <HabitTrendChart
+            weeklyTrend={weeklyTrend}
+            monthlyTrend={monthlyTrend}
+            yearlyTrend={yearlyTrend}
+          />
+        </div>
+        <div className="dashboard-card">
+          <WeeklyCompletionSpilloverChart data={weeklyCompletionBreakdown} />
+        </div>
+      </section>
+    </DashboardParallax>
   );
 }
