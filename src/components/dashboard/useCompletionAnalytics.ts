@@ -81,9 +81,10 @@ export function useCompletionAnalytics(user: User | null): CompletionAnalytics {
           ...(docSnapshot.data() as Omit<Todo, "id">)
         }));
 
+        const activeTodos = todos.filter((todo) => !todo.archivedAt);
         const weeklyBreakdown = days.map((date) => {
           const { start, end } = buildDayRange(date);
-          const completedTodos = todos.filter(
+          const completedTodos = activeTodos.filter(
             (todo) => todo.status === "completed" && inRange(todo.completedDate, start, end)
           );
 
@@ -102,11 +103,12 @@ export function useCompletionAnalytics(user: User | null): CompletionAnalytics {
         });
 
         const { start: todayStart, end: todayEnd } = buildDayRange(today);
-        const todayTarget = todos.filter((todo) =>
-          inRange(todo.scheduledDate, todayStart, todayEnd)
+        const todayTarget = activeTodos.filter(
+          (todo) =>
+            todo.status !== "skipped" && inRange(todo.scheduledDate, todayStart, todayEnd)
         ).length;
 
-        const todayCompletedTodos = todos.filter(
+        const todayCompletedTodos = activeTodos.filter(
           (todo) => todo.status === "completed" && inRange(todo.completedDate, todayStart, todayEnd)
         );
 

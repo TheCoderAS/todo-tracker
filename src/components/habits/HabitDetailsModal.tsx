@@ -125,6 +125,7 @@ const buildTrendEntries = (habit: Habit): TrendEntry[] => {
   return occurrences
     .map((date) => {
       const dateKey = getDateKey(date, habit.timezone);
+      const isSkipped = habit.skippedDates?.includes(dateKey) ?? false;
       return {
         date,
         dateKey,
@@ -133,7 +134,7 @@ const buildTrendEntries = (habit: Habit): TrendEntry[] => {
           day: "numeric",
           year: "numeric"
         }),
-        completed: habit.completionDates?.includes(dateKey) ?? false
+        completed: (habit.completionDates?.includes(dateKey) ?? false) && !isSkipped
       };
     })
     .reverse();
@@ -171,8 +172,9 @@ export default function HabitDetailsModal({ habit, isOpen, onClose }: HabitDetai
 
       dates.forEach((date) => {
         if (!isHabitScheduledForDate(habit, date)) return;
-        scheduled += 1;
         const dateKey = getDateKey(date, habit.timezone);
+        if (habit.skippedDates?.includes(dateKey)) return;
+        scheduled += 1;
         if (habit.completionDates?.includes(dateKey)) {
           completed += 1;
         }

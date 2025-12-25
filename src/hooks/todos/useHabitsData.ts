@@ -33,7 +33,8 @@ export const useHabitsData = (user: User | null | undefined) => {
           ...habit,
           habitType: habit.habitType ?? "positive",
           graceMisses: habit.graceMisses ?? 0,
-          contextTags: habit.contextTags ?? []
+          contextTags: habit.contextTags ?? [],
+          skippedDates: habit.skippedDates ?? []
         };
       });
       setHabits(data);

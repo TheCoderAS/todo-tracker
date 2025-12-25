@@ -16,6 +16,7 @@ const defaultFilters: FilterDraft = {
 };
 
 export const useTodoFilters = (todos: Todo[]) => {
+  const activeTodos = useMemo(() => todos.filter((todo) => !todo.archivedAt), [todos]);
   const [statusFilter, setStatusFilter] = useState<"all" | Todo["status"]>(
     defaultFilters.status
   );
@@ -32,13 +33,13 @@ export const useTodoFilters = (todos: Todo[]) => {
   const [contextTagFilter, setContextTagFilter] = useState("all");
   const uncategorizedLabel = "Uncategorized";
   const hasUncategorized = useMemo(
-    () => todos.some((todo) => !(todo.contextTags ?? []).length),
-    [todos]
+    () => activeTodos.some((todo) => !(todo.contextTags ?? []).length),
+    [activeTodos]
   );
 
   const contextTagOptions = useMemo(() => {
     const tags = new Set<string>();
-    todos.forEach((todo) => {
+    activeTodos.forEach((todo) => {
       (todo.contextTags ?? []).forEach((tag) => tags.add(tag));
     });
     const options = Array.from(tags).sort();
@@ -46,7 +47,7 @@ export const useTodoFilters = (todos: Todo[]) => {
       options.unshift(uncategorizedLabel);
     }
     return options;
-  }, [todos, hasUncategorized, uncategorizedLabel]);
+  }, [activeTodos, hasUncategorized, uncategorizedLabel]);
 
   const handleApplyFilters = () => {
     setStatusFilter(filterDraft.status);
@@ -113,21 +114,22 @@ export const useTodoFilters = (todos: Todo[]) => {
     const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const todayEnd = new Date(todayStart);
     todayEnd.setHours(23, 59, 59, 999);
-    const todaysTodos = todos.filter((todo) => {
+    const todaysTodos = activeTodos.filter((todo) => {
       const scheduled = todo.scheduledDate?.toDate();
       return scheduled && scheduled >= todayStart && scheduled <= todayEnd;
     });
-    const completed = todaysTodos.filter((todo) => todo.status === "completed").length;
+    const visibleTodos = todaysTodos.filter((todo) => todo.status !== "skipped");
+    const completed = visibleTodos.filter((todo) => todo.status === "completed").length;
     return {
-      total: todaysTodos.length,
+      total: visibleTodos.length,
       completed,
-      percent: todaysTodos.length ? Math.round((completed / todaysTodos.length) * 100) : 0
+      percent: visibleTodos.length ? Math.round((completed / visibleTodos.length) * 100) : 0
     };
-  }, [todos]);
+  }, [activeTodos]);
 
   const streakCount = useMemo(() => {
     const completedDates = new Set<string>();
-    todos.forEach((todo) => {
+    activeTodos.forEach((todo) => {
       if (todo.status !== "completed" || !todo.completedDate) return;
       const date = todo.completedDate.toDate();
       completedDates.add(date.toISOString().split("T")[0]);
@@ -141,7 +143,7 @@ export const useTodoFilters = (todos: Todo[]) => {
       cursor.setDate(cursor.getDate() - 1);
     }
     return streak;
-  }, [todos]);
+  }, [activeTodos]);
 
   const groupedTodos = useMemo(() => {
     const now = new Date();
@@ -185,7 +187,7 @@ export const useTodoFilters = (todos: Todo[]) => {
       }
     };
 
-    const filteredTodos = todos.filter((todo) => {
+    const filteredTodos = activeTodos.filter((todo) => {
       const matchesStatus = statusFilter === "all" || todo.status === statusFilter;
       const matchesPriority = priorityFilter === "all" || todo.priority === priorityFilter;
       const matchesDate = matchesDatePreset(todo);
@@ -290,7 +292,7 @@ export const useTodoFilters = (todos: Todo[]) => {
 
     return orderedGroups;
   }, [
-    todos,
+    activeTodos,
     statusFilter,
     priorityFilter,
     sortBy,
@@ -303,6 +305,7 @@ export const useTodoFilters = (todos: Todo[]) => {
   const emptyStateLabel = useMemo(() => {
     if (datePreset === "today") return "Nothing due today.";
     if (statusFilter === "completed") return "No completed tasks yet.";
+    if (statusFilter === "skipped") return "No skipped tasks yet.";
     if (priorityFilter === "high") return "No flagged tasks right now.";
     return "No todos yet. Add one with the + button.";
   }, [datePreset, statusFilter, priorityFilter]);

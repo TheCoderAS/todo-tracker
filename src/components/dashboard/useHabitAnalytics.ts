@@ -33,9 +33,17 @@ type HabitAnalytics = {
   loading: boolean;
 };
 
+const isHabitSkipped = (habit: Habit, date: Date) => {
+  const dateKey = getDateKey(date, habit.timezone);
+  return habit.skippedDates?.includes(dateKey) ?? false;
+};
+
 const isHabitOnTrack = (habit: Habit, date: Date) => {
   const dateKey = getDateKey(date, habit.timezone);
   const isCompleted = habit.completionDates?.includes(dateKey) ?? false;
+  if (isHabitSkipped(habit, date)) {
+    return false;
+  }
   return habit.habitType === "avoid" ? isCompleted : isCompleted;
 };
 
@@ -105,13 +113,14 @@ export function useHabitAnalytics(user: User | null): HabitAnalytics {
             ...habit,
             habitType: habit.habitType ?? "positive",
             graceMisses: habit.graceMisses ?? 0,
-            contextTags: habit.contextTags ?? []
+            contextTags: habit.contextTags ?? [],
+            skippedDates: habit.skippedDates ?? []
           };
         });
 
         const activeHabits = habits.filter((habit) => !habit.archivedAt);
-        const scheduledToday = activeHabits.filter((habit) =>
-          isHabitScheduledForDate(habit, today)
+        const scheduledToday = activeHabits.filter(
+          (habit) => isHabitScheduledForDate(habit, today) && !isHabitSkipped(habit, today)
         );
         const completedToday = scheduledToday.filter((habit) =>
           isHabitOnTrack(habit, today)
@@ -119,7 +128,10 @@ export function useHabitAnalytics(user: User | null): HabitAnalytics {
 
         const weeklyTrend = last7Days.map((date) => {
           const count = activeHabits.filter(
-            (habit) => isHabitScheduledForDate(habit, date) && isHabitOnTrack(habit, date)
+            (habit) =>
+              isHabitScheduledForDate(habit, date) &&
+              !isHabitSkipped(habit, date) &&
+              isHabitOnTrack(habit, date)
           ).length;
           return { date, count };
         });
@@ -135,6 +147,7 @@ export function useHabitAnalytics(user: User | null): HabitAnalytics {
           habit.completionDates?.forEach((dateKey) => {
             const completionDate = new Date(`${dateKey}T00:00:00`);
             if (!isHabitScheduledForDate(habit, completionDate)) return;
+            if (isHabitSkipped(habit, completionDate)) return;
             const monthKey = dateKey.slice(0, 7);
             const yearKey = dateKey.slice(0, 4);
             const monthEntry = monthMap.get(monthKey);
@@ -163,6 +176,7 @@ export function useHabitAnalytics(user: User | null): HabitAnalytics {
         last30Days.forEach((date) => {
           activeHabits.forEach((habit) => {
             if (!isHabitScheduledForDate(habit, date)) return;
+            if (isHabitSkipped(habit, date)) return;
             rollingWindowScheduled += 1;
             if (isHabitOnTrack(habit, date)) {
               rollingWindowCompleted += 1;

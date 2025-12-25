@@ -16,13 +16,14 @@ import HabitForm from "@/components/habits/HabitForm";
 import HabitDetailsModal from "@/components/habits/HabitDetailsModal";
 import HabitSection from "@/components/habits/HabitSection";
 import FocusBlockPanel from "@/components/focus/FocusBlockPanel";
+import ReviewPanel, { type MissedHabitEntry } from "@/components/review/ReviewPanel";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import Modal from "@/components/ui/Modal";
 import OverlayLoader from "@/components/ui/OverlayLoader";
 import Snackbar, { type SnackbarVariant } from "@/components/ui/Snackbar";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { db } from "@/lib/firebase";
-import { getDateKey, getLocalTimeZone } from "@/lib/habitUtils";
+import { getDateKey, getLocalTimeZone, isHabitScheduledForDate } from "@/lib/habitUtils";
 import {
   formatDateDisplay,
   formatDateInput,
@@ -162,6 +163,47 @@ export default function TodosPage() {
   } | null>(null);
 
   const isEditing = useMemo(() => Boolean(editingId), [editingId]);
+  const reviewWindowDays = 7;
+
+  const overdueTodos = useMemo(() => {
+    const now = new Date();
+    return todos
+      .filter(
+        (todo) =>
+          !todo.archivedAt &&
+          todo.status === "pending" &&
+          todo.scheduledDate &&
+          todo.scheduledDate.toDate() < now
+      )
+      .sort(
+        (a, b) =>
+          (a.scheduledDate?.toMillis() ?? 0) - (b.scheduledDate?.toMillis() ?? 0)
+      );
+  }, [todos]);
+
+  const missedHabits = useMemo<MissedHabitEntry[]>(() => {
+    const today = new Date();
+    const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const dates = Array.from({ length: reviewWindowDays }).map((_, index) => {
+      const date = new Date(startOfToday);
+      date.setDate(startOfToday.getDate() - (index + 1));
+      return date;
+    });
+    const entries: MissedHabitEntry[] = [];
+    habits
+      .filter((habit) => !habit.archivedAt)
+      .forEach((habit) => {
+        dates.forEach((date) => {
+          if (!isHabitScheduledForDate(habit, date)) return;
+          const dateKey = getDateKey(date, habit.timezone);
+          const isCompleted = habit.completionDates?.includes(dateKey);
+          const isSkipped = habit.skippedDates?.includes(dateKey);
+          if (isCompleted || isSkipped) return;
+          entries.push({ habit, date, dateKey });
+        });
+      });
+    return entries.sort((a, b) => b.date.getTime() - a.date.getTime());
+  }, [habits]);
 
   const handleFormChange = (
     event:
@@ -295,16 +337,19 @@ export default function TodosPage() {
     setActionLoading(true);
     try {
       const todoRef = doc(db, "users", user.uid, "todos", todo.id);
-      const nextStatus = todo.status === "completed" ? "pending" : "completed";
+      const nextStatus = todo.status === "pending" ? "completed" : "pending";
       await updateDoc(todoRef, {
         status: nextStatus,
-        completedDate: nextStatus === "completed" ? serverTimestamp() : null
+        completedDate: nextStatus === "completed" ? serverTimestamp() : null,
+        skippedAt: null,
+        updatedAt: serverTimestamp()
       });
       if (selectedTodo?.id === todo.id) {
         setSelectedTodo({
           ...selectedTodo,
           status: nextStatus,
-          completedDate: nextStatus === "completed" ? Timestamp.now() : null
+          completedDate: nextStatus === "completed" ? Timestamp.now() : null,
+          skippedAt: null
         });
       }
       if (nextStatus === "completed") {
@@ -344,6 +389,74 @@ export default function TodosPage() {
     } catch (error) {
       setSnackbar({ message: "Unable to update priority flag.", variant: "error" });
       console.error(error);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleRescheduleTodo = async (todo: Todo) => {
+    if (!user) {
+      setSnackbar({ message: "Sign in to update todos.", variant: "error" });
+      return;
+    }
+    const baseDate = todo.scheduledDate?.toDate() ?? new Date();
+    const nextDate = new Date(baseDate);
+    nextDate.setDate(baseDate.getDate() + 1);
+    setActionLoading(true);
+    try {
+      await updateDoc(doc(db, "users", user.uid, "todos", todo.id), {
+        scheduledDate: Timestamp.fromDate(nextDate),
+        status: "pending",
+        completedDate: null,
+        skippedAt: null,
+        updatedAt: serverTimestamp()
+      });
+      setSnackbar({ message: "Todo rescheduled for tomorrow.", variant: "success" });
+    } catch (error) {
+      console.error(error);
+      setSnackbar({ message: "Unable to reschedule todo.", variant: "error" });
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleSkipTodo = async (todo: Todo) => {
+    if (!user) {
+      setSnackbar({ message: "Sign in to update todos.", variant: "error" });
+      return;
+    }
+    setActionLoading(true);
+    try {
+      await updateDoc(doc(db, "users", user.uid, "todos", todo.id), {
+        status: "skipped",
+        completedDate: null,
+        skippedAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      });
+      setSnackbar({ message: "Todo marked as skipped.", variant: "info" });
+    } catch (error) {
+      console.error(error);
+      setSnackbar({ message: "Unable to skip todo.", variant: "error" });
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleArchiveTodo = async (todo: Todo) => {
+    if (!user) {
+      setSnackbar({ message: "Sign in to update todos.", variant: "error" });
+      return;
+    }
+    setActionLoading(true);
+    try {
+      await updateDoc(doc(db, "users", user.uid, "todos", todo.id), {
+        archivedAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      });
+      setSnackbar({ message: "Todo archived.", variant: "info" });
+    } catch (error) {
+      console.error(error);
+      setSnackbar({ message: "Unable to archive todo.", variant: "error" });
     } finally {
       setActionLoading(false);
     }
@@ -395,6 +508,7 @@ export default function TodosPage() {
           description: form.description,
           status: "pending",
           completedDate: null,
+          skippedAt: null,
           author_uid: user.uid,
           updatedAt: serverTimestamp()
         });
@@ -412,6 +526,7 @@ export default function TodosPage() {
           priority: form.priority,
           status: "pending",
           completedDate: null,
+          skippedAt: null,
           author_uid: user.uid,
           tags: form.tags
             .split(",")
@@ -571,6 +686,7 @@ export default function TodosPage() {
           contextTags: habitForm.contextTags,
           triggerAfterHabitId: habitForm.triggerAfterHabitId ?? null,
           completionDates: [],
+          skippedDates: [],
           timezone: getLocalTimeZone(),
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp(),
@@ -600,14 +716,19 @@ export default function TodosPage() {
     }
     const todayKey = getDateKey(new Date(), habit.timezone);
     const completionDates = habit.completionDates ?? [];
+    const skippedDates = habit.skippedDates ?? [];
     const isCompleted = completionDates.includes(todayKey);
     const nextDates = isCompleted
       ? completionDates.filter((date) => date !== todayKey)
       : [...completionDates, todayKey];
+    const nextSkippedDates = isCompleted
+      ? skippedDates
+      : skippedDates.filter((date) => date !== todayKey);
     setActionLoading(true);
     try {
       await updateDoc(doc(db, "users", user.uid, "habits", habit.id), {
         completionDates: nextDates,
+        skippedDates: nextSkippedDates,
         updatedAt: serverTimestamp()
       });
       setSnackbar({
@@ -625,6 +746,87 @@ export default function TodosPage() {
     } catch (error) {
       console.error(error);
       setSnackbar({ message: "Unable to update habit.", variant: "error" });
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleRescheduleHabit = async (habit: Habit, dateKey: string) => {
+    if (!user) {
+      setSnackbar({ message: "Sign in to update habits.", variant: "error" });
+      return;
+    }
+    if (habit.archivedAt) {
+      setSnackbar({ message: "Restore the habit to update it.", variant: "error" });
+      return;
+    }
+    const completionDates = habit.completionDates ?? [];
+    const skippedDates = habit.skippedDates ?? [];
+    const nextCompletionDates = completionDates.includes(dateKey)
+      ? completionDates
+      : [...completionDates, dateKey];
+    const nextSkippedDates = skippedDates.filter((date) => date !== dateKey);
+    setActionLoading(true);
+    try {
+      await updateDoc(doc(db, "users", user.uid, "habits", habit.id), {
+        completionDates: nextCompletionDates,
+        skippedDates: nextSkippedDates,
+        updatedAt: serverTimestamp()
+      });
+      setSnackbar({ message: "Habit session marked as rescheduled.", variant: "success" });
+    } catch (error) {
+      console.error(error);
+      setSnackbar({ message: "Unable to reschedule habit session.", variant: "error" });
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleSkipHabit = async (habit: Habit, dateKey: string) => {
+    if (!user) {
+      setSnackbar({ message: "Sign in to update habits.", variant: "error" });
+      return;
+    }
+    if (habit.archivedAt) {
+      setSnackbar({ message: "Restore the habit to update it.", variant: "error" });
+      return;
+    }
+    const skippedDates = habit.skippedDates ?? [];
+    const completionDates = habit.completionDates ?? [];
+    const nextSkippedDates = skippedDates.includes(dateKey)
+      ? skippedDates
+      : [...skippedDates, dateKey];
+    setActionLoading(true);
+    try {
+      await updateDoc(doc(db, "users", user.uid, "habits", habit.id), {
+        completionDates: completionDates.filter((date) => date !== dateKey),
+        skippedDates: nextSkippedDates,
+        updatedAt: serverTimestamp()
+      });
+      setSnackbar({ message: "Habit session marked as skipped.", variant: "info" });
+    } catch (error) {
+      console.error(error);
+      setSnackbar({ message: "Unable to skip habit session.", variant: "error" });
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleArchiveHabit = async (habit: Habit) => {
+    if (!user) {
+      setSnackbar({ message: "Sign in to update habits.", variant: "error" });
+      return;
+    }
+    setActionLoading(true);
+    try {
+      await updateDoc(doc(db, "users", user.uid, "habits", habit.id), {
+        archivedAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      });
+      setSnackbar({ message: "Habit archived.", variant: "info" });
+    } catch (error) {
+      console.error(error);
+      setSnackbar({ message: "Unable to archive habit.", variant: "error" });
     } finally {
       setActionLoading(false);
     }
@@ -707,6 +909,15 @@ export default function TodosPage() {
           onClick={() => setTab("focus")}
         >
           Focus
+        </button>
+        <button
+          type="button"
+          className={`flex-1 rounded-full px-4 py-2 text-center transition sm:flex-none ${
+            activeTab === "review" ? "bg-sky-500/20 text-sky-200" : "text-slate-400"
+          }`}
+          onClick={() => setTab("review")}
+        >
+          Review
         </button>
       </div>
 
@@ -863,7 +1074,7 @@ export default function TodosPage() {
             onCancel={() => setLinkedHabitPrompt(null)}
           />
         </div>
-      ) : (
+      ) : activeTab === "focus" ? (
         <div key="focus" className="tab-transition">
           <FocusBlockPanel
             user={user}
@@ -872,6 +1083,19 @@ export default function TodosPage() {
             activeBlock={activeBlock}
             loading={isFocusLoading}
             onNotify={(message, variant) => setSnackbar({ message, variant })}
+          />
+        </div>
+      ) : (
+        <div key="review" className="tab-transition">
+          <ReviewPanel
+            overdueTodos={overdueTodos}
+            missedHabits={missedHabits}
+            onRescheduleTodo={handleRescheduleTodo}
+            onSkipTodo={handleSkipTodo}
+            onArchiveTodo={handleArchiveTodo}
+            onRescheduleHabit={handleRescheduleHabit}
+            onSkipHabit={handleSkipHabit}
+            onArchiveHabit={handleArchiveHabit}
           />
         </div>
       )}

@@ -110,13 +110,15 @@ export default function FocusBlockPanel({
   }, [activeBlock?.startedAt]);
 
   const availableTodos = useMemo(
-    () => todos.filter((todo) => todo.status !== "completed"),
+    () => todos.filter((todo) => todo.status === "pending" && !todo.archivedAt),
     [todos]
   );
 
   const activeBlockTodos = useMemo(() => {
     if (!activeBlock) return [] as Todo[];
-    return todos.filter((todo) => activeBlock.selectedTodoIds.includes(todo.id));
+    return todos.filter(
+      (todo) => activeBlock.selectedTodoIds.includes(todo.id) && !todo.archivedAt
+    );
   }, [activeBlock, todos]);
 
   const activeBlockHabits = useMemo(() => {

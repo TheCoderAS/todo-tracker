@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
-type TabState = "todos" | "habits" | "focus";
+type TabState = "todos" | "habits" | "focus" | "review";
 
 const getTabFromParams = (params: URLSearchParams) => {
   const tab = params.get("tab");
-  if (tab === "habits" || tab === "focus") return tab;
+  if (tab === "habits" || tab === "focus" || tab === "review") return tab;
   return "todos";
 };
 
@@ -23,7 +23,7 @@ export const useTabState = () => {
   const setTab = (tab: TabState) => {
     setActiveTab(tab);
     const params = new URLSearchParams(searchParams.toString());
-    if (tab === "habits" || tab === "focus") {
+    if (tab === "habits" || tab === "focus" || tab === "review") {
       params.set("tab", tab);
     } else {
       params.delete("tab");
