@@ -17,6 +17,10 @@ type HabitAnalytics = {
   activeHabits: number;
   completedToday: number;
   completionRate: number;
+  rollingWindowDays: number;
+  rollingWindowCompletionRate: number;
+  rollingWindowCompleted: number;
+  rollingWindowScheduled: number;
   weeklyTrend: HabitTrendDay[];
   monthlyTrend: HabitTrendDay[];
   yearlyTrend: HabitTrendDay[];
@@ -39,6 +43,10 @@ const emptyAnalytics: HabitAnalytics = {
   activeHabits: 0,
   completedToday: 0,
   completionRate: 0,
+  rollingWindowDays: 30,
+  rollingWindowCompletionRate: 0,
+  rollingWindowCompleted: 0,
+  rollingWindowScheduled: 0,
   weeklyTrend: [],
   monthlyTrend: [],
   yearlyTrend: [],
@@ -60,9 +68,15 @@ export function useHabitAnalytics(user: User | null): HabitAnalytics {
 
     let isMounted = true;
     const today = new Date();
+    const rollingWindowDays = 30;
     const last7Days = Array.from({ length: 7 }).map((_, index) => {
       const date = new Date(today);
       date.setDate(today.getDate() - (6 - index));
+      return date;
+    });
+    const last30Days = Array.from({ length: rollingWindowDays }).map((_, index) => {
+      const date = new Date(today);
+      date.setDate(today.getDate() - (rollingWindowDays - 1 - index));
       return date;
     });
     const last6Months = Array.from({ length: 6 }).map((_, index) => {
@@ -144,6 +158,20 @@ export function useHabitAnalytics(user: User | null): HabitAnalytics {
         const completionRate = scheduledToday.length
           ? Math.round((completedToday / scheduledToday.length) * 100)
           : 0;
+        let rollingWindowCompleted = 0;
+        let rollingWindowScheduled = 0;
+        last30Days.forEach((date) => {
+          activeHabits.forEach((habit) => {
+            if (!isHabitScheduledForDate(habit, date)) return;
+            rollingWindowScheduled += 1;
+            if (isHabitOnTrack(habit, date)) {
+              rollingWindowCompleted += 1;
+            }
+          });
+        });
+        const rollingWindowCompletionRate = rollingWindowScheduled
+          ? Math.round((rollingWindowCompleted / rollingWindowScheduled) * 100)
+          : 0;
         const contextTagMap = new Map<
           string,
           { completed: number; scheduled: number }
@@ -179,6 +207,10 @@ export function useHabitAnalytics(user: User | null): HabitAnalytics {
           activeHabits: scheduledToday.length,
           completedToday,
           completionRate,
+          rollingWindowDays,
+          rollingWindowCompletionRate,
+          rollingWindowCompleted,
+          rollingWindowScheduled,
           weeklyTrend,
           monthlyTrend,
           yearlyTrend,
