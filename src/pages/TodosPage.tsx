@@ -113,7 +113,8 @@ export default function TodosPage() {
     reminderDays: getDefaultReminderDays("daily"),
     frequency: "daily",
     graceMisses: 0,
-    contextTags: []
+    contextTags: [],
+    triggerAfterHabitId: null
   });
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingHabitId, setEditingHabitId] = useState<string | null>(null);
@@ -154,6 +155,10 @@ export default function TodosPage() {
   const [selectedTodo, setSelectedTodo] = useState<Todo | null>(null);
   const [lastCompletedId, setLastCompletedId] = useState<string | null>(null);
   const [selectedHabit, setSelectedHabit] = useState<Habit | null>(null);
+  const [linkedHabitPrompt, setLinkedHabitPrompt] = useState<{
+    source: Habit;
+    target: Habit;
+  } | null>(null);
 
   const isEditing = useMemo(() => Boolean(editingId), [editingId]);
 
@@ -210,7 +215,8 @@ export default function TodosPage() {
       reminderDays: getDefaultReminderDays("daily"),
       frequency: "daily",
       graceMisses: 0,
-      contextTags: []
+      contextTags: [],
+      triggerAfterHabitId: null
     });
     setEditingHabitId(null);
   };
@@ -435,6 +441,13 @@ export default function TodosPage() {
       setHabitForm((prev) => ({ ...prev, contextTags: value }));
       return;
     }
+    if (name === "triggerAfterHabitId") {
+      setHabitForm((prev) => ({
+        ...prev,
+        triggerAfterHabitId: value ? value : null
+      }));
+      return;
+    }
     if (name === "frequency") {
       const nextFrequency = value as HabitFrequency;
       setHabitForm((prev) => ({
@@ -520,6 +533,7 @@ export default function TodosPage() {
           frequency: habitForm.frequency,
           graceMisses: habitForm.graceMisses,
           contextTags: habitForm.contextTags,
+          triggerAfterHabitId: habitForm.triggerAfterHabitId ?? null,
           updatedAt: serverTimestamp()
         });
         setSnackbar({ message: "Habit updated.", variant: "success" });
@@ -532,6 +546,7 @@ export default function TodosPage() {
           frequency: habitForm.frequency,
           graceMisses: habitForm.graceMisses,
           contextTags: habitForm.contextTags,
+          triggerAfterHabitId: habitForm.triggerAfterHabitId ?? null,
           completionDates: [],
           timezone: getLocalTimeZone(),
           createdAt: serverTimestamp(),
@@ -576,6 +591,14 @@ export default function TodosPage() {
         message: isCompleted ? "Habit reset for today." : "Nice work! Habit completed.",
         variant: "success"
       });
+      if (!isCompleted && habit.triggerAfterHabitId) {
+        const linkedHabit = habits.find(
+          (item) => item.id === habit.triggerAfterHabitId && !item.archivedAt
+        );
+        if (linkedHabit) {
+          setLinkedHabitPrompt({ source: habit, target: linkedHabit });
+        }
+      }
     } catch (error) {
       console.error(error);
       setSnackbar({ message: "Unable to update habit.", variant: "error" });
@@ -595,7 +618,8 @@ export default function TodosPage() {
         : getDefaultReminderDays(habit.frequency),
       frequency: habit.frequency,
       graceMisses: habit.graceMisses ?? 0,
-      contextTags: habit.contextTags ?? []
+      contextTags: habit.contextTags ?? [],
+      triggerAfterHabitId: habit.triggerAfterHabitId ?? null
     });
     setIsHabitFormOpen(true);
   };
@@ -747,16 +771,17 @@ export default function TodosPage() {
             onClose={closeHabitModal}
             ariaLabel="Habit form"
           >
-            <HabitForm
-              form={habitForm}
-              isEditing={Boolean(editingHabitId)}
-              onChange={handleHabitFormChange}
-              onToggleDay={handleHabitDayToggle}
-              onDayOfMonthChange={handleHabitDayOfMonthChange}
-              onMonthChange={handleHabitMonthChange}
-              onSubmit={handleSubmitHabit}
-              onCancel={closeHabitModal}
-            />
+          <HabitForm
+            form={habitForm}
+            habits={habits.filter((habit) => habit.id !== editingHabitId)}
+            isEditing={Boolean(editingHabitId)}
+            onChange={handleHabitFormChange}
+            onToggleDay={handleHabitDayToggle}
+            onDayOfMonthChange={handleHabitDayOfMonthChange}
+            onMonthChange={handleHabitMonthChange}
+            onSubmit={handleSubmitHabit}
+            onCancel={closeHabitModal}
+          />
           </Modal>
           <HabitDetailsModal
             habit={selectedHabit}
@@ -785,6 +810,29 @@ export default function TodosPage() {
               setConfirmHabitDelete(null);
             }}
             onCancel={() => setConfirmHabitDelete(null)}
+          />
+          <ConfirmDialog
+            isOpen={Boolean(linkedHabitPrompt)}
+            title={
+              linkedHabitPrompt
+                ? `Start “${linkedHabitPrompt.target.title}”?`
+                : "Start next habit?"
+            }
+            description={
+              linkedHabitPrompt
+                ? `You completed “${linkedHabitPrompt.source.title}”. Want to jump into the next habit in your chain?`
+                : "Want to start the linked habit?"
+            }
+            confirmLabel="View habit"
+            cancelLabel="Not now"
+            onConfirm={() => {
+              if (linkedHabitPrompt) {
+                setSelectedHabit(linkedHabitPrompt.target);
+                setTab("habits");
+              }
+              setLinkedHabitPrompt(null);
+            }}
+            onCancel={() => setLinkedHabitPrompt(null)}
           />
         </div>
       )}

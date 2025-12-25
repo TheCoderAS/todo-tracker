@@ -55,6 +55,7 @@ export interface Habit {
   frequency: HabitFrequency;
   graceMisses: number;
   contextTags: string[];
+  triggerAfterHabitId?: string | null;
   createdAt?: Timestamp | null;
   updatedAt?: Timestamp | null;
   lastNotifiedDate?: string | null;
@@ -69,6 +70,7 @@ export interface HabitInput {
   frequency: HabitFrequency;
   graceMisses: number;
   contextTags: string[];
+  triggerAfterHabitId?: string | null;
 }
 
 export interface FocusBlock {

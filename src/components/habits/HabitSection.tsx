@@ -7,6 +7,7 @@ import {
   FiCircle,
   FiEdit2,
   FiEye,
+  FiLink,
   FiPlus,
   FiTrash2
 } from "react-icons/fi";
@@ -127,6 +128,21 @@ export default function HabitSection({
     () => habits.filter((habit) => !habit.archivedAt),
     [habits]
   );
+  const habitLookup = useMemo(() => {
+    const map = new Map<string, Habit>();
+    habits.forEach((habit) => map.set(habit.id, habit));
+    return map;
+  }, [habits]);
+  const triggerSources = useMemo(() => {
+    const map = new Map<string, Habit[]>();
+    habits.forEach((habit) => {
+      if (!habit.triggerAfterHabitId) return;
+      const sources = map.get(habit.triggerAfterHabitId) ?? [];
+      sources.push(habit);
+      map.set(habit.triggerAfterHabitId, sources);
+    });
+    return map;
+  }, [habits]);
   const contextFilteredHabits = useMemo(() => {
     if (contextTagFilter === "all") return activeHabits;
     if (contextTagFilter === uncategorizedLabel) {
@@ -316,6 +332,12 @@ export default function HabitSection({
               const isScheduledToday = isHabitScheduledForDate(habit, now);
               const isArchived = Boolean(habit.archivedAt);
               const completionLabels = getCompletionLabels(habit, Boolean(isCompleted));
+              const triggerTarget = habit.triggerAfterHabitId
+                ? habitLookup.get(habit.triggerAfterHabitId)
+                : null;
+              const triggerIncoming = triggerSources.get(habit.id) ?? [];
+              const visibleTriggerTarget = triggerTarget?.archivedAt ? null : triggerTarget;
+              const visibleTriggerIncoming = triggerIncoming.filter((source) => !source.archivedAt);
               return (
                 <div
                   key={habit.id}
@@ -340,6 +362,25 @@ export default function HabitSection({
                           ? `Reminds at ${habit.reminderTime}`
                           : "No time"}
                       </p>
+                      {visibleTriggerTarget || visibleTriggerIncoming.length ? (
+                        <div className="flex flex-wrap items-center gap-2 text-[0.65rem] text-slate-400">
+                          {visibleTriggerIncoming.length ? (
+                            <span className="inline-flex items-center gap-1 rounded-full border border-slate-800/70 bg-slate-900/60 px-2 py-0.5 text-slate-300">
+                              <FiLink aria-hidden className="text-slate-400" />
+                              After{" "}
+                              {visibleTriggerIncoming
+                                .map((source) => source.title)
+                                .join(", ")}
+                            </span>
+                          ) : null}
+                          {visibleTriggerTarget ? (
+                            <span className="inline-flex items-center gap-1 rounded-full border border-slate-800/70 bg-slate-900/60 px-2 py-0.5 text-slate-300">
+                              <FiLink aria-hidden className="text-slate-400" />
+                              Next {visibleTriggerTarget.title}
+                            </span>
+                          ) : null}
+                        </div>
+                      ) : null}
                     </div>
                     <div className="flex items-center gap-2 sm:justify-end">
                       <button
