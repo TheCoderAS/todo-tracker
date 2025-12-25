@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import type { ChangeEvent, FormEvent } from "react";
 import { FiPlus, FiX } from "react-icons/fi";
 
-import type { HabitFrequency, HabitInput, HabitType } from "@/lib/types";
+import type { Habit, HabitFrequency, HabitInput, HabitType } from "@/lib/types";
 
 const inputClasses =
   "w-full rounded-2xl border border-slate-800/70 bg-slate-950/60 px-4 py-3 text-sm text-slate-100 transition focus:border-emerald-300/50 focus:outline-none focus:ring-1 focus:ring-emerald-300/20";
@@ -51,6 +51,7 @@ const habitTypeOptions: { value: HabitType; label: string; helper: string }[] = 
 
 type HabitFormProps = {
   form: HabitInput;
+  habits: Habit[];
   isEditing?: boolean;
   onChange: (
     event:
@@ -66,6 +67,7 @@ type HabitFormProps = {
 
 export default function HabitForm({
   form,
+  habits,
   isEditing = false,
   onChange,
   onToggleDay,
@@ -90,6 +92,13 @@ export default function HabitForm({
   const showWeeklyDays = form.frequency === "weekly";
   const showMonthlyDay = form.frequency === "monthly";
   const showYearlySchedule = form.frequency === "yearly";
+  const habitOptions = useMemo(
+    () =>
+      habits
+        .filter((habit) => !habit.archivedAt)
+        .sort((a, b) => a.title.localeCompare(b.title)),
+    [habits]
+  );
   const dayOfMonthValue = showYearlySchedule
     ? form.reminderDays.length >= 2
       ? form.reminderDays[1]
@@ -240,6 +249,25 @@ export default function HabitForm({
             required
             className={inputClasses}
           />
+        </label>
+        <label className={labelClasses}>
+          <span className={labelTextClasses}>Trigger next habit</span>
+          <select
+            name="triggerAfterHabitId"
+            value={form.triggerAfterHabitId ?? ""}
+            onChange={onChange}
+            className={inputClasses}
+          >
+            <option value="">No linked habit</option>
+            {habitOptions.map((habit) => (
+              <option key={habit.id} value={habit.id}>
+                {habit.title}
+              </option>
+            ))}
+          </select>
+          <span className="text-[0.65rem] text-slate-500">
+            Choose a habit to prompt right after this one is completed.
+          </span>
         </label>
       </div>
       {showWeeklyDays ? (
