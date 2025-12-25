@@ -3,7 +3,7 @@
 import type { ChangeEvent, FormEvent } from "react";
 import { FiPlus, FiX } from "react-icons/fi";
 
-import type { HabitFrequency, HabitInput } from "@/lib/types";
+import type { HabitFrequency, HabitInput, HabitType } from "@/lib/types";
 
 const inputClasses =
   "w-full rounded-2xl border border-slate-800/70 bg-slate-950/60 px-4 py-3 text-sm text-slate-100 transition focus:border-emerald-300/50 focus:outline-none focus:ring-1 focus:ring-emerald-300/20";
@@ -41,6 +41,11 @@ const frequencyOptions: { value: HabitFrequency; label: string }[] = [
   { value: "weekly", label: "Weekly" },
   { value: "monthly", label: "Monthly" },
   { value: "yearly", label: "Yearly" }
+];
+
+const habitTypeOptions: { value: HabitType; label: string; helper: string }[] = [
+  { value: "positive", label: "Build", helper: "Do something you want more of." },
+  { value: "avoid", label: "Avoid", helper: "Stay on track by avoiding a habit." }
 ];
 
 type HabitFormProps = {
@@ -98,6 +103,24 @@ export default function HabitForm({
         />
       </label>
       <div className="grid gap-4 sm:grid-cols-2">
+        <label className={labelClasses}>
+          <span className={labelTextClasses}>Habit type</span>
+          <select
+            name="habitType"
+            value={form.habitType}
+            onChange={onChange}
+            className={inputClasses}
+          >
+            {habitTypeOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+          <span className="text-[0.65rem] text-slate-500">
+            {habitTypeOptions.find((option) => option.value === form.habitType)?.helper}
+          </span>
+        </label>
         <label className={labelClasses}>
           <span className={labelTextClasses}>Frequency</span>
           <select

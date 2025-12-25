@@ -31,6 +31,7 @@ export const useHabitsData = (user: User | null | undefined) => {
         return {
           id: docSnapshot.id,
           ...habit,
+          habitType: habit.habitType ?? "positive",
           graceMisses: habit.graceMisses ?? 0
         };
       });

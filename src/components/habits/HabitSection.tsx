@@ -74,6 +74,22 @@ const formatScheduleSummary = (habit: Habit) => {
   return `Day ${dayOfMonth}`;
 };
 
+const formatHabitTypeLabel = (habit: Habit) =>
+  habit.habitType === "avoid" ? "Avoid" : "Build";
+
+const getCompletionLabels = (habit: Habit, isCompleted: boolean) => {
+  if (habit.habitType === "avoid") {
+    return {
+      status: isCompleted ? "Stayed on track" : "Slipped",
+      action: isCompleted ? "Stayed on track" : "Mark on track"
+    };
+  }
+  return {
+    status: isCompleted ? "Completed today" : "Scheduled for today",
+    action: isCompleted ? "Done today" : "Mark done"
+  };
+};
+
 export default function HabitSection({
   habits,
   onToggleComplete,
@@ -234,6 +250,7 @@ export default function HabitSection({
               );
               const isScheduledToday = isHabitScheduledForDate(habit, now);
               const isArchived = Boolean(habit.archivedAt);
+              const completionLabels = getCompletionLabels(habit, Boolean(isCompleted));
               return (
                 <div
                   key={habit.id}
@@ -252,7 +269,7 @@ export default function HabitSection({
                         ) : null}
                       </div>
                       <p className="text-xs text-slate-400">
-                        {formatFrequencyLabel(habit.frequency)} •{" "}
+                        {formatHabitTypeLabel(habit)} • {formatFrequencyLabel(habit.frequency)} •{" "}
                         {formatScheduleSummary(habit)} •{" "}
                         {habit.reminderTime
                           ? `Reminds at ${habit.reminderTime}`
@@ -294,9 +311,9 @@ export default function HabitSection({
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <p className="text-xs text-slate-400">
                       {isCompleted
-                        ? "Completed today"
+                        ? completionLabels.status
                         : isScheduledToday
-                        ? "Scheduled for today"
+                        ? completionLabels.status
                         : "Not scheduled today"}
                     </p>
                     {isScheduledToday ? (
@@ -315,7 +332,7 @@ export default function HabitSection({
                         ) : (
                           <FiCircle aria-hidden className="text-slate-500" />
                         )}
-                        {isCompleted ? "Done today" : "Mark done"}
+                        {completionLabels.action}
                       </button>
                     ) : null}
                   </div>

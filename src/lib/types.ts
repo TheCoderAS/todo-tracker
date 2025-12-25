@@ -9,6 +9,7 @@ export type HabitFrequency =
   | "quarterly"
   | "half-yearly"
   | "yearly";
+export type HabitType = "positive" | "avoid";
 
 export interface Todo {
   id: string;
@@ -34,6 +35,7 @@ export interface TodoInput {
 export interface Habit {
   id: string;
   title: string;
+  habitType: HabitType;
   reminderTime: string;
   reminderDays: number[];
   completionDates: string[];
@@ -48,6 +50,7 @@ export interface Habit {
 
 export interface HabitInput {
   title: string;
+  habitType: HabitType;
   reminderTime: string;
   reminderDays: number[];
   frequency: HabitFrequency;
