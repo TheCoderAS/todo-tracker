@@ -25,7 +25,12 @@ import OverlayLoader from "@/components/ui/OverlayLoader";
 import Snackbar, { type SnackbarVariant } from "@/components/ui/Snackbar";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { db } from "@/lib/firebase";
-import { getDateKey, getLocalTimeZone, isHabitScheduledForDate } from "@/lib/habitUtils";
+import {
+  getDateKey,
+  getHabitMilestoneProgress,
+  getLocalTimeZone,
+  isHabitScheduledForDate
+} from "@/lib/habitUtils";
 import {
   formatDateDisplay,
   formatDateInput,
@@ -716,6 +721,7 @@ export default function TodosPage() {
           updatedAt: serverTimestamp(),
           author_uid: user.uid,
           lastNotifiedDate: null,
+          lastLevelNotified: 0,
           archivedAt: null
         });
         setSnackbar({ message: "Habit added to your list.", variant: "success" });
@@ -748,15 +754,23 @@ export default function TodosPage() {
     const nextSkippedDates = isCompleted
       ? skippedDates
       : skippedDates.filter((date) => date !== todayKey);
+    const milestoneProgress = getHabitMilestoneProgress(nextDates.length);
+    const lastNotifiedLevel = habit.lastLevelNotified ?? 0;
+    const shouldCelebrate = !isCompleted && milestoneProgress.level > lastNotifiedLevel;
     setActionLoading(true);
     try {
       await updateDoc(doc(db, "users", user.uid, "habits", habit.id), {
         completionDates: nextDates,
         skippedDates: nextSkippedDates,
-        updatedAt: serverTimestamp()
+        updatedAt: serverTimestamp(),
+        ...(shouldCelebrate ? { lastLevelNotified: milestoneProgress.level } : {})
       });
       setSnackbar({
-        message: isCompleted ? "Habit reset for today." : "Nice work! Habit completed.",
+        message: isCompleted
+          ? "Habit reset for today."
+          : shouldCelebrate
+          ? `Level up! You're now level ${milestoneProgress.level}.`
+          : "Nice work! Habit completed.",
         variant: "success"
       });
       if (!isCompleted && habit.triggerAfterHabitId) {
@@ -790,14 +804,24 @@ export default function TodosPage() {
       ? completionDates
       : [...completionDates, dateKey];
     const nextSkippedDates = skippedDates.filter((date) => date !== dateKey);
+    const milestoneProgress = getHabitMilestoneProgress(nextCompletionDates.length);
+    const lastNotifiedLevel = habit.lastLevelNotified ?? 0;
+    const shouldCelebrate =
+      !completionDates.includes(dateKey) && milestoneProgress.level > lastNotifiedLevel;
     setActionLoading(true);
     try {
       await updateDoc(doc(db, "users", user.uid, "habits", habit.id), {
         completionDates: nextCompletionDates,
         skippedDates: nextSkippedDates,
-        updatedAt: serverTimestamp()
+        updatedAt: serverTimestamp(),
+        ...(shouldCelebrate ? { lastLevelNotified: milestoneProgress.level } : {})
       });
-      setSnackbar({ message: "Habit session marked as rescheduled.", variant: "success" });
+      setSnackbar({
+        message: shouldCelebrate
+          ? `Level up! You're now level ${milestoneProgress.level}.`
+          : "Habit session marked as rescheduled.",
+        variant: "success"
+      });
     } catch (error) {
       console.error(error);
       setSnackbar({ message: "Unable to reschedule habit session.", variant: "error" });

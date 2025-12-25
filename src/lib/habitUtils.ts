@@ -130,3 +130,34 @@ export const isHabitScheduledForDate = (
 
 export const getLocalTimeZone = () =>
   Intl.DateTimeFormat().resolvedOptions().timeZone ?? null;
+
+export const habitMilestones = [
+  1,
+  5,
+  10,
+  20,
+  35,
+  50,
+  75,
+  100,
+  150,
+  200,
+  300,
+  500
+];
+
+export const getHabitMilestoneProgress = (totalCompletions: number) => {
+  const safeTotal = Math.max(totalCompletions, 0);
+  const level = habitMilestones.filter((milestone) => safeTotal >= milestone).length;
+  const currentMilestone = level > 0 ? habitMilestones[level - 1] : 0;
+  const nextMilestone = habitMilestones[level] ?? null;
+  const progressToNext = nextMilestone ? safeTotal - currentMilestone : 0;
+  const completionsNeeded = nextMilestone ? nextMilestone - currentMilestone : 0;
+  return {
+    level,
+    currentMilestone,
+    nextMilestone,
+    progressToNext,
+    completionsNeeded
+  };
+};

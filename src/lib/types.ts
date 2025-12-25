@@ -91,6 +91,7 @@ export interface Habit {
   createdAt?: Timestamp | null;
   updatedAt?: Timestamp | null;
   lastNotifiedDate?: string | null;
+  lastLevelNotified?: number | null;
   archivedAt?: Timestamp | null;
 }
 
