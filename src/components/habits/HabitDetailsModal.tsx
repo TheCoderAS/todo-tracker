@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import { FiCalendar, FiCheckCircle, FiClock } from "react-icons/fi";
 
 import Modal from "@/components/ui/Modal";
-import { getDateKey, isHabitScheduledForDate } from "@/lib/habitUtils";
+import { getDateKey, getHabitMilestoneProgress, isHabitScheduledForDate } from "@/lib/habitUtils";
 import type { Habit, HabitFrequency } from "@/lib/types";
 
 type HabitDetailsModalProps = {
@@ -149,6 +149,10 @@ export default function HabitDetailsModal({ habit, isOpen, onClose }: HabitDetai
   const lastCompletion = habit?.completionDates?.length
     ? habit?.completionDates[habit.completionDates.length - 1]
     : null;
+  const milestoneProgress = useMemo(
+    () => getHabitMilestoneProgress(totalCompletions),
+    [totalCompletions]
+  );
   const { rollingCompletionRate, rollingCompleted, rollingScheduled, rollingWindowDays } =
     useMemo(() => {
       const windowDays = 30;
@@ -231,6 +235,22 @@ export default function HabitDetailsModal({ habit, isOpen, onClose }: HabitDetai
                 <span className="font-semibold text-slate-100">
                   {totalCompletions}
                 </span>
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <FiCheckCircle aria-hidden className="text-emerald-300" />
+              <span>
+                Level{" "}
+                <span className="font-semibold text-slate-100">
+                  {milestoneProgress.level}
+                </span>{" "}
+                {milestoneProgress.nextMilestone ? (
+                  <span className="text-slate-400">
+                    • Next milestone at {milestoneProgress.nextMilestone} completions
+                  </span>
+                ) : (
+                  <span className="text-slate-400">• Milestones mastered</span>
+                )}
               </span>
             </div>
             <div className="flex items-center gap-2">

@@ -13,7 +13,7 @@ import {
 } from "react-icons/fi";
 
 import type { Habit, HabitFrequency } from "@/lib/types";
-import { getDateKey, isHabitScheduledForDate } from "@/lib/habitUtils";
+import { getDateKey, getHabitMilestoneProgress, isHabitScheduledForDate } from "@/lib/habitUtils";
 
 const dayLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
@@ -332,6 +332,9 @@ export default function HabitSection({
               const isScheduledToday = isHabitScheduledForDate(habit, now);
               const isArchived = Boolean(habit.archivedAt);
               const completionLabels = getCompletionLabels(habit, Boolean(isCompleted));
+              const milestoneProgress = getHabitMilestoneProgress(
+                habit.completionDates?.length ?? 0
+              );
               const triggerTarget = habit.triggerAfterHabitId
                 ? habitLookup.get(habit.triggerAfterHabitId)
                 : null;
@@ -361,6 +364,12 @@ export default function HabitSection({
                         {habit.reminderTime
                           ? `Reminds at ${habit.reminderTime}`
                           : "No time"}
+                      </p>
+                      <p className="text-xs text-slate-500">
+                        Level {milestoneProgress.level} •{" "}
+                        {milestoneProgress.nextMilestone
+                          ? `${milestoneProgress.nextMilestone} completions to next milestone`
+                          : "Milestones mastered"}
                       </p>
                       {visibleTriggerTarget || visibleTriggerIncoming.length ? (
                         <div className="flex flex-wrap items-center gap-2 text-[0.65rem] text-slate-400">
