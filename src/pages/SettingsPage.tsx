@@ -127,6 +127,7 @@ export default function SettingsPage() {
       root.classList.remove("theme-light");
     }
     localStorage.setItem(THEME_STORAGE_KEY, theme);
+    window.dispatchEvent(new Event("theme-preference"));
   }, [theme]);
 
   useEffect(() => {

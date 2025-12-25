@@ -7,6 +7,8 @@ import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import OverlayLoader from "@/components/ui/OverlayLoader";
 import { useAuth } from "@/components/auth/AuthProvider";
 
+const THEME_STORAGE_KEY = "theme";
+
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { loading, signOutUser } = useAuth();
   const navigate = useNavigate();
@@ -17,6 +19,33 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0 });
   }, [location.pathname, location.search]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const applyTheme = () => {
+      const storedTheme = localStorage.getItem(THEME_STORAGE_KEY) || "dark";
+      const root = document.documentElement;
+      if (storedTheme === "light") {
+        root.classList.add("theme-light");
+      } else {
+        root.classList.remove("theme-light");
+      }
+    };
+
+    const handleStorage = (event: StorageEvent) => {
+      if (event.key && event.key !== THEME_STORAGE_KEY) return;
+      applyTheme();
+    };
+
+    applyTheme();
+    window.addEventListener("storage", handleStorage);
+    window.addEventListener("theme-preference", applyTheme);
+    return () => {
+      window.removeEventListener("storage", handleStorage);
+      window.removeEventListener("theme-preference", applyTheme);
+    };
+  }, []);
 
   const handleSignOut = async () => {
     setShowConfirm(false);
