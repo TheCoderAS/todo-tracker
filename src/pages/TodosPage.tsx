@@ -1038,6 +1038,7 @@ export default function TodosPage() {
         await updateDoc(doc(db, "users", user.uid, "routines", editingRoutineId), {
           title: normalizedTitle,
           items,
+          author_uid: user.uid,
           updatedAt: serverTimestamp()
         });
         setSnackbar({ message: "Routine updated.", variant: "success" });
@@ -1045,6 +1046,7 @@ export default function TodosPage() {
         await addDoc(collection(db, "users", user.uid, "routines"), {
           title: normalizedTitle,
           items,
+          author_uid: user.uid,
           createdAt: serverTimestamp()
         });
         setSnackbar({ message: "Routine saved.", variant: "success" });
@@ -1094,6 +1096,7 @@ export default function TodosPage() {
             title: normalizeTitle(item.title),
             scheduledDate: scheduledDateValue,
             createdAt: serverTimestamp(),
+            author_uid: user.uid,
             priority: item.priority,
             status: "pending",
             completedDate: null,
@@ -1129,6 +1132,15 @@ export default function TodosPage() {
           onClick={() => setTab("todos")}
         >
           Todos
+        </button>
+        <button
+          type="button"
+          className={`flex-1 rounded-full px-4 py-2 text-center transition sm:flex-none ${
+            activeTab === "routines" ? "bg-sky-500/20 text-sky-200" : "text-slate-400"
+          }`}
+          onClick={() => setTab("routines")}
+        >
+          Routines
         </button>
         <button
           type="button"
@@ -1229,6 +1241,49 @@ export default function TodosPage() {
             onCancel={() => setConfirmDeleteId(null)}
           />
         </div>
+      ) : activeTab === "routines" ? (
+        <div key="routines" className="tab-transition">
+          <RoutineSection
+            routines={routines}
+            onOpenCreate={openRoutineModal}
+            onEdit={handleEditRoutine}
+            onDelete={handleDeleteRoutineRequest}
+            onRun={handleRunRoutine}
+            isLoading={isRoutineLoading}
+          />
+          <Modal
+            isOpen={isRoutineFormOpen}
+            onClose={closeRoutineModal}
+            ariaLabel="Routine form"
+          >
+            <RoutineForm
+              form={routineForm}
+              priorities={priorities}
+              isEditing={Boolean(editingRoutineId)}
+              onTitleChange={handleRoutineTitleChange}
+              onItemChange={handleRoutineItemChange}
+              onAddItem={handleAddRoutineItem}
+              onRemoveItem={handleRemoveRoutineItem}
+              onSubmit={handleSubmitRoutine}
+              onCancel={closeRoutineModal}
+            />
+          </Modal>
+          <ConfirmDialog
+            isOpen={Boolean(confirmRoutineDelete)}
+            title="Delete this routine?"
+            description="This action cannot be undone."
+            confirmLabel="Delete routine"
+            cancelLabel="Cancel"
+            isLoading={actionLoading}
+            onConfirm={() => {
+              if (confirmRoutineDelete) {
+                handleDeleteRoutine(confirmRoutineDelete);
+              }
+              setConfirmRoutineDelete(null);
+            }}
+            onCancel={() => setConfirmRoutineDelete(null)}
+          />
+        </div>
       ) : activeTab === "habits" ? (
         <div key="habits" className="tab-transition">
           <HabitSection
@@ -1239,14 +1294,6 @@ export default function TodosPage() {
             onDelete={handleDeleteHabitRequest}
             onViewDetails={setSelectedHabit}
             isLoading={isHabitLoading}
-          />
-          <RoutineSection
-            routines={routines}
-            onOpenCreate={openRoutineModal}
-            onEdit={handleEditRoutine}
-            onDelete={handleDeleteRoutineRequest}
-            onRun={handleRunRoutine}
-            isLoading={isRoutineLoading}
           />
           <Modal
             isOpen={isHabitFormOpen}
@@ -1266,23 +1313,6 @@ export default function TodosPage() {
               onMonthChange={handleHabitMonthChange}
               onSubmit={handleSubmitHabit}
               onCancel={closeHabitModal}
-            />
-          </Modal>
-          <Modal
-            isOpen={isRoutineFormOpen}
-            onClose={closeRoutineModal}
-            ariaLabel="Routine form"
-          >
-            <RoutineForm
-              form={routineForm}
-              priorities={priorities}
-              isEditing={Boolean(editingRoutineId)}
-              onTitleChange={handleRoutineTitleChange}
-              onItemChange={handleRoutineItemChange}
-              onAddItem={handleAddRoutineItem}
-              onRemoveItem={handleRemoveRoutineItem}
-              onSubmit={handleSubmitRoutine}
-              onCancel={closeRoutineModal}
             />
           </Modal>
           <HabitDetailsModal
@@ -1312,21 +1342,6 @@ export default function TodosPage() {
               setConfirmHabitDelete(null);
             }}
             onCancel={() => setConfirmHabitDelete(null)}
-          />
-          <ConfirmDialog
-            isOpen={Boolean(confirmRoutineDelete)}
-            title="Delete this routine?"
-            description="This action cannot be undone."
-            confirmLabel="Delete routine"
-            cancelLabel="Cancel"
-            isLoading={actionLoading}
-            onConfirm={() => {
-              if (confirmRoutineDelete) {
-                handleDeleteRoutine(confirmRoutineDelete);
-              }
-              setConfirmRoutineDelete(null);
-            }}
-            onCancel={() => setConfirmRoutineDelete(null)}
           />
           <ConfirmDialog
             isOpen={Boolean(linkedHabitPrompt)}
