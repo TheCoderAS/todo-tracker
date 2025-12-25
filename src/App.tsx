@@ -7,6 +7,7 @@ import AppLayout from "@/layouts/AppLayout";
 import AuthPage from "@/pages/auth/AuthPage";
 import DashboardPage from "@/pages/DashboardPage";
 import ProfilePage from "@/pages/ProfilePage";
+import RoutinesPage from "@/pages/RoutinesPage";
 import TodosPage from "@/pages/TodosPage";
 
 const ProtectedLayout = () => (
@@ -26,6 +27,7 @@ export default function App() {
           <Route element={<ProtectedLayout />}>
             <Route path="/" element={<DashboardPage />} />
             <Route path="/todos" element={<TodosPage />} />
+            <Route path="/routines" element={<RoutinesPage />} />
             <Route path="/profile" element={<ProfilePage />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />

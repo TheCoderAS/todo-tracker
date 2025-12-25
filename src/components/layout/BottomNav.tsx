@@ -3,26 +3,20 @@ import { FiGrid, FiList, FiRepeat, FiUser } from "react-icons/fi";
 
 const navItems = [
   { href: "/", label: "Dashboard", icon: FiGrid },
-  { href: "/todos", label: "Tasks", icon: FiList, tab: "todos" },
-  { href: "/todos?tab=routines", label: "Routines", icon: FiRepeat, tab: "routines" },
+  { href: "/todos", label: "Tasks", icon: FiList },
+  { href: "/routines", label: "Routines", icon: FiRepeat },
   { href: "/profile", label: "Profile", icon: FiUser }
 ];
 
 export default function BottomNav() {
   const location = useLocation();
   const pathname = location.pathname;
-  const searchParams = new URLSearchParams(location.search);
-  const activeTab = searchParams.get("tab") ?? "todos";
-
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-20 border-t border-slate-900/60 bg-gradient-to-r from-slate-950/95 via-slate-950/90 to-slate-950/95 px-6 py-2 backdrop-blur">
       <div className="mx-auto flex w-full max-w-6xl items-center justify-around gap-4">
-        {navItems.map(({ href, label, icon: Icon, tab }) => {
-          const isActive = tab
-            ? pathname === "/todos" && activeTab === tab
-            : href === "/"
-              ? pathname === "/"
-              : pathname === href || pathname?.startsWith(`${href}/`);
+        {navItems.map(({ href, label, icon: Icon }) => {
+          const isActive =
+            href === "/" ? pathname === "/" : pathname === href || pathname?.startsWith(`${href}/`);
           return (
             <Link
               key={href}
