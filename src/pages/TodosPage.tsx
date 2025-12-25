@@ -50,6 +50,7 @@ const defaultForm: TodoInput = {
   scheduledTime: "",
   priority: "medium",
   tags: "",
+  contextTags: [],
   description: ""
 };
 
@@ -111,7 +112,8 @@ export default function TodosPage() {
     reminderTime: "",
     reminderDays: getDefaultReminderDays("daily"),
     frequency: "daily",
-    graceMisses: 0
+    graceMisses: 0,
+    contextTags: []
   });
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingHabitId, setEditingHabitId] = useState<string | null>(null);
@@ -132,6 +134,8 @@ export default function TodosPage() {
     datePreset,
     selectedDate,
     filterDraft,
+    contextTagFilter,
+    contextTagOptions,
     groupedTodos,
     todayStats,
     streakCount,
@@ -139,6 +143,7 @@ export default function TodosPage() {
     setSortBy,
     setSortOrder,
     setFilterDraft,
+    setContextTagFilter,
     handleApplyFilters,
     handleResetFilters,
     handleQuickFilter
@@ -153,10 +158,16 @@ export default function TodosPage() {
   const isEditing = useMemo(() => Boolean(editingId), [editingId]);
 
   const handleFormChange = (
-    event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    event:
+      | React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+      | { target: { name: string; value: string[] } }
   ) => {
     const { name, value } = event.target;
     let nextValue: string | number = value;
+    if (name === "contextTags" && Array.isArray(value)) {
+      setForm((prev) => ({ ...prev, contextTags: value }));
+      return;
+    }
     if (name === "tags") {
       nextValue = value.toLowerCase();
     }
@@ -198,7 +209,8 @@ export default function TodosPage() {
       reminderTime: formatTimeValue(now),
       reminderDays: getDefaultReminderDays("daily"),
       frequency: "daily",
-      graceMisses: 0
+      graceMisses: 0,
+      contextTags: []
     });
     setEditingHabitId(null);
   };
@@ -243,6 +255,7 @@ export default function TodosPage() {
       scheduledTime: todo.scheduledDate ? formatTimeInput(todo.scheduledDate) : "",
       priority: todo.priority,
       tags: todo.tags.join(", "),
+      contextTags: todo.contextTags ?? [],
       description: todo.description ?? ""
     });
     setIsFormOpen(true);
@@ -370,6 +383,7 @@ export default function TodosPage() {
             .split(",")
             .map((tag) => tag.trim())
             .filter(Boolean),
+          contextTags: form.contextTags,
           description: form.description,
           status: "pending",
           completedDate: null,
@@ -395,6 +409,7 @@ export default function TodosPage() {
             .split(",")
             .map((tag) => tag.trim())
             .filter(Boolean),
+          contextTags: form.contextTags,
           description: form.description
         });
         setSnackbar({ message: "Todo added to your list.", variant: "success" });
@@ -410,10 +425,16 @@ export default function TodosPage() {
   };
 
   const handleHabitFormChange = (
-    event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    event:
+      | React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+      | { target: { name: string; value: string[] } }
   ) => {
     const { name, value } = event.target;
     let nextValue = value;
+    if (name === "contextTags" && Array.isArray(value)) {
+      setHabitForm((prev) => ({ ...prev, contextTags: value }));
+      return;
+    }
     if (name === "frequency") {
       const nextFrequency = value as HabitFrequency;
       setHabitForm((prev) => ({
@@ -498,6 +519,7 @@ export default function TodosPage() {
           reminderDays: habitForm.reminderDays,
           frequency: habitForm.frequency,
           graceMisses: habitForm.graceMisses,
+          contextTags: habitForm.contextTags,
           updatedAt: serverTimestamp()
         });
         setSnackbar({ message: "Habit updated.", variant: "success" });
@@ -509,6 +531,7 @@ export default function TodosPage() {
           reminderDays: habitForm.reminderDays,
           frequency: habitForm.frequency,
           graceMisses: habitForm.graceMisses,
+          contextTags: habitForm.contextTags,
           completionDates: [],
           timezone: getLocalTimeZone(),
           createdAt: serverTimestamp(),
@@ -571,7 +594,8 @@ export default function TodosPage() {
         ? habit.reminderDays
         : getDefaultReminderDays(habit.frequency),
       frequency: habit.frequency,
-      graceMisses: habit.graceMisses ?? 0
+      graceMisses: habit.graceMisses ?? 0,
+      contextTags: habit.contextTags ?? []
     });
     setIsHabitFormOpen(true);
   };
@@ -658,6 +682,9 @@ export default function TodosPage() {
             onQuickFilter={handleQuickFilter}
             onSortByChange={setSortBy}
             onSortOrderChange={setSortOrder}
+            contextTagFilter={contextTagFilter}
+            contextTagOptions={contextTagOptions}
+            onContextTagChange={setContextTagFilter}
             emptyStateLabel={emptyStateLabel}
             todayStats={todayStats}
             streakCount={streakCount}

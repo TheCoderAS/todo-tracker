@@ -29,6 +29,24 @@ export const useTodoFilters = (todos: Todo[]) => {
   );
   const [selectedDate, setSelectedDate] = useState(defaultFilters.selectedDate);
   const [filterDraft, setFilterDraft] = useState<FilterDraft>(defaultFilters);
+  const [contextTagFilter, setContextTagFilter] = useState("all");
+  const uncategorizedLabel = "Uncategorized";
+  const hasUncategorized = useMemo(
+    () => todos.some((todo) => !(todo.contextTags ?? []).length),
+    [todos]
+  );
+
+  const contextTagOptions = useMemo(() => {
+    const tags = new Set<string>();
+    todos.forEach((todo) => {
+      (todo.contextTags ?? []).forEach((tag) => tags.add(tag));
+    });
+    const options = Array.from(tags).sort();
+    if (hasUncategorized) {
+      options.unshift(uncategorizedLabel);
+    }
+    return options;
+  }, [todos, hasUncategorized, uncategorizedLabel]);
 
   const handleApplyFilters = () => {
     setStatusFilter(filterDraft.status);
@@ -171,7 +189,12 @@ export const useTodoFilters = (todos: Todo[]) => {
       const matchesStatus = statusFilter === "all" || todo.status === statusFilter;
       const matchesPriority = priorityFilter === "all" || todo.priority === priorityFilter;
       const matchesDate = matchesDatePreset(todo);
-      return matchesStatus && matchesPriority && matchesDate;
+      const matchesContextTag =
+        contextTagFilter === "all" ||
+        (contextTagFilter === uncategorizedLabel
+          ? !(todo.contextTags ?? []).length
+          : (todo.contextTags ?? []).includes(contextTagFilter));
+      return matchesStatus && matchesPriority && matchesDate && matchesContextTag;
     });
 
     if (filteredTodos.length === 0) return [];
@@ -273,7 +296,8 @@ export const useTodoFilters = (todos: Todo[]) => {
     sortBy,
     sortOrder,
     datePreset,
-    selectedDate
+    selectedDate,
+    contextTagFilter
   ]);
 
   const emptyStateLabel = useMemo(() => {
@@ -291,6 +315,8 @@ export const useTodoFilters = (todos: Todo[]) => {
     datePreset,
     selectedDate,
     filterDraft,
+    contextTagFilter,
+    contextTagOptions,
     groupedTodos,
     todayStats,
     streakCount,
@@ -298,6 +324,7 @@ export const useTodoFilters = (todos: Todo[]) => {
     setSortBy,
     setSortOrder,
     setFilterDraft,
+    setContextTagFilter,
     handleApplyFilters,
     handleResetFilters,
     handleQuickFilter

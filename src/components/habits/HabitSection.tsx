@@ -103,22 +103,49 @@ export default function HabitSection({
     "all" | "completed" | "pending" | "archived"
   >("all");
   const [frequencyFilter, setFrequencyFilter] = useState<"all" | HabitFrequency>("all");
+  const [contextTagFilter, setContextTagFilter] = useState("all");
+  const uncategorizedLabel = "Uncategorized";
+  const hasUncategorized = useMemo(
+    () => habits.some((habit) => !(habit.contextTags ?? []).length),
+    [habits]
+  );
+
+  const contextTagOptions = useMemo(() => {
+    const tags = new Set<string>();
+    habits.forEach((habit) => {
+      (habit.contextTags ?? []).forEach((tag) => tags.add(tag));
+    });
+    const options = Array.from(tags).sort();
+    if (hasUncategorized) {
+      options.unshift(uncategorizedLabel);
+    }
+    return options;
+  }, [habits, hasUncategorized, uncategorizedLabel]);
 
   const now = new Date();
   const activeHabits = useMemo(
     () => habits.filter((habit) => !habit.archivedAt),
     [habits]
   );
+  const contextFilteredHabits = useMemo(() => {
+    if (contextTagFilter === "all") return activeHabits;
+    if (contextTagFilter === uncategorizedLabel) {
+      return activeHabits.filter((habit) => !(habit.contextTags ?? []).length);
+    }
+    return activeHabits.filter((habit) =>
+      (habit.contextTags ?? []).includes(contextTagFilter)
+    );
+  }, [activeHabits, contextTagFilter, uncategorizedLabel]);
 
   const todayStats = useMemo(() => {
-    const scheduledToday = activeHabits.filter((habit) =>
+    const scheduledToday = contextFilteredHabits.filter((habit) =>
       isHabitScheduledForDate(habit, now)
     );
     const completed = scheduledToday.filter((habit) =>
       habit.completionDates?.includes(getDateKey(now, habit.timezone))
     ).length;
     return { total: scheduledToday.length, completed };
-  }, [activeHabits, now]);
+  }, [contextFilteredHabits, now]);
 
   const filteredHabits = useMemo(() => {
     return habits.filter((habit) => {
@@ -142,9 +169,30 @@ export default function HabitSection({
       if (frequencyFilter !== "all" && habit.frequency !== frequencyFilter) {
         return false;
       }
+      if (contextTagFilter !== "all") {
+        if (
+          contextTagFilter === uncategorizedLabel &&
+          (habit.contextTags ?? []).length
+        ) {
+          return false;
+        }
+        if (
+          contextTagFilter !== uncategorizedLabel &&
+          !(habit.contextTags ?? []).includes(contextTagFilter)
+        ) {
+          return false;
+        }
+      }
       return true;
     });
-  }, [frequencyFilter, habits, now, statusFilter]);
+  }, [
+    contextTagFilter,
+    frequencyFilter,
+    habits,
+    now,
+    statusFilter,
+    uncategorizedLabel
+  ]);
 
   return (
     <section className="grid gap-6">
@@ -225,6 +273,23 @@ export default function HabitSection({
                 <option value="weekly">Weekly</option>
                 <option value="monthly">Monthly</option>
                 <option value="yearly">Yearly</option>
+              </select>
+            </label>
+          </div>
+          <div className="rounded-2xl border border-slate-800/70 bg-slate-950/40 px-2 pr-1 py-1 text-xs text-slate-200">
+            <label className="flex items-center gap-2">
+              <span className="text-slate-400">Context</span>
+              <select
+                value={contextTagFilter}
+                onChange={(event) => setContextTagFilter(event.target.value)}
+                className="rounded-full border border-slate-800/70 bg-slate-950/60 px-2 py-1 text-[0.7rem] text-slate-200"
+              >
+                <option value="all">All</option>
+                {contextTagOptions.map((tag) => (
+                  <option key={tag} value={tag}>
+                    {tag}
+                  </option>
+                ))}
               </select>
             </label>
           </div>

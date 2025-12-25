@@ -30,6 +30,7 @@ export interface Todo {
   createdAt?: Timestamp | null;
   priority: TodoPriority;
   tags: string[];
+  contextTags: string[];
   description: string;
 }
 
@@ -39,6 +40,7 @@ export interface TodoInput {
   scheduledTime: string;
   priority: TodoPriority;
   tags: string;
+  contextTags: string[];
   description: string;
 }
 
@@ -52,6 +54,7 @@ export interface Habit {
   timezone: string | null;
   frequency: HabitFrequency;
   graceMisses: number;
+  contextTags: string[];
   createdAt?: Timestamp | null;
   updatedAt?: Timestamp | null;
   lastNotifiedDate?: string | null;
@@ -65,6 +68,7 @@ export interface HabitInput {
   reminderDays: number[];
   frequency: HabitFrequency;
   graceMisses: number;
+  contextTags: string[];
 }
 
 export interface FocusBlock {

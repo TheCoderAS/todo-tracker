@@ -26,10 +26,16 @@ export const useTodosData = (user: User | null | undefined) => {
 
     let isFirstSnapshot = true;
     const unsubscribe = onSnapshot(todosQuery, (snapshot) => {
-      const data = snapshot.docs.map((docSnapshot) => ({
-        id: docSnapshot.id,
-        ...(docSnapshot.data() as Omit<Todo, "id">)
-      }));
+      const data = snapshot.docs.map((docSnapshot) => {
+        const todo = docSnapshot.data() as Omit<Todo, "id">;
+        return {
+          id: docSnapshot.id,
+          ...todo,
+          tags: todo.tags ?? [],
+          contextTags: todo.contextTags ?? [],
+          description: todo.description ?? ""
+        };
+      });
       setTodos(data);
       if (isFirstSnapshot) {
         setIsInitialLoad(false);
