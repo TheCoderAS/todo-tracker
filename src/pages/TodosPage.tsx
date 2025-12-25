@@ -64,6 +64,12 @@ const formatTimeValue = (date: Date) => {
   return `${hours}:${minutes}`;
 };
 
+const normalizeTitle = (value: string) => {
+  const trimmed = value.trim();
+  if (!trimmed) return "";
+  return `${trimmed.charAt(0).toUpperCase()}${trimmed.slice(1)}`;
+};
+
 const getDefaultReminderDays = (frequency: HabitFrequency) => {
   const today = new Date();
   if (frequency === "weekly") {
@@ -150,8 +156,8 @@ export default function TodosPage() {
       nextValue = value.toLowerCase();
     }
     if (name === "title") {
-      nextValue = value.slice(0, 24);
-      if (nextValue.trim() && nextValue.trim().length <= 24) {
+      nextValue = value.slice(0, 40);
+      if (nextValue.trim() && nextValue.trim().length <= 40) {
         setTitleHasError(false);
       }
     }
@@ -325,7 +331,8 @@ export default function TodosPage() {
       return;
     }
 
-    if (!form.title.trim()) {
+    const normalizedTitle = normalizeTitle(form.title);
+    if (!normalizedTitle) {
       setTitleHasError(true);
       setActionLoading(false);
       return;
@@ -349,7 +356,7 @@ export default function TodosPage() {
         const todoRef = doc(db, "users", user.uid, "todos", editingId);
         const existing = todos.find((todo) => todo.id === editingId);
         await updateDoc(todoRef, {
-          title: form.title.trim(),
+          title: normalizedTitle,
           scheduledDate,
           priority: form.priority,
           tags: form.tags
@@ -370,7 +377,7 @@ export default function TodosPage() {
         });
       } else {
         await addDoc(collection(db, "users", user.uid, "todos"), {
-          title: form.title.trim(),
+          title: normalizedTitle,
           scheduledDate,
           createdAt: serverTimestamp(),
           priority: form.priority,
@@ -399,6 +406,7 @@ export default function TodosPage() {
     event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = event.target;
+    let nextValue = value;
     if (name === "frequency") {
       const nextFrequency = value as HabitFrequency;
       setHabitForm((prev) => ({
@@ -408,7 +416,10 @@ export default function TodosPage() {
       }));
       return;
     }
-    setHabitForm((prev) => ({ ...prev, [name]: value }));
+    if (name === "title") {
+      nextValue = value.slice(0, 40);
+    }
+    setHabitForm((prev) => ({ ...prev, [name]: nextValue }));
   };
 
   const handleHabitDayToggle = (dayIndex: number) => {
@@ -453,7 +464,8 @@ export default function TodosPage() {
 
   const handleSubmitHabit = async (event: React.FormEvent) => {
     event.preventDefault();
-    if (!habitForm.title.trim()) {
+    const normalizedHabitTitle = normalizeTitle(habitForm.title);
+    if (!normalizedHabitTitle) {
       setSnackbar({ message: "Add a habit title to continue.", variant: "error" });
       return;
     }
@@ -469,7 +481,7 @@ export default function TodosPage() {
     try {
       if (editingHabitId) {
         await updateDoc(doc(db, "users", user.uid, "habits", editingHabitId), {
-          title: habitForm.title.trim(),
+          title: normalizedHabitTitle,
           reminderTime: habitForm.reminderTime,
           reminderDays: habitForm.reminderDays,
           frequency: habitForm.frequency,
@@ -478,7 +490,7 @@ export default function TodosPage() {
         setSnackbar({ message: "Habit updated.", variant: "success" });
       } else {
         await addDoc(collection(db, "users", user.uid, "habits"), {
-          title: habitForm.title.trim(),
+          title: normalizedHabitTitle,
           reminderTime: habitForm.reminderTime,
           reminderDays: habitForm.reminderDays,
           frequency: habitForm.frequency,
