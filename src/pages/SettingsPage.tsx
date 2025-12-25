@@ -39,10 +39,10 @@ const defaultProfile: ProfileFormState = {
 };
 
 const inputClasses =
-  "w-full rounded-2xl border border-slate-800/70 bg-slate-950/60 px-4 py-3 text-sm text-slate-100 transition focus:border-emerald-300/50 focus:outline-none focus:ring-1 focus:ring-emerald-300/20";
+  "w-full rounded-2xl border border-slate-800/70 bg-slate-950/55 px-3.5 py-2.5 text-sm text-slate-100 shadow-sm transition-colors duration-200 ease-out focus:border-emerald-300/60 focus:bg-slate-950/70 focus:outline-none focus:ring-2 focus:ring-emerald-300/15";
 
-const labelClasses = "flex flex-col gap-2";
-const labelTextClasses = "text-xs font-semibold capitalize text-slate-300";
+const labelClasses = "flex flex-col gap-1.5";
+const labelTextClasses = "text-[0.7rem] font-semibold uppercase tracking-wide text-slate-400";
 
 const deriveNameParts = (displayName?: string | null) => {
   const parts = displayName?.trim().split(/\s+/).filter(Boolean) ?? [];

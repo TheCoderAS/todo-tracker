@@ -252,7 +252,7 @@ export default function FiltersModal({
               ))}
             </div>
             {showDatePicker ? (
-              <label className="grid gap-2 text-xs font-semibold text-slate-300">
+              <label className="grid gap-1.5 text-[0.7rem] font-semibold uppercase tracking-wide text-slate-400">
                 Choose date
                 <input
                   type="date"

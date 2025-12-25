@@ -7,10 +7,10 @@ import { FiPlus, FiX } from "react-icons/fi";
 import type { Habit, HabitFrequency, HabitInput, HabitType } from "@/lib/types";
 
 const inputClasses =
-  "w-full rounded-2xl border border-slate-800/70 bg-slate-950/60 px-4 py-3 text-sm text-slate-100 transition focus:border-emerald-300/50 focus:outline-none focus:ring-1 focus:ring-emerald-300/20";
+  "w-full rounded-2xl border border-slate-800/70 bg-slate-950/55 px-3.5 py-2.5 text-sm text-slate-100 shadow-sm transition-colors duration-200 ease-out focus:border-emerald-300/60 focus:bg-slate-950/70 focus:outline-none focus:ring-2 focus:ring-emerald-300/15";
 
-const labelClasses = "flex flex-col gap-2";
-const labelTextClasses = "text-xs font-semibold capitalize text-slate-300";
+const labelClasses = "flex flex-col gap-1.5";
+const labelTextClasses = "text-[0.7rem] font-semibold uppercase tracking-wide text-slate-400";
 
 const days = [
   { id: 0, label: "Sun" },
@@ -150,7 +150,7 @@ export default function HabitForm({
       </label>
       <div className={labelClasses}>
         <span className={labelTextClasses}>Context tags</span>
-        <div className="flex flex-wrap gap-2 rounded-2xl border border-slate-800/70 bg-slate-950/60 px-3 py-3">
+        <div className="flex flex-wrap gap-2 rounded-2xl border border-slate-800/70 bg-slate-950/55 px-3 py-3 shadow-sm transition-colors duration-200 ease-out focus-within:border-emerald-300/50 focus-within:bg-slate-950/70 focus-within:ring-2 focus-within:ring-emerald-300/10">
           {contextTags.map((tag) => (
             <button
               key={tag}
