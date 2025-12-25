@@ -108,6 +108,7 @@ export default function TodosPage() {
   const [actionLoading, setActionLoading] = useState(false);
   const [titleHasError, setTitleHasError] = useState(false);
   const [scheduleHasError, setScheduleHasError] = useState(false);
+  const [confirmHabitDelete, setConfirmHabitDelete] = useState<Habit | null>(null);
   const [snackbar, setSnackbar] = useState<{
     message: string;
     variant: SnackbarVariant;
@@ -137,7 +138,6 @@ export default function TodosPage() {
   const [selectedTodo, setSelectedTodo] = useState<Todo | null>(null);
   const [lastCompletedId, setLastCompletedId] = useState<string | null>(null);
   const [selectedHabit, setSelectedHabit] = useState<Habit | null>(null);
-  const [confirmHabitDeleteId, setConfirmHabitDeleteId] = useState<string | null>(null);
 
   const isEditing = useMemo(() => Boolean(editingId), [editingId]);
 
@@ -548,18 +548,23 @@ export default function TodosPage() {
   };
 
   const handleDeleteHabitRequest = (habit: Habit) => {
-    setConfirmHabitDeleteId(habit.id);
+    setConfirmHabitDelete(habit);
   };
 
-  const handleDeleteHabit = async (habitId: string) => {
+  const handleDeleteHabit = async (habit: Habit) => {
     if (!user) return;
     setActionLoading(true);
     try {
-      await updateDoc(doc(db, "users", user.uid, "habits", habitId), {
-        archivedAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
-      });
-      setSnackbar({ message: "Habit archived.", variant: "info" });
+      if (habit.archivedAt) {
+        await deleteDoc(doc(db, "users", user.uid, "habits", habit.id));
+        setSnackbar({ message: "Habit deleted.", variant: "info" });
+      } else {
+        await updateDoc(doc(db, "users", user.uid, "habits", habit.id), {
+          archivedAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        });
+        setSnackbar({ message: "Habit archived.", variant: "info" });
+      }
     } catch (error) {
       console.error(error);
       setSnackbar({ message: "Unable to delete habit.", variant: "error" });
@@ -694,19 +699,27 @@ export default function TodosPage() {
             onClose={() => setSelectedHabit(null)}
           />
           <ConfirmDialog
-            isOpen={Boolean(confirmHabitDeleteId)}
-            title="Delete this habit?"
-            description="This will archive the habit and keep its history."
-            confirmLabel="Archive habit"
+            isOpen={Boolean(confirmHabitDelete)}
+            title={
+              confirmHabitDelete?.archivedAt
+                ? "Delete this habit permanently?"
+                : "Delete this habit?"
+            }
+            description={
+              confirmHabitDelete?.archivedAt
+                ? "This action cannot be undone."
+                : "This will archive the habit and keep its history."
+            }
+            confirmLabel={confirmHabitDelete?.archivedAt ? "Delete habit" : "Archive habit"}
             cancelLabel="Cancel"
             isLoading={actionLoading}
             onConfirm={() => {
-              if (confirmHabitDeleteId) {
-                handleDeleteHabit(confirmHabitDeleteId);
+              if (confirmHabitDelete) {
+                handleDeleteHabit(confirmHabitDelete);
               }
-              setConfirmHabitDeleteId(null);
+              setConfirmHabitDelete(null);
             }}
-            onCancel={() => setConfirmHabitDeleteId(null)}
+            onCancel={() => setConfirmHabitDelete(null)}
           />
         </div>
       )}

@@ -1,7 +1,15 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { FiCheckCircle, FiCircle, FiEdit2, FiEye, FiPlus, FiTrash2 } from "react-icons/fi";
+import {
+  FiArchive,
+  FiCheckCircle,
+  FiCircle,
+  FiEdit2,
+  FiEye,
+  FiPlus,
+  FiTrash2
+} from "react-icons/fi";
 
 import type { Habit, HabitFrequency } from "@/lib/types";
 import { getDateKey, isHabitScheduledForDate } from "@/lib/habitUtils";
@@ -231,8 +239,8 @@ export default function HabitSection({
                   key={habit.id}
                   className="flex flex-col gap-4 rounded-3xl border border-slate-900/60 bg-slate-950/70 p-5 shadow-lg shadow-slate-950/40"
                 >
-                  <div className="flex flex-wrap items-start justify-between gap-4">
-                    <div className="grid gap-1">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="grid min-w-0 gap-1">
                       <div className="flex flex-wrap items-center gap-2">
                         <h3 className="text-base font-semibold text-white">
                           {habit.title}
@@ -251,7 +259,7 @@ export default function HabitSection({
                           : "No time"}
                       </p>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 sm:justify-end">
                       <button
                         type="button"
                         className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-800/70 text-slate-300 transition hover:border-slate-600/80 hover:text-white"
@@ -271,11 +279,15 @@ export default function HabitSection({
                       </button>
                       <button
                         type="button"
-                        className="flex h-9 w-9 items-center justify-center rounded-full border border-rose-400/30 text-rose-200 transition hover:border-rose-300/70 hover:text-rose-100"
+                        className={`flex h-9 w-9 items-center justify-center rounded-full border text-slate-300 transition ${
+                          isArchived
+                            ? "border-rose-400/30 text-rose-200 hover:border-rose-300/70 hover:text-rose-100"
+                            : "border-slate-800/70 hover:border-slate-600/80 hover:text-white"
+                        }`}
                         onClick={() => onDelete(habit)}
-                        aria-label="Delete habit"
+                        aria-label={isArchived ? "Delete habit" : "Archive habit"}
                       >
-                        <FiTrash2 aria-hidden />
+                        {isArchived ? <FiTrash2 aria-hidden /> : <FiArchive aria-hidden />}
                       </button>
                     </div>
                   </div>
