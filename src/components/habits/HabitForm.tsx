@@ -84,16 +84,6 @@ export default function HabitForm({
 }: HabitFormProps) {
   const [contextTagInput, setContextTagInput] = useState("");
   const contextTags = useMemo(() => form.contextTags ?? [], [form.contextTags]);
-  const contextTagSuggestions = useMemo(
-    () => ["work", "home", "health", "personal", "family", "learning"],
-    []
-  );
-  const suggestedContextTags = useMemo(() => {
-    if (!contextTagInput.trim()) return contextTagSuggestions;
-    return contextTagSuggestions.filter((suggestion) =>
-      suggestion.toLowerCase().includes(contextTagInput.toLowerCase())
-    );
-  }, [contextTagInput, contextTagSuggestions]);
 
   const showWeeklyDays = form.frequency === "weekly";
   const showMonthlyDay = form.frequency === "monthly";
@@ -185,18 +175,6 @@ export default function HabitForm({
             enterKeyHint="done"
             className="min-w-[140px] flex-1 bg-transparent text-sm text-slate-100 outline-none"
           />
-        </div>
-        <div className="mt-2 flex flex-wrap gap-2">
-          {suggestedContextTags.map((tag) => (
-            <button
-              key={tag}
-              type="button"
-              onClick={() => handleContextTagAdd(tag)}
-              className="rounded-full border border-slate-800/80 px-3 py-1 text-xs text-slate-400 transition hover:border-slate-500/70 hover:text-slate-200"
-            >
-              {tag}
-            </button>
-          ))}
         </div>
       </div>
       <div className="grid gap-4 sm:grid-cols-2">

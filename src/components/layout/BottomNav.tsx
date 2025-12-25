@@ -1,11 +1,11 @@
 import { Link, useLocation } from "react-router-dom";
-import { FiGrid, FiList, FiRepeat, FiUser } from "react-icons/fi";
+import { FiGrid, FiList, FiRepeat, FiSettings } from "react-icons/fi";
 
 const navItems = [
   { href: "/", label: "Dashboard", icon: FiGrid },
   { href: "/todos", label: "Tasks", icon: FiList },
   { href: "/routines", label: "Routines", icon: FiRepeat },
-  { href: "/profile", label: "Profile", icon: FiUser }
+  { href: "/settings", label: "Setting", icon: FiSettings }
 ];
 
 export default function BottomNav() {

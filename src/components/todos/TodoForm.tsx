@@ -53,10 +53,6 @@ export default function TodoForm({
     Boolean(form.description)
   );
   const descriptionRef = useRef<HTMLDivElement | null>(null);
-  const tagSuggestions = useMemo(
-    () => ["focus", "design", "deep-work", "review", "research", "follow-up"],
-    []
-  );
   const tags = useMemo(
     () =>
       form.tags
@@ -66,22 +62,6 @@ export default function TodoForm({
     [form.tags]
   );
   const contextTags = useMemo(() => form.contextTags ?? [], [form.contextTags]);
-  const suggestedTags = useMemo(() => {
-    if (!tagInput.trim()) return tagSuggestions;
-    return tagSuggestions.filter((suggestion) =>
-      suggestion.toLowerCase().includes(tagInput.toLowerCase())
-    );
-  }, [tagInput, tagSuggestions]);
-  const contextTagSuggestions = useMemo(
-    () => ["work", "home", "health", "personal", "family", "learning"],
-    []
-  );
-  const suggestedContextTags = useMemo(() => {
-    if (!contextTagInput.trim()) return contextTagSuggestions;
-    return contextTagSuggestions.filter((suggestion) =>
-      suggestion.toLowerCase().includes(contextTagInput.toLowerCase())
-    );
-  }, [contextTagInput, contextTagSuggestions]);
 
   const updateTags = (nextTags: string[]) => {
     onChange({
@@ -278,18 +258,6 @@ export default function TodoForm({
                   className="min-w-[120px] flex-1 bg-transparent text-sm text-slate-100 outline-none"
                 />
               </div>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {suggestedTags.map((tag) => (
-                  <button
-                    key={tag}
-                    type="button"
-                    onClick={() => handleTagAdd(tag)}
-                    className="rounded-full border border-slate-800/80 px-3 py-1 text-xs text-slate-400 transition hover:border-slate-500/70 hover:text-slate-200"
-                  >
-                    {tag}
-                  </button>
-                ))}
-              </div>
             </div>
           </div>
           <div className={labelClasses}>
@@ -321,18 +289,6 @@ export default function TodoForm({
                 enterKeyHint="done"
                 className="min-w-[140px] flex-1 bg-transparent text-sm text-slate-100 outline-none"
               />
-            </div>
-            <div className="mt-2 flex flex-wrap gap-2">
-              {suggestedContextTags.map((tag) => (
-                <button
-                  key={tag}
-                  type="button"
-                  onClick={() => handleContextTagAdd(tag)}
-                  className="rounded-full border border-slate-800/80 px-3 py-1 text-xs text-slate-400 transition hover:border-slate-500/70 hover:text-slate-200"
-                >
-                  {tag}
-                </button>
-              ))}
             </div>
           </div>
         </div>
