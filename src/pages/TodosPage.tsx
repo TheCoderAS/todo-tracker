@@ -1136,15 +1136,6 @@ export default function TodosPage() {
         <button
           type="button"
           className={`flex-1 rounded-full px-4 py-2 text-center transition sm:flex-none ${
-            activeTab === "routines" ? "bg-sky-500/20 text-sky-200" : "text-slate-400"
-          }`}
-          onClick={() => setTab("routines")}
-        >
-          Routines
-        </button>
-        <button
-          type="button"
-          className={`flex-1 rounded-full px-4 py-2 text-center transition sm:flex-none ${
             activeTab === "habits" ? "bg-sky-500/20 text-sky-200" : "text-slate-400"
           }`}
           onClick={() => setTab("habits")}
