@@ -64,6 +64,12 @@ const formatTimeValue = (date: Date) => {
   return `${hours}:${minutes}`;
 };
 
+const normalizeTitle = (value: string) => {
+  const trimmed = value.trim();
+  if (!trimmed) return "";
+  return `${trimmed.charAt(0).toUpperCase()}${trimmed.slice(1)}`;
+};
+
 const getDefaultReminderDays = (frequency: HabitFrequency) => {
   const today = new Date();
   if (frequency === "weekly") {
@@ -100,7 +106,8 @@ export default function TodosPage() {
     title: "",
     reminderTime: "",
     reminderDays: getDefaultReminderDays("daily"),
-    frequency: "daily"
+    frequency: "daily",
+    graceMisses: 0
   });
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingHabitId, setEditingHabitId] = useState<string | null>(null);
@@ -108,6 +115,7 @@ export default function TodosPage() {
   const [actionLoading, setActionLoading] = useState(false);
   const [titleHasError, setTitleHasError] = useState(false);
   const [scheduleHasError, setScheduleHasError] = useState(false);
+  const [confirmHabitDelete, setConfirmHabitDelete] = useState<Habit | null>(null);
   const [snackbar, setSnackbar] = useState<{
     message: string;
     variant: SnackbarVariant;
@@ -137,7 +145,6 @@ export default function TodosPage() {
   const [selectedTodo, setSelectedTodo] = useState<Todo | null>(null);
   const [lastCompletedId, setLastCompletedId] = useState<string | null>(null);
   const [selectedHabit, setSelectedHabit] = useState<Habit | null>(null);
-  const [confirmHabitDeleteId, setConfirmHabitDeleteId] = useState<string | null>(null);
 
   const isEditing = useMemo(() => Boolean(editingId), [editingId]);
 
@@ -145,13 +152,13 @@ export default function TodosPage() {
     event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = event.target;
-    let nextValue = value;
+    let nextValue: string | number = value;
     if (name === "tags") {
       nextValue = value.toLowerCase();
     }
     if (name === "title") {
-      nextValue = value.slice(0, 24);
-      if (nextValue.trim() && nextValue.trim().length <= 24) {
+      nextValue = value.slice(0, 40);
+      if (nextValue.trim() && nextValue.trim().length <= 40) {
         setTitleHasError(false);
       }
     }
@@ -185,7 +192,8 @@ export default function TodosPage() {
       title: "",
       reminderTime: formatTimeValue(now),
       reminderDays: getDefaultReminderDays("daily"),
-      frequency: "daily"
+      frequency: "daily",
+      graceMisses: 0
     });
     setEditingHabitId(null);
   };
@@ -325,7 +333,8 @@ export default function TodosPage() {
       return;
     }
 
-    if (!form.title.trim()) {
+    const normalizedTitle = normalizeTitle(form.title);
+    if (!normalizedTitle) {
       setTitleHasError(true);
       setActionLoading(false);
       return;
@@ -349,7 +358,7 @@ export default function TodosPage() {
         const todoRef = doc(db, "users", user.uid, "todos", editingId);
         const existing = todos.find((todo) => todo.id === editingId);
         await updateDoc(todoRef, {
-          title: form.title.trim(),
+          title: normalizedTitle,
           scheduledDate,
           priority: form.priority,
           tags: form.tags
@@ -370,7 +379,7 @@ export default function TodosPage() {
         });
       } else {
         await addDoc(collection(db, "users", user.uid, "todos"), {
-          title: form.title.trim(),
+          title: normalizedTitle,
           scheduledDate,
           createdAt: serverTimestamp(),
           priority: form.priority,
@@ -399,6 +408,7 @@ export default function TodosPage() {
     event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = event.target;
+    let nextValue = value;
     if (name === "frequency") {
       const nextFrequency = value as HabitFrequency;
       setHabitForm((prev) => ({
@@ -408,7 +418,14 @@ export default function TodosPage() {
       }));
       return;
     }
-    setHabitForm((prev) => ({ ...prev, [name]: value }));
+    if (name === "title") {
+      nextValue = value.slice(0, 40);
+    }
+    if (name === "graceMisses") {
+      const nextNumber = Number.parseInt(value, 10);
+      nextValue = Number.isNaN(nextNumber) ? 0 : Math.max(nextNumber, 0);
+    }
+    setHabitForm((prev) => ({ ...prev, [name]: nextValue }));
   };
 
   const handleHabitDayToggle = (dayIndex: number) => {
@@ -453,7 +470,8 @@ export default function TodosPage() {
 
   const handleSubmitHabit = async (event: React.FormEvent) => {
     event.preventDefault();
-    if (!habitForm.title.trim()) {
+    const normalizedHabitTitle = normalizeTitle(habitForm.title);
+    if (!normalizedHabitTitle) {
       setSnackbar({ message: "Add a habit title to continue.", variant: "error" });
       return;
     }
@@ -469,19 +487,21 @@ export default function TodosPage() {
     try {
       if (editingHabitId) {
         await updateDoc(doc(db, "users", user.uid, "habits", editingHabitId), {
-          title: habitForm.title.trim(),
+          title: normalizedHabitTitle,
           reminderTime: habitForm.reminderTime,
           reminderDays: habitForm.reminderDays,
           frequency: habitForm.frequency,
+          graceMisses: habitForm.graceMisses,
           updatedAt: serverTimestamp()
         });
         setSnackbar({ message: "Habit updated.", variant: "success" });
       } else {
         await addDoc(collection(db, "users", user.uid, "habits"), {
-          title: habitForm.title.trim(),
+          title: normalizedHabitTitle,
           reminderTime: habitForm.reminderTime,
           reminderDays: habitForm.reminderDays,
           frequency: habitForm.frequency,
+          graceMisses: habitForm.graceMisses,
           completionDates: [],
           timezone: getLocalTimeZone(),
           createdAt: serverTimestamp(),
@@ -542,24 +562,30 @@ export default function TodosPage() {
       reminderDays: habit.reminderDays?.length
         ? habit.reminderDays
         : getDefaultReminderDays(habit.frequency),
-      frequency: habit.frequency
+      frequency: habit.frequency,
+      graceMisses: habit.graceMisses ?? 0
     });
     setIsHabitFormOpen(true);
   };
 
   const handleDeleteHabitRequest = (habit: Habit) => {
-    setConfirmHabitDeleteId(habit.id);
+    setConfirmHabitDelete(habit);
   };
 
-  const handleDeleteHabit = async (habitId: string) => {
+  const handleDeleteHabit = async (habit: Habit) => {
     if (!user) return;
     setActionLoading(true);
     try {
-      await updateDoc(doc(db, "users", user.uid, "habits", habitId), {
-        archivedAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
-      });
-      setSnackbar({ message: "Habit archived.", variant: "info" });
+      if (habit.archivedAt) {
+        await deleteDoc(doc(db, "users", user.uid, "habits", habit.id));
+        setSnackbar({ message: "Habit deleted.", variant: "info" });
+      } else {
+        await updateDoc(doc(db, "users", user.uid, "habits", habit.id), {
+          archivedAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        });
+        setSnackbar({ message: "Habit archived.", variant: "info" });
+      }
     } catch (error) {
       console.error(error);
       setSnackbar({ message: "Unable to delete habit.", variant: "error" });
@@ -694,19 +720,27 @@ export default function TodosPage() {
             onClose={() => setSelectedHabit(null)}
           />
           <ConfirmDialog
-            isOpen={Boolean(confirmHabitDeleteId)}
-            title="Delete this habit?"
-            description="This will archive the habit and keep its history."
-            confirmLabel="Archive habit"
+            isOpen={Boolean(confirmHabitDelete)}
+            title={
+              confirmHabitDelete?.archivedAt
+                ? "Delete this habit permanently?"
+                : "Delete this habit?"
+            }
+            description={
+              confirmHabitDelete?.archivedAt
+                ? "This action cannot be undone."
+                : "This will archive the habit and keep its history."
+            }
+            confirmLabel={confirmHabitDelete?.archivedAt ? "Delete habit" : "Archive habit"}
             cancelLabel="Cancel"
             isLoading={actionLoading}
             onConfirm={() => {
-              if (confirmHabitDeleteId) {
-                handleDeleteHabit(confirmHabitDeleteId);
+              if (confirmHabitDelete) {
+                handleDeleteHabit(confirmHabitDelete);
               }
-              setConfirmHabitDeleteId(null);
+              setConfirmHabitDelete(null);
             }}
-            onCancel={() => setConfirmHabitDeleteId(null)}
+            onCancel={() => setConfirmHabitDelete(null)}
           />
         </div>
       )}

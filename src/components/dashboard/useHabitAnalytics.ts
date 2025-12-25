@@ -71,10 +71,14 @@ export function useHabitAnalytics(user: User | null): HabitAnalytics {
     const unsubscribe = onSnapshot(
       habitsQuery,
       (snapshot) => {
-        const habits = snapshot.docs.map((docSnapshot) => ({
-          id: docSnapshot.id,
-          ...(docSnapshot.data() as Omit<Habit, "id">)
-        }));
+        const habits = snapshot.docs.map((docSnapshot) => {
+          const habit = docSnapshot.data() as Omit<Habit, "id">;
+          return {
+            id: docSnapshot.id,
+            ...habit,
+            graceMisses: habit.graceMisses ?? 0
+          };
+        });
 
         const activeHabits = habits.filter((habit) => !habit.archivedAt);
         const scheduledToday = activeHabits.filter((habit) =>

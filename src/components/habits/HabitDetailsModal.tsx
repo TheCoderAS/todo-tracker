@@ -172,6 +172,15 @@ export default function HabitDetailsModal({ habit, isOpen, onClose }: HabitDetai
                 </span>
               </span>
             </div>
+            <div className="flex items-center gap-2">
+              <FiCalendar aria-hidden className="text-sky-300" />
+              <span>
+                Grace misses per week{" "}
+                <span className="font-semibold text-slate-100">
+                  {habit.graceMisses ?? 0}
+                </span>
+              </span>
+            </div>
             {lastCompletion ? (
               <p className="text-xs text-slate-500">
                 Last completed on {lastCompletion}

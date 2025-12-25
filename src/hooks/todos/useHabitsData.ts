@@ -26,10 +26,14 @@ export const useHabitsData = (user: User | null | undefined) => {
 
     let isFirstSnapshot = true;
     const unsubscribe = onSnapshot(habitsQuery, (snapshot) => {
-      const data = snapshot.docs.map((docSnapshot) => ({
-        id: docSnapshot.id,
-        ...(docSnapshot.data() as Omit<Habit, "id">)
-      }));
+      const data = snapshot.docs.map((docSnapshot) => {
+        const habit = docSnapshot.data() as Omit<Habit, "id">;
+        return {
+          id: docSnapshot.id,
+          ...habit,
+          graceMisses: habit.graceMisses ?? 0
+        };
+      });
       setHabits(data);
       if (isFirstSnapshot) {
         setIsInitialLoad(false);

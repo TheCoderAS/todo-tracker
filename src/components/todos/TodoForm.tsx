@@ -138,7 +138,7 @@ export default function TodoForm({
             placeholder="What would you like add?"
             value={form.title}
             onChange={onChange}
-            maxLength={24}
+            maxLength={40}
             required
             className={`${inputClasses} ${
               titleHasError ? "border-rose-500/80 text-rose-100" : ""
