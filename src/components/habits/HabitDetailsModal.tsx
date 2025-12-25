@@ -20,6 +20,13 @@ type TrendEntry = {
   completed: boolean;
 };
 
+const getTrendStatusLabel = (habit: Habit, completed: boolean) => {
+  if (habit.habitType === "avoid") {
+    return completed ? "Stayed on track" : "Slipped";
+  }
+  return completed ? "Completed" : "Scheduled";
+};
+
 const formatFrequencyLabel = (frequency: HabitFrequency) => {
   switch (frequency) {
     case "daily":
@@ -132,12 +139,18 @@ const buildTrendEntries = (habit: Habit): TrendEntry[] => {
     .reverse();
 };
 
+const formatHabitTypeLabel = (habit: Habit) =>
+  habit.habitType === "avoid" ? "Avoid habit" : "Build habit";
+
 export default function HabitDetailsModal({ habit, isOpen, onClose }: HabitDetailsModalProps) {
   const trendEntries = useMemo(() => (habit ? buildTrendEntries(habit) : []), [habit]);
   const totalCompletions = habit?.completionDates?.length ?? 0;
   const lastCompletion = habit?.completionDates?.length
     ? habit?.completionDates[habit.completionDates.length - 1]
     : null;
+  const trendStatusLabel = habit
+    ? (completed: boolean) => getTrendStatusLabel(habit, completed)
+    : () => "";
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} ariaLabel="Habit details">
@@ -160,6 +173,15 @@ export default function HabitDetailsModal({ habit, isOpen, onClose }: HabitDetai
                 Reminder at{" "}
                 <span className="font-semibold text-slate-100">
                   {habit.reminderTime || "No time set"}
+                </span>
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <FiCalendar aria-hidden className="text-sky-300" />
+              <span>
+                Habit type{" "}
+                <span className="font-semibold text-slate-100">
+                  {formatHabitTypeLabel(habit)}
                 </span>
               </span>
             </div>
@@ -208,7 +230,7 @@ export default function HabitDetailsModal({ habit, isOpen, onClose }: HabitDetai
                     }`}
                   >
                     <FiCheckCircle aria-hidden className="text-[0.7rem]" />
-                    {entry.completed ? "Completed" : "Scheduled"}
+                    {trendStatusLabel(entry.completed)}
                   </span>
                 </div>
               ))}

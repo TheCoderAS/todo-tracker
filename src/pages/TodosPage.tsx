@@ -104,6 +104,7 @@ export default function TodosPage() {
   const [form, setForm] = useState<TodoInput>(defaultForm);
   const [habitForm, setHabitForm] = useState<HabitInput>({
     title: "",
+    habitType: "positive",
     reminderTime: "",
     reminderDays: getDefaultReminderDays("daily"),
     frequency: "daily",
@@ -190,6 +191,7 @@ export default function TodosPage() {
     const now = new Date();
     setHabitForm({
       title: "",
+      habitType: "positive",
       reminderTime: formatTimeValue(now),
       reminderDays: getDefaultReminderDays("daily"),
       frequency: "daily",
@@ -488,6 +490,7 @@ export default function TodosPage() {
       if (editingHabitId) {
         await updateDoc(doc(db, "users", user.uid, "habits", editingHabitId), {
           title: normalizedHabitTitle,
+          habitType: habitForm.habitType,
           reminderTime: habitForm.reminderTime,
           reminderDays: habitForm.reminderDays,
           frequency: habitForm.frequency,
@@ -498,6 +501,7 @@ export default function TodosPage() {
       } else {
         await addDoc(collection(db, "users", user.uid, "habits"), {
           title: normalizedHabitTitle,
+          habitType: habitForm.habitType,
           reminderTime: habitForm.reminderTime,
           reminderDays: habitForm.reminderDays,
           frequency: habitForm.frequency,
@@ -558,6 +562,7 @@ export default function TodosPage() {
     setEditingHabitId(habit.id);
     setHabitForm({
       title: habit.title,
+      habitType: habit.habitType ?? "positive",
       reminderTime: habit.reminderTime,
       reminderDays: habit.reminderDays?.length
         ? habit.reminderDays

@@ -23,6 +23,12 @@ type HabitAnalytics = {
   loading: boolean;
 };
 
+const isHabitOnTrack = (habit: Habit, date: Date) => {
+  const dateKey = getDateKey(date, habit.timezone);
+  const isCompleted = habit.completionDates?.includes(dateKey) ?? false;
+  return habit.habitType === "avoid" ? isCompleted : isCompleted;
+};
+
 const emptyAnalytics: HabitAnalytics = {
   activeHabits: 0,
   completedToday: 0,
@@ -76,6 +82,7 @@ export function useHabitAnalytics(user: User | null): HabitAnalytics {
           return {
             id: docSnapshot.id,
             ...habit,
+            habitType: habit.habitType ?? "positive",
             graceMisses: habit.graceMisses ?? 0
           };
         });
@@ -85,14 +92,12 @@ export function useHabitAnalytics(user: User | null): HabitAnalytics {
           isHabitScheduledForDate(habit, today)
         );
         const completedToday = scheduledToday.filter((habit) =>
-          habit.completionDates?.includes(getDateKey(today, habit.timezone))
+          isHabitOnTrack(habit, today)
         ).length;
 
         const weeklyTrend = last7Days.map((date) => {
           const count = activeHabits.filter(
-            (habit) =>
-              isHabitScheduledForDate(habit, date) &&
-              habit.completionDates?.includes(getDateKey(date, habit.timezone))
+            (habit) => isHabitScheduledForDate(habit, date) && isHabitOnTrack(habit, date)
           ).length;
           return { date, count };
         });
