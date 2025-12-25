@@ -39,6 +39,7 @@ export interface Habit {
   completionDates: string[];
   timezone: string | null;
   frequency: HabitFrequency;
+  graceMisses: number;
   createdAt?: Timestamp | null;
   updatedAt?: Timestamp | null;
   lastNotifiedDate?: string | null;
@@ -50,4 +51,5 @@ export interface HabitInput {
   reminderTime: string;
   reminderDays: number[];
   frequency: HabitFrequency;
+  graceMisses: number;
 }

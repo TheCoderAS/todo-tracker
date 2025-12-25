@@ -106,7 +106,8 @@ export default function TodosPage() {
     title: "",
     reminderTime: "",
     reminderDays: getDefaultReminderDays("daily"),
-    frequency: "daily"
+    frequency: "daily",
+    graceMisses: 0
   });
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingHabitId, setEditingHabitId] = useState<string | null>(null);
@@ -151,7 +152,7 @@ export default function TodosPage() {
     event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = event.target;
-    let nextValue = value;
+    let nextValue: string | number = value;
     if (name === "tags") {
       nextValue = value.toLowerCase();
     }
@@ -191,7 +192,8 @@ export default function TodosPage() {
       title: "",
       reminderTime: formatTimeValue(now),
       reminderDays: getDefaultReminderDays("daily"),
-      frequency: "daily"
+      frequency: "daily",
+      graceMisses: 0
     });
     setEditingHabitId(null);
   };
@@ -419,6 +421,10 @@ export default function TodosPage() {
     if (name === "title") {
       nextValue = value.slice(0, 40);
     }
+    if (name === "graceMisses") {
+      const nextNumber = Number.parseInt(value, 10);
+      nextValue = Number.isNaN(nextNumber) ? 0 : Math.max(nextNumber, 0);
+    }
     setHabitForm((prev) => ({ ...prev, [name]: nextValue }));
   };
 
@@ -485,6 +491,7 @@ export default function TodosPage() {
           reminderTime: habitForm.reminderTime,
           reminderDays: habitForm.reminderDays,
           frequency: habitForm.frequency,
+          graceMisses: habitForm.graceMisses,
           updatedAt: serverTimestamp()
         });
         setSnackbar({ message: "Habit updated.", variant: "success" });
@@ -494,6 +501,7 @@ export default function TodosPage() {
           reminderTime: habitForm.reminderTime,
           reminderDays: habitForm.reminderDays,
           frequency: habitForm.frequency,
+          graceMisses: habitForm.graceMisses,
           completionDates: [],
           timezone: getLocalTimeZone(),
           createdAt: serverTimestamp(),
@@ -554,7 +562,8 @@ export default function TodosPage() {
       reminderDays: habit.reminderDays?.length
         ? habit.reminderDays
         : getDefaultReminderDays(habit.frequency),
-      frequency: habit.frequency
+      frequency: habit.frequency,
+      graceMisses: habit.graceMisses ?? 0
     });
     setIsHabitFormOpen(true);
   };

@@ -114,6 +114,18 @@ export default function HabitForm({
           </select>
         </label>
         <label className={labelClasses}>
+          <span className={labelTextClasses}>Grace misses per week</span>
+          <input
+            name="graceMisses"
+            type="number"
+            min={0}
+            max={7}
+            value={form.graceMisses}
+            onChange={onChange}
+            className={inputClasses}
+          />
+        </label>
+        <label className={labelClasses}>
           <span className={labelTextClasses}>Reminder time</span>
           <input
             name="reminderTime"
