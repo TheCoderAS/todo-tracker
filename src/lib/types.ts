@@ -46,6 +46,35 @@ export interface TodoInput {
   description: string;
 }
 
+export interface RoutineItemTemplate {
+  title: string;
+  priority: TodoPriority;
+  tags: string[];
+  contextTags: string[];
+  description: string;
+}
+
+export interface RoutineItemInput {
+  title: string;
+  priority: TodoPriority;
+  tags: string;
+  contextTags: string;
+  description: string;
+}
+
+export interface RoutineInput {
+  title: string;
+  items: RoutineItemInput[];
+}
+
+export interface Routine {
+  id: string;
+  title: string;
+  items: RoutineItemTemplate[];
+  createdAt?: Timestamp | null;
+  updatedAt?: Timestamp | null;
+}
+
 export interface Habit {
   id: string;
   title: string;
