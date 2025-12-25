@@ -15,6 +15,7 @@ import TodoSection from "@/components/todos/TodoSection";
 import HabitForm from "@/components/habits/HabitForm";
 import HabitDetailsModal from "@/components/habits/HabitDetailsModal";
 import HabitSection from "@/components/habits/HabitSection";
+import FocusBlockPanel from "@/components/focus/FocusBlockPanel";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import Modal from "@/components/ui/Modal";
 import OverlayLoader from "@/components/ui/OverlayLoader";
@@ -39,6 +40,7 @@ import { useHabitsData } from "@/hooks/todos/useHabitsData";
 import { useTabState } from "@/hooks/todos/useTabState";
 import { useTodoFilters } from "@/hooks/todos/useTodoFilters";
 import { useTodosData } from "@/hooks/todos/useTodosData";
+import { useFocusBlocksData } from "@/hooks/focus/useFocusBlocksData";
 
 const priorities: TodoPriority[] = ["low", "medium", "high"];
 
@@ -100,6 +102,7 @@ export default function TodosPage() {
   const { user, loading } = useAuth();
   const { todos, isInitialLoad } = useTodosData(user);
   const { habits, isInitialLoad: isHabitInitialLoad } = useHabitsData(user);
+  const { activeBlock, isInitialLoad: isFocusInitialLoad } = useFocusBlocksData(user);
   const { activeTab, setTab } = useTabState();
   const [form, setForm] = useState<TodoInput>(defaultForm);
   const [habitForm, setHabitForm] = useState<HabitInput>({
@@ -601,9 +604,18 @@ export default function TodosPage() {
 
   const isLoading = loading || isInitialLoad;
   const isHabitLoading = loading || isHabitInitialLoad;
+  const isFocusLoading = loading || isFocusInitialLoad;
 
   return (
     <section className="flex flex-col gap-6">
+      <FocusBlockPanel
+        user={user}
+        todos={todos}
+        habits={habits}
+        activeBlock={activeBlock}
+        loading={isFocusLoading}
+        onNotify={(message, variant) => setSnackbar({ message, variant })}
+      />
       <div className="flex w-full rounded-full border border-slate-800/70 bg-slate-900/60 p-1 text-xs font-semibold">
         <button
           type="button"
