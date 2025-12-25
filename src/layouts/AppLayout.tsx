@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 import AppHeader from "@/components/layout/AppHeader";
@@ -13,6 +13,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0 });
+  }, [location.pathname, location.search]);
 
   const handleSignOut = async () => {
     setShowConfirm(false);

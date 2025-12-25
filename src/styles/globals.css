@@ -92,6 +92,17 @@
   animation: floatMenu 320ms ease-out;
 }
 
+.modal-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  margin: -1.5rem -1.5rem 0;
+  padding: 1.5rem 1.5rem 1rem;
+  border-bottom: 1px solid rgba(30, 41, 59, 0.7);
+  background: rgba(2, 6, 23, 0.95);
+  backdrop-filter: blur(12px);
+}
+
 .page-transition {
   position: relative;
   animation: pageEnter 280ms ease-out both;

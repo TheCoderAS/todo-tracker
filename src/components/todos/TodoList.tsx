@@ -435,21 +435,20 @@ export default function TodoList({
         ariaLabel="Todo details"
       >
         {selectedTodo ? (
-          <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-6">
-            <div className="grid gap-5">
-              <div className="flex items-start justify-between gap-4">
-                <div className="grid gap-2">
-                  <h3 className="text-lg font-semibold text-white">{selectedTodo.title}</h3>
-                  <div className="flex flex-wrap items-center gap-2 text-xs text-slate-400">
-                    <span
-                      className={`flex items-center gap-1 rounded-full bg-slate-950/70 px-2 py-1 ${priorityIconStyles[selectedTodo.priority]}`}
-                    >
-                      <FiFlag aria-hidden />
-                      <span>{formatTitleCase(selectedTodo.priority)}</span>
-                    </span>
-                    <span
-                      className={`flex items-center gap-1 rounded-full bg-slate-950/70 px-2 py-1 ${statusIconStyles[selectedTodo.status]}`}
-                    >
+          <div className="grid gap-6">
+            <div className="modal-header flex items-start justify-between gap-4">
+              <div className="grid gap-2">
+                <h3 className="text-lg font-semibold text-white">{selectedTodo.title}</h3>
+                <div className="flex flex-wrap items-center gap-2 text-xs text-slate-400">
+                  <span
+                    className={`flex items-center gap-1 rounded-full bg-slate-950/70 px-2 py-1 ${priorityIconStyles[selectedTodo.priority]}`}
+                  >
+                    <FiFlag aria-hidden />
+                    <span>{formatTitleCase(selectedTodo.priority)}</span>
+                  </span>
+                  <span
+                    className={`flex items-center gap-1 rounded-full bg-slate-950/70 px-2 py-1 ${statusIconStyles[selectedTodo.status]}`}
+                  >
                     {selectedTodo.status === "completed" ? (
                       <FiCheckCircle aria-hidden />
                     ) : selectedTodo.status === "skipped" ? (
@@ -460,9 +459,19 @@ export default function TodoList({
                     <span>{formatTitleCase(selectedTodo.status)}</span>
                   </span>
                 </div>
-                </div>
               </div>
-              <div className="grid gap-3 text-xs text-slate-300">
+              <button
+                type="button"
+                className="flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-700/70 text-slate-200 transition hover:border-slate-500"
+                onClick={() => onSelectTodo(null)}
+                aria-label="Close"
+              >
+                <FiX aria-hidden />
+              </button>
+            </div>
+            <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-6">
+              <div className="grid gap-5">
+                <div className="grid gap-3 text-xs text-slate-300">
                 <div className="flex items-center gap-2">
                   <FiCalendar aria-hidden className="text-slate-400" />
                   <span>{formatDate(selectedTodo.scheduledDate)}</span>
@@ -494,15 +503,7 @@ export default function TodoList({
                 )}
               </div>
             </div>
-            <div className="flex min-w-[3.5rem] flex-col items-center gap-2 text-slate-200">
-              <button
-                type="button"
-                className="flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-700/70 text-slate-200 transition hover:border-slate-500"
-                onClick={() => onSelectTodo(null)}
-                aria-label="Close"
-              >
-                <FiX aria-hidden />
-              </button>
+              <div className="flex min-w-[3.5rem] flex-col items-center gap-2 text-slate-200">
               <button
                 type="button"
                 className="flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-700/70 text-slate-200 transition hover:border-slate-500"
@@ -545,6 +546,7 @@ export default function TodoList({
               >
                 <FiTrash2 aria-hidden />
               </button>
+            </div>
             </div>
           </div>
         ) : null}

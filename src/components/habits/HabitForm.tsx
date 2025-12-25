@@ -131,9 +131,11 @@ export default function HabitForm({
 
   return (
     <form className="grid gap-5" onSubmit={onSubmit}>
-      <h2 className="text-xl font-semibold text-white">
-        {isEditing ? "Edit habit" : "Add a new habit"}
-      </h2>
+      <div className="modal-header">
+        <h2 className="text-xl font-semibold text-white">
+          {isEditing ? "Edit habit" : "Add a new habit"}
+        </h2>
+      </div>
       <label className={labelClasses}>
         <span className={labelTextClasses}>Title</span>
         <input

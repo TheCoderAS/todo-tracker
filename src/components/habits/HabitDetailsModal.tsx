@@ -199,7 +199,7 @@ export default function HabitDetailsModal({ habit, isOpen, onClose }: HabitDetai
     <Modal isOpen={isOpen} onClose={onClose} ariaLabel="Habit details">
       {habit ? (
         <div className="grid gap-6">
-          <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="modal-header flex flex-wrap items-center justify-between gap-3">
             <div>
               <p className="text-xs font-semibold uppercase text-slate-500">Habit details</p>
               <h3 className="text-xl font-semibold text-white">{habit.title}</h3>

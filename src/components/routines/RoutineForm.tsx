@@ -320,7 +320,7 @@ export default function RoutineForm({
 }: RoutineFormProps) {
   return (
     <form className="grid gap-5" onSubmit={onSubmit}>
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="modal-header flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-xl font-semibold text-white">
           {isEditing ? "Edit routine" : "Create routine"}
         </h2>
