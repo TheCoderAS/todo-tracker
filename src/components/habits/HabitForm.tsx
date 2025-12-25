@@ -51,6 +51,7 @@ const habitTypeOptions: { value: HabitType; label: string; helper: string }[] = 
 
 type HabitFormProps = {
   form: HabitInput;
+  graceMissesInput: string;
   habits: Habit[];
   isEditing?: boolean;
   onChange: (
@@ -58,6 +59,8 @@ type HabitFormProps = {
       | ChangeEvent<HTMLInputElement | HTMLSelectElement>
       | { target: { name: string; value: string[] } }
   ) => void;
+  onGraceMissesChange: (value: string) => void;
+  onGraceMissesBlur: () => void;
   onToggleDay: (dayIndex: number) => void;
   onDayOfMonthChange: (dayOfMonth: number) => void;
   onMonthChange: (month: number) => void;
@@ -67,9 +70,12 @@ type HabitFormProps = {
 
 export default function HabitForm({
   form,
+  graceMissesInput,
   habits,
   isEditing = false,
   onChange,
+  onGraceMissesChange,
+  onGraceMissesBlur,
   onToggleDay,
   onDayOfMonthChange,
   onMonthChange,
@@ -234,8 +240,9 @@ export default function HabitForm({
             type="number"
             min={0}
             max={7}
-            value={form.graceMisses}
-            onChange={onChange}
+            value={graceMissesInput}
+            onChange={(event) => onGraceMissesChange(event.target.value)}
+            onBlur={onGraceMissesBlur}
             className={inputClasses}
           />
         </label>

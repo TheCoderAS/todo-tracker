@@ -92,9 +92,12 @@ export default function FocusBlockPanel({
   loading,
   onNotify
 }: FocusBlockPanelProps) {
+  const minDuration = 5;
+  const maxDuration = 120;
+  const defaultDuration = 25;
   const [selectedTodoIds, setSelectedTodoIds] = useState<string[]>([]);
   const [selectedHabitIds, setSelectedHabitIds] = useState<string[]>([]);
-  const [durationMinutes, setDurationMinutes] = useState(25);
+  const [durationInput, setDurationInput] = useState(String(defaultDuration));
   const [actionLoading, setActionLoading] = useState(false);
   const [tick, setTick] = useState(Date.now());
 
@@ -128,6 +131,12 @@ export default function FocusBlockPanel({
     const remainingMs = end.getTime() - tick;
     return Math.max(Math.floor(remainingMs / 1000), 0);
   }, [activeBlock, tick]);
+
+  const durationMinutes = useMemo(() => {
+    const numeric = Number(durationInput);
+    if (Number.isNaN(numeric)) return minDuration;
+    return Math.min(maxDuration, Math.max(minDuration, numeric));
+  }, [durationInput, maxDuration, minDuration]);
 
   const activeEndTimeLabel = useMemo(() => {
     if (!activeBlock?.startedAt) return null;
@@ -165,6 +174,7 @@ export default function FocusBlockPanel({
     setActionLoading(true);
     try {
       await addDoc(collection(db, "users", user.uid, "focusBlocks"), {
+        author_uid: user.uid,
         status: "active",
         selectedTodoIds,
         selectedHabitIds,
@@ -176,6 +186,7 @@ export default function FocusBlockPanel({
       });
       setSelectedTodoIds([]);
       setSelectedHabitIds([]);
+      setDurationInput(String(defaultDuration));
       onNotify("Focus block started.", "success");
     } catch (error) {
       console.error(error);
@@ -376,7 +387,7 @@ export default function FocusBlockPanel({
                     className="flex items-center gap-3 rounded-xl border border-transparent bg-slate-950/30 px-3 py-2 transition hover:border-slate-700"
                   >
                     <input
-                      type="checkbox"
+                  type="checkbox"
                       checked={selectedTodoIds.includes(todo.id)}
                       onChange={() => handleTodoToggle(todo.id)}
                       className="h-4 w-4 rounded border-slate-600 bg-slate-950 text-emerald-400 focus:ring-emerald-300/30"
@@ -416,14 +427,24 @@ export default function FocusBlockPanel({
               <div className="mt-3 flex items-center gap-3">
                 <input
                   type="number"
-                  min={5}
-                  max={120}
-                  value={durationMinutes}
+                  min={minDuration}
+                  max={maxDuration}
+                  value={durationInput}
                   onChange={(event) =>
-                    setDurationMinutes(
-                      Math.min(120, Math.max(5, Number(event.target.value) || 5))
-                    )
+                    setDurationInput(event.target.value)
                   }
+                  onBlur={() => {
+                    if (!durationInput.trim()) {
+                      setDurationInput(String(minDuration));
+                      return;
+                    }
+                    const numeric = Number(durationInput);
+                    if (!Number.isNaN(numeric)) {
+                      setDurationInput(
+                        String(Math.min(maxDuration, Math.max(minDuration, numeric)))
+                      );
+                    }
+                  }}
                   className="h-10 w-24 rounded-xl border border-slate-700 bg-slate-950/80 px-3 text-sm text-white"
                 />
                 <span className="text-sm text-slate-400">minutes</span>

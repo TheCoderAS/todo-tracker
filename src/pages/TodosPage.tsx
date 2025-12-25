@@ -116,6 +116,7 @@ export default function TodosPage() {
     contextTags: [],
     triggerAfterHabitId: null
   });
+  const [graceMissesInput, setGraceMissesInput] = useState("0");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingHabitId, setEditingHabitId] = useState<string | null>(null);
   const [isHabitFormOpen, setIsHabitFormOpen] = useState(false);
@@ -218,6 +219,7 @@ export default function TodosPage() {
       contextTags: [],
       triggerAfterHabitId: null
     });
+    setGraceMissesInput("0");
     setEditingHabitId(null);
   };
 
@@ -460,11 +462,32 @@ export default function TodosPage() {
     if (name === "title") {
       nextValue = value.slice(0, 40);
     }
-    if (name === "graceMisses") {
-      const nextNumber = Number.parseInt(value, 10);
-      nextValue = Number.isNaN(nextNumber) ? 0 : Math.max(nextNumber, 0);
-    }
     setHabitForm((prev) => ({ ...prev, [name]: nextValue }));
+  };
+
+  const handleGraceMissesChange = (value: string) => {
+    setGraceMissesInput(value);
+    if (!value.trim()) return;
+    const nextNumber = Number.parseInt(value, 10);
+    if (Number.isNaN(nextNumber)) return;
+    setHabitForm((prev) => ({
+      ...prev,
+      graceMisses: Math.min(7, Math.max(0, nextNumber))
+    }));
+  };
+
+  const handleGraceMissesBlur = () => {
+    if (!graceMissesInput.trim()) {
+      setGraceMissesInput("0");
+      setHabitForm((prev) => ({ ...prev, graceMisses: 0 }));
+      return;
+    }
+    const nextNumber = Number.parseInt(graceMissesInput, 10);
+    const normalized = Number.isNaN(nextNumber)
+      ? 0
+      : Math.min(7, Math.max(0, nextNumber));
+    setGraceMissesInput(String(normalized));
+    setHabitForm((prev) => ({ ...prev, graceMisses: normalized }));
   };
 
   const handleHabitDayToggle = (dayIndex: number) => {
@@ -621,6 +644,7 @@ export default function TodosPage() {
       contextTags: habit.contextTags ?? [],
       triggerAfterHabitId: habit.triggerAfterHabitId ?? null
     });
+    setGraceMissesInput(String(habit.graceMisses ?? 0));
     setIsHabitFormOpen(true);
   };
 
@@ -656,14 +680,6 @@ export default function TodosPage() {
 
   return (
     <section className="flex flex-col gap-6">
-      <FocusBlockPanel
-        user={user}
-        todos={todos}
-        habits={habits}
-        activeBlock={activeBlock}
-        loading={isFocusLoading}
-        onNotify={(message, variant) => setSnackbar({ message, variant })}
-      />
       <div className="flex w-full rounded-full border border-slate-800/70 bg-slate-900/60 p-1 text-xs font-semibold">
         <button
           type="button"
@@ -682,6 +698,15 @@ export default function TodosPage() {
           onClick={() => setTab("habits")}
         >
           Habits
+        </button>
+        <button
+          type="button"
+          className={`flex-1 rounded-full px-4 py-2 text-center transition sm:flex-none ${
+            activeTab === "focus" ? "bg-sky-500/20 text-sky-200" : "text-slate-400"
+          }`}
+          onClick={() => setTab("focus")}
+        >
+          Focus
         </button>
       </div>
 
@@ -755,7 +780,7 @@ export default function TodosPage() {
             onCancel={() => setConfirmDeleteId(null)}
           />
         </div>
-      ) : (
+      ) : activeTab === "habits" ? (
         <div key="habits" className="tab-transition">
           <HabitSection
             habits={habits}
@@ -771,17 +796,20 @@ export default function TodosPage() {
             onClose={closeHabitModal}
             ariaLabel="Habit form"
           >
-          <HabitForm
-            form={habitForm}
-            habits={habits.filter((habit) => habit.id !== editingHabitId)}
-            isEditing={Boolean(editingHabitId)}
-            onChange={handleHabitFormChange}
-            onToggleDay={handleHabitDayToggle}
-            onDayOfMonthChange={handleHabitDayOfMonthChange}
-            onMonthChange={handleHabitMonthChange}
-            onSubmit={handleSubmitHabit}
-            onCancel={closeHabitModal}
-          />
+            <HabitForm
+              form={habitForm}
+              graceMissesInput={graceMissesInput}
+              habits={habits.filter((habit) => habit.id !== editingHabitId)}
+              isEditing={Boolean(editingHabitId)}
+              onChange={handleHabitFormChange}
+              onGraceMissesChange={handleGraceMissesChange}
+              onGraceMissesBlur={handleGraceMissesBlur}
+              onToggleDay={handleHabitDayToggle}
+              onDayOfMonthChange={handleHabitDayOfMonthChange}
+              onMonthChange={handleHabitMonthChange}
+              onSubmit={handleSubmitHabit}
+              onCancel={closeHabitModal}
+            />
           </Modal>
           <HabitDetailsModal
             habit={selectedHabit}
@@ -833,6 +861,17 @@ export default function TodosPage() {
               setLinkedHabitPrompt(null);
             }}
             onCancel={() => setLinkedHabitPrompt(null)}
+          />
+        </div>
+      ) : (
+        <div key="focus" className="tab-transition">
+          <FocusBlockPanel
+            user={user}
+            todos={todos}
+            habits={habits}
+            activeBlock={activeBlock}
+            loading={isFocusLoading}
+            onNotify={(message, variant) => setSnackbar({ message, variant })}
           />
         </div>
       )}
