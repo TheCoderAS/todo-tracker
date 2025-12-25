@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import { FiCalendar, FiCheckCircle, FiClock } from "react-icons/fi";
 
 import Modal from "@/components/ui/Modal";
-import { getDateKey } from "@/lib/habitUtils";
+import { getDateKey, isHabitScheduledForDate } from "@/lib/habitUtils";
 import type { Habit, HabitFrequency } from "@/lib/types";
 
 type HabitDetailsModalProps = {
@@ -148,6 +148,43 @@ export default function HabitDetailsModal({ habit, isOpen, onClose }: HabitDetai
   const lastCompletion = habit?.completionDates?.length
     ? habit?.completionDates[habit.completionDates.length - 1]
     : null;
+  const { rollingCompletionRate, rollingCompleted, rollingScheduled, rollingWindowDays } =
+    useMemo(() => {
+      const windowDays = 30;
+      if (!habit) {
+        return {
+          rollingCompletionRate: 0,
+          rollingCompleted: 0,
+          rollingScheduled: 0,
+          rollingWindowDays: windowDays
+        };
+      }
+
+      const today = new Date();
+      const dates = Array.from({ length: windowDays }).map((_, index) => {
+        const date = new Date(today);
+        date.setDate(today.getDate() - index);
+        return date;
+      });
+      let scheduled = 0;
+      let completed = 0;
+
+      dates.forEach((date) => {
+        if (!isHabitScheduledForDate(habit, date)) return;
+        scheduled += 1;
+        const dateKey = getDateKey(date, habit.timezone);
+        if (habit.completionDates?.includes(dateKey)) {
+          completed += 1;
+        }
+      });
+
+      return {
+        rollingCompletionRate: scheduled ? Math.round((completed / scheduled) * 100) : 0,
+        rollingCompleted: completed,
+        rollingScheduled: scheduled,
+        rollingWindowDays: windowDays
+      };
+    }, [habit]);
   const trendStatusLabel = habit
     ? (completed: boolean) => getTrendStatusLabel(habit, completed)
     : () => "";
@@ -195,6 +232,15 @@ export default function HabitDetailsModal({ habit, isOpen, onClose }: HabitDetai
               </span>
             </div>
             <div className="flex items-center gap-2">
+              <FiCheckCircle aria-hidden className="text-emerald-300" />
+              <span>
+                Consistency (last {rollingWindowDays} days){" "}
+                <span className="font-semibold text-slate-100">
+                  {rollingCompletionRate}% ({rollingCompleted}/{rollingScheduled})
+                </span>
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
               <FiCalendar aria-hidden className="text-sky-300" />
               <span>
                 Grace misses per week{" "}
@@ -208,6 +254,10 @@ export default function HabitDetailsModal({ habit, isOpen, onClose }: HabitDetai
                 Last completed on {lastCompletion}
               </p>
             ) : null}
+            <p className="text-xs text-slate-500">
+              Consistency counts scheduled sessions you hit. Streaks only track
+              consecutive wins.
+            </p>
           </div>
 
           <div className="grid gap-3">

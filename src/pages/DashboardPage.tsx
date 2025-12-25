@@ -1,6 +1,7 @@
 import { useAuth } from "@/components/auth/AuthProvider";
 import CompletedTargetCard from "@/components/dashboard/CompletedTargetCard";
 import HabitAnalyticsCard from "@/components/dashboard/HabitAnalyticsCard";
+import HabitConsistencyCard from "@/components/dashboard/HabitConsistencyCard";
 import HabitTrendChart from "@/components/dashboard/HabitTrendChart";
 import WeeklyCompletionChart from "@/components/dashboard/WeeklyCompletionChart";
 import WeeklyCompletionSpilloverChart from "@/components/dashboard/WeeklyCompletionSpilloverChart";
@@ -21,6 +22,10 @@ export default function DashboardPage() {
     activeHabits,
     completedToday: habitsCompletedToday,
     completionRate,
+    rollingWindowDays,
+    rollingWindowCompletionRate,
+    rollingWindowCompleted,
+    rollingWindowScheduled,
     weeklyTrend,
     monthlyTrend,
     yearlyTrend,
@@ -29,7 +34,7 @@ export default function DashboardPage() {
 
   return (
     <section className="grid gap-6">
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <CompletedTargetCard
           completed={todayCompleted}
           target={todayTarget}
@@ -41,6 +46,13 @@ export default function DashboardPage() {
           completedToday={habitsCompletedToday}
           completionRate={completionRate}
           weeklyTrend={weeklyTrend}
+          loading={habitLoading}
+        />
+        <HabitConsistencyCard
+          days={rollingWindowDays}
+          completed={rollingWindowCompleted}
+          scheduled={rollingWindowScheduled}
+          completionRate={rollingWindowCompletionRate}
           loading={habitLoading}
         />
       </div>
