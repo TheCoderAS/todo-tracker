@@ -13,6 +13,7 @@ import {
   FiTag,
   FiTrash2,
   FiWatch,
+  FiXCircle,
   FiX
 } from "react-icons/fi";
 
@@ -58,7 +59,8 @@ export default function TodoList({
 
   const statusIconStyles: Record<Todo["status"], string> = {
     pending: "text-slate-300",
-    completed: "text-emerald-300"
+    completed: "text-emerald-300",
+    skipped: "text-slate-400"
   };
 
   const formatTitleCase = (value: string) =>
@@ -168,8 +170,10 @@ export default function TodoList({
     const pendingGroups: { title: string; items: Todo[] }[] = [];
     const completedGroups: { title: string; items: Todo[] }[] = [];
     groups.forEach((group) => {
-      const pendingItems = group.items.filter((todo) => todo.status !== "completed");
-      const completedItems = group.items.filter((todo) => todo.status === "completed");
+      const pendingItems = group.items.filter((todo) => todo.status === "pending");
+      const completedItems = group.items.filter(
+        (todo) => todo.status === "completed" || todo.status === "skipped"
+      );
       if (pendingItems.length) pendingGroups.push({ title: group.title, items: pendingItems });
       if (completedItems.length)
         completedGroups.push({ title: group.title, items: completedItems });
@@ -184,8 +188,8 @@ export default function TodoList({
       setCountdown("00:00:00");
       return;
     }
-    const isCompleted = selectedTodo.status === "completed";
-    if (isCompleted || !selectedTodo.scheduledDate) {
+    const isResolved = selectedTodo.status !== "pending";
+    if (isResolved || !selectedTodo.scheduledDate) {
       setCountdown("00:00:00");
       return;
     }
@@ -225,6 +229,9 @@ export default function TodoList({
     if (todo.status === "completed") {
       return { label: "Completed", className: "text-emerald-300" };
     }
+    if (todo.status === "skipped") {
+      return { label: "Skipped", className: "text-slate-400" };
+    }
     if (!todo.scheduledDate) {
       return { label: "No due time", className: "text-slate-500" };
     }
@@ -256,15 +263,16 @@ export default function TodoList({
           const dueMeta = getDueMeta(todo);
           const scheduledDate = todo.scheduledDate?.toDate() ?? null;
           const isOverdue =
-            todo.status !== "completed" &&
+            todo.status === "pending" &&
             scheduledDate !== null &&
             scheduledDate.getTime() < Date.now();
           const diffHours = scheduledDate
             ? (scheduledDate.getTime() - Date.now()) / 3600000
             : null;
           const isDueSoon =
-            todo.status !== "completed" && diffHours !== null && diffHours > 0 && diffHours <= 3;
+            todo.status === "pending" && diffHours !== null && diffHours > 0 && diffHours <= 3;
           const isCompleted = todo.status === "completed";
+          const isSkipped = todo.status === "skipped";
           const shouldCelebrate = todo.id === lastCompletedId;
           const subtaskCount = countListItems(todo.description ?? "");
           const cardTone = isOverdue
@@ -273,12 +281,14 @@ export default function TodoList({
             ? "glow-amber"
             : isCompleted
             ? "glow-emerald"
+            : isSkipped
+            ? "status-ring"
             : "status-ring";
           return (
             <article
               key={todo.id}
               className={`flex flex-col gap-4 rounded-3xl border border-slate-900/60 bg-gradient-to-br from-slate-900/80 via-slate-950/90 to-slate-950/80 px-5 py-4 transition hover:border-slate-700/70 ${cardTone} ${
-                isCompleted ? "opacity-70" : ""
+                isCompleted || isSkipped ? "opacity-70" : ""
               } ${isDueSoon ? "amber-pulse" : ""}`}
               role="button"
               tabIndex={0}
@@ -294,7 +304,11 @@ export default function TodoList({
                 <div className="min-w-0">
                   <strong
                     className={`block truncate text-base font-semibold text-white ${
-                      isCompleted ? "line-through decoration-emerald-400/70" : ""
+                      isCompleted
+                        ? "line-through decoration-emerald-400/70"
+                        : isSkipped
+                        ? "line-through decoration-slate-500/70"
+                        : ""
                     }`}
                   >
                     {todo.title}
@@ -304,7 +318,9 @@ export default function TodoList({
                       isOverdue ? "text-rose-300" : ""
                     }`}
                   >
-                    {isOverdue ? (
+                    {isSkipped ? (
+                      <FiXCircle aria-hidden className="text-slate-400" />
+                    ) : isOverdue ? (
                       <FiAlertTriangle aria-hidden className="text-rose-300" />
                     ) : (
                       <FiClock aria-hidden />
@@ -335,20 +351,26 @@ export default function TodoList({
                   <button
                     type="button"
                     className={`flex h-10 w-10 items-center justify-center rounded-full border border-slate-800/70 bg-slate-950/60 text-sm transition hover:border-slate-600/70 ${
-                      isCompleted ? "text-emerald-200" : "text-slate-300 hover:text-white"
+                      isCompleted
+                        ? "text-emerald-200"
+                        : isSkipped
+                        ? "text-slate-400"
+                        : "text-slate-300 hover:text-white"
                     } ${shouldCelebrate ? "celebrate-pop" : ""}`}
                     onClick={(event) => {
                       event.stopPropagation();
                       onToggleStatus(todo);
                     }}
                     aria-label={
-                      todo.status === "completed"
-                        ? "Mark todo as pending"
-                        : "Mark todo as completed"
+                      todo.status === "pending"
+                        ? "Mark todo as completed"
+                        : "Mark todo as pending"
                     }
                   >
                     {todo.status === "completed" ? (
                       <FiCircle aria-hidden />
+                    ) : todo.status === "skipped" ? (
+                      <FiXCircle aria-hidden />
                     ) : (
                       <FiCheckCircle aria-hidden />
                     )}
@@ -428,14 +450,16 @@ export default function TodoList({
                     <span
                       className={`flex items-center gap-1 rounded-full bg-slate-950/70 px-2 py-1 ${statusIconStyles[selectedTodo.status]}`}
                     >
-                      {selectedTodo.status === "completed" ? (
-                        <FiCheckCircle aria-hidden />
-                      ) : (
-                        <FiCircle aria-hidden />
-                      )}
-                      <span>{formatTitleCase(selectedTodo.status)}</span>
-                    </span>
-                  </div>
+                    {selectedTodo.status === "completed" ? (
+                      <FiCheckCircle aria-hidden />
+                    ) : selectedTodo.status === "skipped" ? (
+                      <FiXCircle aria-hidden />
+                    ) : (
+                      <FiCircle aria-hidden />
+                    )}
+                    <span>{formatTitleCase(selectedTodo.status)}</span>
+                  </span>
+                </div>
                 </div>
               </div>
               <div className="grid gap-3 text-xs text-slate-300">
@@ -443,7 +467,7 @@ export default function TodoList({
                   <FiCalendar aria-hidden className="text-slate-400" />
                   <span>{formatDate(selectedTodo.scheduledDate)}</span>
                 </div>
-                {selectedTodo.status !== "completed" ? (
+                {selectedTodo.status === "pending" ? (
                   <div className="flex items-center gap-2">
                     <FiWatch aria-hidden className="text-slate-400" />
                     <span>{countdown}</span>
@@ -497,13 +521,15 @@ export default function TodoList({
                   onToggleStatus(selectedTodo);
                 }}
                 aria-label={
-                  selectedTodo.status === "completed"
-                    ? "Mark todo as pending"
-                    : "Mark todo as completed"
+                  selectedTodo.status === "pending"
+                    ? "Mark todo as completed"
+                    : "Mark todo as pending"
                 }
               >
                 {selectedTodo.status === "completed" ? (
                   <FiCircle aria-hidden />
+                ) : selectedTodo.status === "skipped" ? (
+                  <FiXCircle aria-hidden />
                 ) : (
                   <FiCheckCircle aria-hidden />
                 )}

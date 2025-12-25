@@ -31,6 +31,8 @@ export const useTodosData = (user: User | null | undefined) => {
         return {
           id: docSnapshot.id,
           ...todo,
+          archivedAt: todo.archivedAt ?? null,
+          skippedAt: todo.skippedAt ?? null,
           tags: todo.tags ?? [],
           contextTags: todo.contextTags ?? [],
           description: todo.description ?? ""

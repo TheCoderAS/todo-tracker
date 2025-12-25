@@ -189,10 +189,12 @@ export default function PwaManager() {
     );
 
     const unsubscribe = onSnapshot(todosQuery, (snapshot) => {
-      const data = snapshot.docs.map((docSnapshot) => ({
-        id: docSnapshot.id,
-        ...(docSnapshot.data() as Omit<Todo, "id">)
-      }));
+      const data = snapshot.docs
+        .map((docSnapshot) => ({
+          id: docSnapshot.id,
+          ...(docSnapshot.data() as Omit<Todo, "id">)
+        }))
+        .filter((todo) => !todo.archivedAt);
       setDueTodayTodos(data);
     });
 

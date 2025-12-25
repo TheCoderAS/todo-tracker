@@ -35,7 +35,8 @@ type FiltersModalProps = {
 const statusOptions: { value: FilterDraft["status"]; label: string }[] = [
   { value: "all", label: "All" },
   { value: "pending", label: "Pending" },
-  { value: "completed", label: "Completed" }
+  { value: "completed", label: "Completed" },
+  { value: "skipped", label: "Skipped" }
 ];
 
 const priorityOptions: { value: FilterDraft["priority"]; label: string }[] = [
