@@ -26,7 +26,7 @@ export default function ConfirmDialog({
   return (
     <Modal isOpen={isOpen} onClose={onCancel} ariaLabel={title}>
       <div className="grid gap-6">
-        <div className="grid gap-2">
+        <div className="modal-header grid gap-2">
           <h2 className="text-xl font-semibold text-white">{title}</h2>
           <p className="text-sm text-slate-300">{description}</p>
         </div>

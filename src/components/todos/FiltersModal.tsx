@@ -121,7 +121,7 @@ export default function FiltersModal({
   return (
     <Modal isOpen={isOpen} onClose={onClose} ariaLabel="Filter todos" variant="bottom-sheet">
       <div className="grid gap-6">
-        <div className="flex items-center justify-between gap-4">
+        <div className="modal-header flex items-center justify-between gap-4">
           <div>
             <p className="text-xs font-semibold uppercase text-slate-500">
               Filter & sorting

@@ -83,7 +83,7 @@ export default function Modal({
     >
       <div className="pointer-events-none absolute inset-0" aria-hidden />
       <div
-        className={`relative overflow-y-auto border border-slate-800/70 bg-slate-950/95 p-6 shadow-2xl shadow-slate-950/60 transition-all duration-[280ms] ease-out ${panelClass} ${
+        className={`modal-panel relative overflow-y-auto border border-slate-800/70 bg-slate-950/95 p-6 shadow-2xl shadow-slate-950/60 transition-all duration-[280ms] ease-out ${panelClass} ${
           isClosing ? "translate-y-4 scale-95 opacity-0" : "translate-y-0 scale-100 opacity-100"
         }`}
         onClick={(event) => event.stopPropagation()}

@@ -127,6 +127,7 @@ export default function SettingsPage() {
       root.classList.remove("theme-light");
     }
     localStorage.setItem(THEME_STORAGE_KEY, theme);
+    window.dispatchEvent(new Event("theme-preference"));
   }, [theme]);
 
   useEffect(() => {
@@ -212,8 +213,8 @@ export default function SettingsPage() {
   }
 
   return (
-    <section className="grid gap-6">
-      <div className="rounded-3xl border border-slate-900/60 bg-slate-950/70 p-6 shadow-2xl shadow-slate-950/60">
+    <section className="grid gap-4">
+      <div className="rounded-3xl border border-slate-900/60 bg-slate-950/70 p-5 shadow-2xl shadow-slate-950/60">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-slate-800/80 bg-slate-900/60 text-lg font-semibold text-slate-100">
@@ -236,8 +237,8 @@ export default function SettingsPage() {
         </div>
       </div>
 
-      <div className="grid gap-4">
-        <div className="rounded-3xl border border-slate-900/60 bg-slate-950/70 p-5">
+      <div className="grid gap-3">
+        <div className="rounded-3xl border border-slate-900/60 bg-slate-950/70 p-4">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-start gap-3">
               <div className="mt-1 rounded-2xl border border-slate-800/70 bg-slate-900/60 p-2 text-slate-300">
@@ -261,7 +262,7 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        <div className="rounded-3xl border border-slate-900/60 bg-slate-950/70 p-5">
+        <div className="rounded-3xl border border-slate-900/60 bg-slate-950/70 p-4">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-start gap-3">
               <div className="mt-1 rounded-2xl border border-slate-800/70 bg-slate-900/60 p-2 text-slate-300">
@@ -300,7 +301,7 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        <div className="rounded-3xl border border-slate-900/60 bg-slate-950/70 p-5">
+        <div className="rounded-3xl border border-slate-900/60 bg-slate-950/70 p-4">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-start gap-3">
               <div className="mt-1 rounded-2xl border border-slate-800/70 bg-slate-900/60 p-2 text-slate-300">
@@ -337,8 +338,8 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        <div className="grid gap-4 lg:grid-cols-2">
-          <div className="rounded-3xl border border-slate-900/60 bg-slate-950/70 p-5">
+        <div className="grid gap-3 lg:grid-cols-2">
+          <div className="rounded-3xl border border-slate-900/60 bg-slate-950/70 p-4">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div className="flex items-start gap-3">
                 <div className="mt-1 rounded-2xl border border-slate-800/70 bg-slate-900/60 p-2 text-slate-300">
@@ -360,7 +361,7 @@ export default function SettingsPage() {
               </button>
             </div>
           </div>
-          <div className="rounded-3xl border border-slate-900/60 bg-slate-950/70 p-5">
+          <div className="rounded-3xl border border-slate-900/60 bg-slate-950/70 p-4">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div className="flex items-start gap-3">
                 <div className="mt-1 rounded-2xl border border-slate-800/70 bg-slate-900/60 p-2 text-slate-300">
@@ -391,7 +392,7 @@ export default function SettingsPage() {
         ariaLabel="Edit profile"
       >
         <form className="grid gap-5" onSubmit={handleSave}>
-          <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="modal-header flex flex-wrap items-center justify-between gap-3">
             <h3 className="text-lg font-semibold text-white">Update profile</h3>
             <button
               type="button"
@@ -475,7 +476,7 @@ export default function SettingsPage() {
 
       <Modal isOpen={isAboutOpen} onClose={() => setIsAboutOpen(false)} ariaLabel="About">
         <div className="grid gap-4">
-          <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="modal-header flex flex-wrap items-center justify-between gap-3">
             <h3 className="text-lg font-semibold text-white">About Aura Pulse</h3>
             <button
               type="button"
@@ -515,7 +516,7 @@ export default function SettingsPage() {
 
       <Modal isOpen={isFaqOpen} onClose={() => setIsFaqOpen(false)} ariaLabel="FAQs">
         <div className="grid gap-4">
-          <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="modal-header flex flex-wrap items-center justify-between gap-3">
             <h3 className="text-lg font-semibold text-white">FAQs & how-to guide</h3>
             <button
               type="button"
@@ -529,59 +530,82 @@ export default function SettingsPage() {
           <div className="grid gap-4">
             <div className="rounded-2xl border border-slate-800/70 bg-slate-950/70 p-4">
               <h4 className="text-sm font-semibold text-white">Tasks (Todos)</h4>
-              <ol className="mt-2 list-decimal space-y-2 pl-4 text-sm text-slate-200">
-                <li>Open the Tasks tab and tap the + button.</li>
-                <li>Add a title, schedule time, priority, tags, and context tags.</li>
-                <li>Expand the description editor for detailed notes.</li>
-                <li>Save to add the task to your daily plan.</li>
+              <p className="mt-2 text-xs text-slate-400">
+                Create focused tasks and organize them so they surface in your daily plan.
+              </p>
+              <ol className="mt-3 list-decimal space-y-2 pl-4 text-sm text-slate-200">
+                <li>Open the Tasks tab and tap the + button to add a new todo.</li>
+                <li>Give it a clear title, then pick a date and time for scheduling.</li>
+                <li>Set priority, tags, and context tags to help with filtering later.</li>
+                <li>Expand the description editor to add notes or links.</li>
+                <li>Save to place the task into your daily plan or review list.</li>
               </ol>
             </div>
 
             <div className="rounded-2xl border border-slate-800/70 bg-slate-950/70 p-4">
               <h4 className="text-sm font-semibold text-white">Habits</h4>
-              <ol className="mt-2 list-decimal space-y-2 pl-4 text-sm text-slate-200">
-                <li>Switch to the Habits tab and tap the + button.</li>
-                <li>Name the habit, set type, frequency, reminder time, and context tags.</li>
-                <li>Use the schedule controls to repeat weekly, monthly, or yearly.</li>
-                <li>Save, then tap the habit to mark progress each day.</li>
+              <p className="mt-2 text-xs text-slate-400">
+                Build consistency by scheduling habits and tracking streaks.
+              </p>
+              <ol className="mt-3 list-decimal space-y-2 pl-4 text-sm text-slate-200">
+                <li>Switch to the Habits tab and tap the + button to create one.</li>
+                <li>Name the habit, select positive or negative, and choose frequency.</li>
+                <li>Pick reminder days and a time so it shows up in your daily list.</li>
+                <li>Add context tags to group similar routines or focus themes.</li>
+                <li>Save, then tap the habit each day to log your progress.</li>
               </ol>
             </div>
 
             <div className="rounded-2xl border border-slate-800/70 bg-slate-950/70 p-4">
               <h4 className="text-sm font-semibold text-white">Routines</h4>
-              <ol className="mt-2 list-decimal space-y-2 pl-4 text-sm text-slate-200">
-                <li>Open Routines and choose “Add routine.”</li>
-                <li>Create template items with tags, context tags, and descriptions.</li>
-                <li>Save the routine, then run it to add tasks to today.</li>
-                <li>Edit or delete routines anytime from the routine list.</li>
+              <p className="mt-2 text-xs text-slate-400">
+                Save repeatable sequences so you can launch them in one tap.
+              </p>
+              <ol className="mt-3 list-decimal space-y-2 pl-4 text-sm text-slate-200">
+                <li>Open Routines and choose “Add routine” from the toolbar.</li>
+                <li>Add each step as a template task with tags and descriptions.</li>
+                <li>Save the routine, then run it to add tasks to today’s plan.</li>
+                <li>Open the routine list anytime to update or delete steps.</li>
               </ol>
             </div>
 
             <div className="rounded-2xl border border-slate-800/70 bg-slate-950/70 p-4">
               <h4 className="text-sm font-semibold text-white">Focus sessions</h4>
-              <ol className="mt-2 list-decimal space-y-2 pl-4 text-sm text-slate-200">
-                <li>Open the Focus panel from the dashboard.</li>
-                <li>Select the tasks and habits you want to focus on.</li>
-                <li>Start the session to track progress and completion rates.</li>
+              <p className="mt-2 text-xs text-slate-400">
+                Use focus mode to stay on track and measure your momentum.
+              </p>
+              <ol className="mt-3 list-decimal space-y-2 pl-4 text-sm text-slate-200">
+                <li>Open the Focus panel from the dashboard or the Focus tab.</li>
+                <li>Select the tasks and habits you want to prioritize today.</li>
+                <li>Start the session and work through items one at a time.</li>
+                <li>End the session to review completion rates and insights.</li>
               </ol>
             </div>
 
             <div className="rounded-2xl border border-slate-800/70 bg-slate-950/70 p-4">
               <h4 className="text-sm font-semibold text-white">Dashboard insights</h4>
-              <ul className="mt-2 list-disc space-y-2 pl-4 text-sm text-slate-200">
-                <li>Daily stats highlight pending tasks and habit streaks.</li>
-                <li>Trend cards show weekly completion insights.</li>
-                <li>Review alerts help you reschedule or archive missed items.</li>
-              </ul>
+              <p className="mt-2 text-xs text-slate-400">
+                Read trends and completion cues so you can adjust your plan.
+              </p>
+              <ol className="mt-3 list-decimal space-y-2 pl-4 text-sm text-slate-200">
+                <li>Check the daily stats card for tasks and habit streaks.</li>
+                <li>Scan the weekly trend cards to see completion patterns.</li>
+                <li>Use review alerts to reschedule or archive missed items.</li>
+                <li>Return to the dashboard after updates to confirm progress.</li>
+              </ol>
             </div>
 
             <div className="rounded-2xl border border-slate-800/70 bg-slate-950/70 p-4">
-              <h4 className="text-sm font-semibold text-white">Side concerns</h4>
-              <ul className="mt-2 list-disc space-y-2 pl-4 text-sm text-slate-200">
-                <li>If notifications are quiet, enable them in Settings.</li>
+              <h4 className="text-sm font-semibold text-white">Common concerns</h4>
+              <p className="mt-2 text-xs text-slate-400">
+                Quick fixes for the most frequent setup questions.
+              </p>
+              <ol className="mt-3 list-decimal space-y-2 pl-4 text-sm text-slate-200">
+                <li>Open Settings to confirm notifications are turned on.</li>
+                <li>Check device notification permissions if alerts feel quiet.</li>
                 <li>Use context tags to filter habits and tasks faster.</li>
                 <li>Reset your password from Settings if you forget it.</li>
-              </ul>
+              </ol>
             </div>
           </div>
         </div>

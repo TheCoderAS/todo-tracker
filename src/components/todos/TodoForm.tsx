@@ -140,13 +140,12 @@ export default function TodoForm({
   }, [form.description]);
 
   return (
-    <form
-      className="grid gap-5"
-      onSubmit={onSubmit}
-    >
-      <h2 className="text-xl font-semibold text-white">
-        {isEditing ? "Edit todo" : "Add a new todo"}
-      </h2>
+    <form className="grid gap-5" onSubmit={onSubmit}>
+      <div className="modal-header">
+        <h2 className="text-xl font-semibold text-white">
+          {isEditing ? "Edit todo" : "Add a new todo"}
+        </h2>
+      </div>
       <div>
         <label className={labelClasses}>
           <span className={labelTextClasses}>Title</span>
