@@ -17,6 +17,8 @@ export type FocusBlockMetrics = {
   completedTodos: number;
   totalHabits: number;
   completedHabits: number;
+  completionRate: number;
+  actualDurationMinutes: number;
 };
 
 export interface Todo {

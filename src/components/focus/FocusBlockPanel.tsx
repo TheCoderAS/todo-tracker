@@ -57,11 +57,21 @@ const getCompletionMetrics = (
     getHabitCompletionStatus(habit, today)
   ).length;
 
+  const totalItems = selectedTodos.length + selectedHabits.length;
+  const completedItems = completedTodos + completedHabits;
+  const completionRate = totalItems > 0 ? completedItems / totalItems : 0;
+  const startedAt = block.startedAt?.toDate();
+  const actualDurationMinutes = startedAt
+    ? Math.max(Math.round((Date.now() - startedAt.getTime()) / 60000), 1)
+    : block.durationMinutes;
+
   return {
     totalTodos: selectedTodos.length,
     completedTodos,
     totalHabits: selectedHabits.length,
-    completedHabits
+    completedHabits,
+    completionRate,
+    actualDurationMinutes
   };
 };
 
@@ -117,6 +127,13 @@ export default function FocusBlockPanel({
     if (!end) return 0;
     const remainingMs = end.getTime() - tick;
     return Math.max(Math.floor(remainingMs / 1000), 0);
+  }, [activeBlock, tick]);
+
+  const activeEndTimeLabel = useMemo(() => {
+    if (!activeBlock?.startedAt) return null;
+    const end = getFocusBlockEnd(activeBlock);
+    if (!end) return null;
+    return end.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   }, [activeBlock, tick]);
 
   const handleTodoToggle = (todoId: string) => {
@@ -187,6 +204,25 @@ export default function FocusBlockPanel({
     }
   };
 
+  const handleCancelBlock = async () => {
+    if (!user || !activeBlock) return;
+    setActionLoading(true);
+    try {
+      const metrics = getCompletionMetrics(activeBlock, todos, habits);
+      await updateDoc(doc(db, "users", user.uid, "focusBlocks", activeBlock.id), {
+        status: "cancelled",
+        endedAt: serverTimestamp(),
+        metrics
+      });
+      onNotify("Focus block cancelled.", "info");
+    } catch (error) {
+      console.error(error);
+      onNotify("Unable to cancel focus block.", "error");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   return (
     <section className="rounded-3xl border border-white/10 bg-slate-950/70 p-6 shadow-[0_0_40px_rgba(15,23,42,0.35)]">
       <div className="flex flex-wrap items-start justify-between gap-4">
@@ -215,6 +251,11 @@ export default function FocusBlockPanel({
             <p className="mt-1 text-xs text-emerald-200/70">
               {remainingSeconds > 0 ? "Stay focused" : "Block finished"}
             </p>
+            {activeEndTimeLabel ? (
+              <p className="mt-1 text-[11px] uppercase tracking-[0.2em] text-emerald-200/50">
+                Ends {activeEndTimeLabel}
+              </p>
+            ) : null}
           </div>
         ) : null}
       </div>
@@ -286,15 +327,41 @@ export default function FocusBlockPanel({
                   {activeBlock.durationMinutes} min
                 </span>
               </div>
+              <div className="flex items-center justify-between">
+                <span>Completion rate</span>
+                <span className="font-semibold text-white">
+                  {Math.round(
+                    (activeBlockTodos.length + activeBlockHabits.length > 0
+                      ? (activeBlockTodos.filter((todo) => todo.status === "completed")
+                          .length +
+                          activeBlockHabits.filter((habit) =>
+                            getHabitCompletionStatus(habit, new Date())
+                          ).length) /
+                        (activeBlockTodos.length + activeBlockHabits.length)
+                      : 0) * 100
+                  )}
+                  %
+                </span>
+              </div>
             </div>
-            <button
-              type="button"
-              className="mt-5 w-full rounded-2xl border border-emerald-400/40 bg-emerald-500/20 px-4 py-3 text-sm font-semibold text-emerald-100 transition hover:border-emerald-300/60 hover:bg-emerald-400/30 disabled:cursor-not-allowed disabled:opacity-60"
-              onClick={handleCompleteBlock}
-              disabled={actionLoading}
-            >
-              Log completion metrics
-            </button>
+            <div className="mt-5 flex flex-col gap-3">
+              <button
+                type="button"
+                className="w-full rounded-2xl border border-emerald-400/40 bg-emerald-500/20 px-4 py-3 text-sm font-semibold text-emerald-100 transition hover:border-emerald-300/60 hover:bg-emerald-400/30 disabled:cursor-not-allowed disabled:opacity-60"
+                onClick={handleCompleteBlock}
+                disabled={actionLoading}
+              >
+                Log completion metrics
+              </button>
+              <button
+                type="button"
+                className="w-full rounded-2xl border border-slate-700/60 bg-slate-900/60 px-4 py-2 text-xs font-semibold text-slate-300 transition hover:border-slate-600/70 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+                onClick={handleCancelBlock}
+                disabled={actionLoading}
+              >
+                Cancel focus block
+              </button>
+            </div>
           </div>
         </div>
       ) : (
