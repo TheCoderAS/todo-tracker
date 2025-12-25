@@ -11,6 +11,16 @@
     overflow-x: hidden;
   }
 
+  html.theme-light body {
+    color-scheme: light;
+    filter: invert(1) hue-rotate(180deg);
+    background-image: radial-gradient(circle at top, #e2e8f0 0%, #f8fafc 55%);
+  }
+
+  html.theme-light .no-invert {
+    filter: invert(1) hue-rotate(180deg);
+  }
+
   html {
     scroll-behavior: smooth;
   }

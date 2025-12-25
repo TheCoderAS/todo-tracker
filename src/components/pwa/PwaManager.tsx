@@ -16,16 +16,40 @@ import { db } from "@/lib/firebase";
 import { getFirebaseMessaging } from "@/lib/firebaseMessaging";
 import type { Todo } from "@/lib/types";
 
+const NOTIFICATIONS_STORAGE_KEY = "notificationsEnabled";
+
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
+};
+
+const readNotificationPreference = () => {
+  if (typeof window === "undefined") return true;
+  const stored = localStorage.getItem(NOTIFICATIONS_STORAGE_KEY);
+  if (stored === null) return true;
+  return stored === "true";
 };
 
 export default function PwaManager() {
   const { user } = useAuth();
   const [dueTodayTodos, setDueTodayTodos] = useState<Todo[]>([]);
   const [dayKey, setDayKey] = useState(() => new Date().toDateString());
+  const [notificationsEnabled, setNotificationsEnabled] = useState(() =>
+    readNotificationPreference()
+  );
   const notificationIntervalRef = useRef<number | null>(null);
   const storedNotificationIdsRef = useRef<Set<string>>(new Set());
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const handlePreferenceChange = () =>
+      setNotificationsEnabled(readNotificationPreference());
+    window.addEventListener("storage", handlePreferenceChange);
+    window.addEventListener("notifications-preference", handlePreferenceChange);
+    return () => {
+      window.removeEventListener("storage", handlePreferenceChange);
+      window.removeEventListener("notifications-preference", handlePreferenceChange);
+    };
+  }, []);
   useEffect(() => {
     if (typeof window === "undefined") return;
 
@@ -51,6 +75,7 @@ export default function PwaManager() {
     if (typeof window === "undefined") return;
     if (!user) return;
     if (!("Notification" in window)) return;
+    if (!notificationsEnabled) return;
 
     const saveNotification = async ({
       notificationId,
@@ -168,7 +193,7 @@ export default function PwaManager() {
       }
       Promise.resolve(unsubscribeForeground).then((unsubscribe) => unsubscribe?.());
     };
-  }, [user]);
+  }, [notificationsEnabled, user]);
 
   useEffect(() => {
     if (!user) {
@@ -236,6 +261,7 @@ export default function PwaManager() {
     if (typeof window === "undefined") return;
     if (!user) return;
     if (!("Notification" in window)) return;
+    if (!notificationsEnabled) return;
 
     const summaryIntervalMinutes = Number(
       import.meta.env.VITE_NOTIFICATION_SUMMARY_INTERVAL_MINUTES || "5"
@@ -295,7 +321,7 @@ export default function PwaManager() {
         notificationIntervalRef.current = null;
       }
     };
-  }, [dueTodayTodos, user]);
+  }, [dueTodayTodos, notificationsEnabled, user]);
 
   return null;
 }
