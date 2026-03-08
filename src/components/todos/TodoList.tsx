@@ -240,6 +240,16 @@ export default function TodoList({
 
   const hasCompleted = groupSplit.completedGroups.some((group) => group.items.length > 0);
 
+  const truncatedPendingGroups = useMemo(() => {
+    let remaining = visibleCount;
+    return groupSplit.pendingGroups.map((group) => {
+      if (remaining <= 0) return { ...group, items: [] };
+      const items = group.items.slice(0, remaining);
+      remaining -= items.length;
+      return { ...group, items };
+    }).filter((g) => g.items.length > 0);
+  }, [groupSplit.pendingGroups, visibleCount]);
+
   useEffect(() => {
     if (!selectedTodo) {
       setCountdown("00:00:00");
@@ -505,16 +515,6 @@ export default function TodoList({
       </div>
     );
   };
-
-  const truncatedPendingGroups = useMemo(() => {
-    let remaining = visibleCount;
-    return groupSplit.pendingGroups.map((group) => {
-      if (remaining <= 0) return { ...group, items: [] };
-      const items = group.items.slice(0, remaining);
-      remaining -= items.length;
-      return { ...group, items };
-    }).filter((g) => g.items.length > 0);
-  }, [groupSplit.pendingGroups, visibleCount]);
 
   const listContent = (
     <>
