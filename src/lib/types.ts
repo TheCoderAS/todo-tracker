@@ -2,6 +2,7 @@ import type { Timestamp } from "firebase/firestore";
 
 export type TodoStatus = "pending" | "completed" | "skipped";
 export type TodoPriority = "low" | "medium" | "high";
+export type TodoRecurrence = "none" | "daily" | "weekly" | "monthly";
 export type HabitFrequency =
   | "daily"
   | "weekly"
@@ -21,6 +22,12 @@ export type FocusBlockMetrics = {
   actualDurationMinutes: number;
 };
 
+export interface Subtask {
+  id: string;
+  title: string;
+  completed: boolean;
+}
+
 export interface Todo {
   id: string;
   title: string;
@@ -34,6 +41,9 @@ export interface Todo {
   tags: string[];
   contextTags: string[];
   description: string;
+  recurrence?: TodoRecurrence;
+  subtasks?: Subtask[];
+  manualOrder?: number;
 }
 
 export interface TodoInput {
@@ -44,6 +54,8 @@ export interface TodoInput {
   tags: string;
   contextTags: string[];
   description: string;
+  recurrence: TodoRecurrence;
+  subtasks: Subtask[];
 }
 
 export interface RoutineItemTemplate {

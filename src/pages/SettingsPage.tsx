@@ -3,6 +3,7 @@ import { useLocation } from "react-router-dom";
 import { sendPasswordResetEmail, updateProfile } from "firebase/auth";
 import {
   FiBell,
+  FiDownload,
   FiEdit2,
   FiHelpCircle,
   FiInfo,
@@ -19,6 +20,7 @@ import { useAuth } from "@/components/auth/AuthProvider";
 import OverlayLoader from "@/components/ui/OverlayLoader";
 import Snackbar, { type SnackbarVariant } from "@/components/ui/Snackbar";
 import { auth, db } from "@/lib/firebase";
+import { useSearchData } from "@/hooks/useSearchData";
 import appMeta from "../../package.json";
 
 const THEME_STORAGE_KEY = "theme";
@@ -64,6 +66,7 @@ const readNotificationPreference = () => {
 
 export default function SettingsPage() {
   const { user } = useAuth();
+  const { todos, habits } = useSearchData(user);
   const location = useLocation();
   const [form, setForm] = useState<ProfileFormState>(defaultProfile);
   const [isLoading, setIsLoading] = useState(true);
@@ -204,6 +207,80 @@ export default function SettingsPage() {
     }
   };
 
+  const handleExportJSON = () => {
+    const data = {
+      exportedAt: new Date().toISOString(),
+      todos: todos.map((t) => ({
+        id: t.id,
+        title: t.title,
+        status: t.status,
+        priority: t.priority,
+        tags: t.tags,
+        description: t.description,
+        recurrence: t.recurrence ?? null,
+        scheduledDate: t.scheduledDate?.toDate().toISOString() ?? null,
+        completedDate: t.completedDate?.toDate().toISOString() ?? null,
+        createdAt: t.createdAt?.toDate().toISOString() ?? null
+      })),
+      habits: habits.map((h) => ({
+        id: h.id,
+        title: h.title,
+        frequency: h.frequency,
+        reminderTime: h.reminderTime,
+        reminderDays: h.reminderDays,
+        completionDates: h.completionDates,
+        archivedAt: h.archivedAt ? "archived" : null,
+        createdAt: h.createdAt?.toDate().toISOString() ?? null
+      }))
+    };
+
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `aura-pulse-export-${new Date().toISOString().split("T")[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    setSnackbar({ message: "Data exported as JSON.", variant: "success" });
+  };
+
+  const handleExportCSV = () => {
+    const headers = ["Type", "Title", "Status", "Priority", "Tags", "Scheduled Date", "Completed Date", "Recurrence"];
+    const rows = todos.map((t) => [
+      "Todo",
+      `"${t.title.replace(/"/g, '""')}"`,
+      t.status,
+      t.priority,
+      `"${t.tags.join(", ")}"`,
+      t.scheduledDate?.toDate().toISOString() ?? "",
+      t.completedDate?.toDate().toISOString() ?? "",
+      t.recurrence ?? ""
+    ]);
+
+    habits.forEach((h) => {
+      rows.push([
+        "Habit",
+        `"${h.title.replace(/"/g, '""')}"`,
+        h.archivedAt ? "archived" : "active",
+        "",
+        "",
+        "",
+        "",
+        h.frequency
+      ]);
+    });
+
+    const csv = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `aura-pulse-export-${new Date().toISOString().split("T")[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    setSnackbar({ message: "Data exported as CSV.", variant: "success" });
+  };
+
   if (isLoading) {
     return (
       <section className="relative z-10 flex min-h-[60vh] items-center justify-center">
@@ -295,7 +372,7 @@ export default function SettingsPage() {
                     : "translate-x-0 bg-slate-700 text-slate-200"
                 }`}
               >
-                {theme === "light" ? "☀" : "☾"}
+                {theme === "light" ? "\u2600" : "\u263E"}
               </span>
             </button>
           </div>
@@ -335,6 +412,38 @@ export default function SettingsPage() {
                 {notificationsEnabled ? "On" : "Off"}
               </span>
             </button>
+          </div>
+        </div>
+
+        <div className="rounded-3xl border border-slate-900/60 bg-slate-950/70 p-4">
+          <div className="flex items-start gap-3">
+            <div className="mt-1 rounded-2xl border border-slate-800/70 bg-slate-900/60 p-2 text-slate-300">
+              <FiDownload aria-hidden />
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-white">Data export</p>
+              <p className="text-xs text-slate-400">
+                Download all your todos and habits. Your data belongs to you.
+              </p>
+              <div className="mt-3 flex flex-wrap gap-3">
+                <button
+                  type="button"
+                  onClick={handleExportJSON}
+                  className="flex items-center gap-2 rounded-full border border-slate-700/70 px-4 py-2 text-xs font-semibold uppercase text-slate-300 transition hover:border-slate-500/80 hover:text-white"
+                >
+                  <FiDownload aria-hidden />
+                  Export JSON
+                </button>
+                <button
+                  type="button"
+                  onClick={handleExportCSV}
+                  className="flex items-center gap-2 rounded-full border border-slate-700/70 px-4 py-2 text-xs font-semibold uppercase text-slate-300 transition hover:border-slate-500/80 hover:text-white"
+                >
+                  <FiDownload aria-hidden />
+                  Export CSV
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -562,9 +671,9 @@ export default function SettingsPage() {
                 Save repeatable sequences so you can launch them in one tap.
               </p>
               <ol className="mt-3 list-decimal space-y-2 pl-4 text-sm text-slate-200">
-                <li>Open Routines and choose “Add routine” from the toolbar.</li>
+                <li>Open Routines and choose "Add routine" from the toolbar.</li>
                 <li>Add each step as a template task with tags and descriptions.</li>
-                <li>Save the routine, then run it to add tasks to today’s plan.</li>
+                <li>Save the routine, then run it to add tasks to today's plan.</li>
                 <li>Open the routine list anytime to update or delete steps.</li>
               </ol>
             </div>

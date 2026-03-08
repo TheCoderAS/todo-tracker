@@ -1,10 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import type { User } from "firebase/auth";
-import { collection, onSnapshot, Timestamp } from "firebase/firestore";
+import { useMemo } from "react";
+import type { Timestamp } from "firebase/firestore";
 
-import { db } from "@/lib/firebase";
 import type { Todo } from "@/lib/types";
 
 export type CompletionDay = {
@@ -18,6 +16,17 @@ export type WeeklyCompletionBreakdown = {
   spillover: number;
 };
 
+export type DayOfWeekStat = {
+  day: string;
+  count: number;
+};
+
+export type PriorityStat = {
+  priority: string;
+  count: number;
+  total: number;
+};
+
 type CompletionAnalytics = {
   dailyCompletions: CompletionDay[];
   weeklyCompletionBreakdown: WeeklyCompletionBreakdown[];
@@ -25,8 +34,13 @@ type CompletionAnalytics = {
   todayCompleted: number;
   onTimeCompletions: number;
   spilloverCompletions: number;
+  completionByDayOfWeek: DayOfWeekStat[];
+  completionByPriority: PriorityStat[];
+  productivityScore: number;
   loading: boolean;
 };
+
+const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 const emptyAnalytics: CompletionAnalytics = {
   dailyCompletions: [],
@@ -35,6 +49,9 @@ const emptyAnalytics: CompletionAnalytics = {
   todayCompleted: 0,
   onTimeCompletions: 0,
   spilloverCompletions: 0,
+  completionByDayOfWeek: dayNames.map((day) => ({ day, count: 0 })),
+  completionByPriority: [],
+  productivityScore: 0,
   loading: false
 };
 
@@ -45,19 +62,16 @@ const buildDayRange = (date: Date) => {
   return { start, end };
 };
 
-export function useCompletionAnalytics(user: User | null): CompletionAnalytics {
-  const [analytics, setAnalytics] = useState<CompletionAnalytics>({
-    ...emptyAnalytics,
-    loading: true
-  });
+export function useCompletionAnalytics(
+  todos: Todo[],
+  isLoading: boolean
+): CompletionAnalytics {
+  return useMemo(() => {
+    if (isLoading) return { ...emptyAnalytics, loading: true };
+    if (todos.length === 0) return emptyAnalytics;
 
-  useEffect(() => {
-    if (!user) {
-      setAnalytics(emptyAnalytics);
-      return;
-    }
+    const activeTodos = todos.filter((todo) => !todo.archivedAt);
 
-    let isMounted = true;
     const today = new Date();
     const days = Array.from({ length: 30 }).map((_, index) => {
       const date = new Date(today);
@@ -71,91 +85,105 @@ export function useCompletionAnalytics(user: User | null): CompletionAnalytics {
       return value >= start && value <= end;
     };
 
-    setAnalytics((prev) => ({ ...prev, loading: true }));
+    const weeklyBreakdown = days.map((date) => {
+      const { start, end } = buildDayRange(date);
+      const completedTodos = activeTodos.filter(
+        (todo) =>
+          todo.status === "completed" && inRange(todo.completedDate, start, end)
+      );
 
-    const unsubscribe = onSnapshot(
-      collection(db, "users", user.uid, "todos"),
-      (snapshot) => {
-        const todos = snapshot.docs.map((docSnapshot) => ({
-          id: docSnapshot.id,
-          ...(docSnapshot.data() as Omit<Todo, "id">)
-        }));
-
-        const activeTodos = todos.filter((todo) => !todo.archivedAt);
-        const weeklyBreakdown = days.map((date) => {
-          const { start, end } = buildDayRange(date);
-          const completedTodos = activeTodos.filter(
-            (todo) => todo.status === "completed" && inRange(todo.completedDate, start, end)
-          );
-
-          let onTime = 0;
-          let spillover = 0;
-          completedTodos.forEach((todo) => {
-            const scheduledDate = todo.scheduledDate?.toDate();
-            if (scheduledDate && scheduledDate < start) {
-              spillover += 1;
-              return;
-            }
-            onTime += 1;
-          });
-
-          return { date: start, onTime, spillover };
-        });
-
-        const { start: todayStart, end: todayEnd } = buildDayRange(today);
-        const todayTarget = activeTodos.filter(
-          (todo) =>
-            todo.status !== "skipped" && inRange(todo.scheduledDate, todayStart, todayEnd)
-        ).length;
-
-        const todayCompletedTodos = activeTodos.filter(
-          (todo) => todo.status === "completed" && inRange(todo.completedDate, todayStart, todayEnd)
-        );
-
-        let onTime = 0;
-        let spillover = 0;
-        todayCompletedTodos.forEach((todo) => {
-          const scheduledDate = todo.scheduledDate?.toDate();
-          if (scheduledDate && scheduledDate < todayStart) {
-            spillover += 1;
-            return;
-          }
-          onTime += 1;
-        });
-
-        if (!isMounted) return;
-        setAnalytics({
-          dailyCompletions: weeklyBreakdown.map((entry) => ({
-            date: entry.date,
-            count: entry.onTime + entry.spillover
-          })),
-          weeklyCompletionBreakdown: weeklyBreakdown,
-          todayCompleted:
-            weeklyBreakdown[weeklyBreakdown.length - 1]
-              ? weeklyBreakdown[weeklyBreakdown.length - 1].onTime +
-                weeklyBreakdown[weeklyBreakdown.length - 1].spillover
-              : 0,
-          todayTarget,
-          onTimeCompletions: onTime,
-          spilloverCompletions: spillover,
-          loading: false
-        });
-      },
-      (error) => {
-        console.error(error);
-        if (isMounted) {
-          setAnalytics((prev) => ({ ...prev, loading: false }));
+      let onTime = 0;
+      let spillover = 0;
+      completedTodos.forEach((todo) => {
+        const scheduledDate = todo.scheduledDate?.toDate();
+        if (scheduledDate && scheduledDate < start) {
+          spillover += 1;
+          return;
         }
-      }
+        onTime += 1;
+      });
+
+      return { date: start, onTime, spillover };
+    });
+
+    const { start: todayStart, end: todayEnd } = buildDayRange(today);
+    const todayTarget = activeTodos.filter(
+      (todo) =>
+        todo.status !== "skipped" &&
+        inRange(todo.scheduledDate, todayStart, todayEnd)
+    ).length;
+
+    const todayCompletedTodos = activeTodos.filter(
+      (todo) =>
+        todo.status === "completed" &&
+        inRange(todo.completedDate, todayStart, todayEnd)
     );
 
-    return () => {
-      isMounted = false;
-      if (typeof unsubscribe === "function") {
-        unsubscribe();
+    let onTime = 0;
+    let spillover = 0;
+    todayCompletedTodos.forEach((todo) => {
+      const scheduledDate = todo.scheduledDate?.toDate();
+      if (scheduledDate && scheduledDate < todayStart) {
+        spillover += 1;
+        return;
       }
-    };
-  }, [user]);
+      onTime += 1;
+    });
 
-  return analytics;
+    const dayOfWeekCounts = new Array(7).fill(0);
+    const priorityCounts: Record<string, { completed: number; total: number }> = {
+      high: { completed: 0, total: 0 },
+      medium: { completed: 0, total: 0 },
+      low: { completed: 0, total: 0 }
+    };
+
+    activeTodos.forEach((todo) => {
+      if (todo.priority && priorityCounts[todo.priority]) {
+        priorityCounts[todo.priority].total += 1;
+      }
+      if (todo.status === "completed" && todo.completedDate) {
+        const completedDate = todo.completedDate.toDate();
+        dayOfWeekCounts[completedDate.getDay()] += 1;
+        if (todo.priority && priorityCounts[todo.priority]) {
+          priorityCounts[todo.priority].completed += 1;
+        }
+      }
+    });
+
+    const completionByDayOfWeek = dayNames.map((day, i) => ({
+      day,
+      count: dayOfWeekCounts[i]
+    }));
+
+    const completionByPriority = (["high", "medium", "low"] as const).map((p) => ({
+      priority: p.charAt(0).toUpperCase() + p.slice(1),
+      count: priorityCounts[p].completed,
+      total: priorityCounts[p].total
+    }));
+
+    const totalCompleted = activeTodos.filter((t) => t.status === "completed").length;
+    const totalTodos = activeTodos.filter((t) => t.status !== "skipped").length;
+    const productivityScore =
+      totalTodos > 0 ? Math.round((totalCompleted / totalTodos) * 100) : 0;
+
+    return {
+      dailyCompletions: weeklyBreakdown.map((entry) => ({
+        date: entry.date,
+        count: entry.onTime + entry.spillover
+      })),
+      weeklyCompletionBreakdown: weeklyBreakdown,
+      todayCompleted:
+        weeklyBreakdown[weeklyBreakdown.length - 1]
+          ? weeklyBreakdown[weeklyBreakdown.length - 1].onTime +
+            weeklyBreakdown[weeklyBreakdown.length - 1].spillover
+          : 0,
+      todayTarget,
+      onTimeCompletions: onTime,
+      spilloverCompletions: spillover,
+      completionByDayOfWeek,
+      completionByPriority,
+      productivityScore,
+      loading: false
+    };
+  }, [todos, isLoading]);
 }

@@ -5,7 +5,7 @@ const navItems = [
   { href: "/", label: "Dashboard", icon: FiGrid },
   { href: "/todos", label: "Tasks", icon: FiList },
   { href: "/routines", label: "Routines", icon: FiRepeat },
-  { href: "/settings", label: "Setting", icon: FiSettings }
+  { href: "/settings", label: "Settings", icon: FiSettings }
 ];
 
 export default function BottomNav() {

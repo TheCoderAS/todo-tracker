@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { FiCalendar, FiCheckCircle, FiClock } from "react-icons/fi";
+import { FiCalendar, FiCheckCircle, FiClock, FiTrendingUp, FiZap } from "react-icons/fi";
 
 import Modal from "@/components/ui/Modal";
 import { getDateKey, getHabitMilestoneProgress, isHabitScheduledForDate } from "@/lib/habitUtils";
@@ -140,6 +140,81 @@ const buildTrendEntries = (habit: Habit): TrendEntry[] => {
     .reverse();
 };
 
+const computeStreak = (habit: Habit): { current: number; longest: number } => {
+  const completionSet = new Set(habit.completionDates ?? []);
+  if (completionSet.size === 0) return { current: 0, longest: 0 };
+
+  const sorted = Array.from(completionSet).sort();
+  let current = 0;
+  let longest = 0;
+  let streak = 0;
+
+  const cursor = new Date();
+  const todayKey = getDateKey(cursor, habit.timezone);
+  const yesterdayDate = new Date(cursor);
+  yesterdayDate.setDate(yesterdayDate.getDate() - 1);
+  const yesterdayKey = getDateKey(yesterdayDate, habit.timezone);
+
+  if (completionSet.has(todayKey) || completionSet.has(yesterdayKey)) {
+    const start = completionSet.has(todayKey) ? cursor : yesterdayDate;
+    const c = new Date(start);
+    while (completionSet.has(getDateKey(c, habit.timezone))) {
+      current++;
+      c.setDate(c.getDate() - 1);
+    }
+  }
+
+  streak = 1;
+  for (let i = 1; i < sorted.length; i++) {
+    const prev = new Date(sorted[i - 1] + "T12:00:00");
+    const curr = new Date(sorted[i] + "T12:00:00");
+    const diffDays = Math.round((curr.getTime() - prev.getTime()) / 86400000);
+    if (diffDays === 1) {
+      streak++;
+    } else {
+      if (streak > longest) longest = streak;
+      streak = 1;
+    }
+  }
+  if (streak > longest) longest = streak;
+
+  return { current, longest };
+};
+
+const dayLabels = ["S", "M", "T", "W", "T", "F", "S"];
+
+const buildHeatmapData = (habit: Habit) => {
+  const completionSet = new Set(habit.completionDates ?? []);
+  const today = new Date();
+  const weeks: { date: Date; dateKey: string; completed: boolean }[][] = [];
+
+  const startDate = new Date(today);
+  startDate.setDate(startDate.getDate() - 90);
+  startDate.setDate(startDate.getDate() - startDate.getDay());
+
+  let currentWeek: { date: Date; dateKey: string; completed: boolean }[] = [];
+  const cursor = new Date(startDate);
+
+  while (cursor <= today) {
+    const dateKey = getDateKey(new Date(cursor), habit.timezone);
+    currentWeek.push({
+      date: new Date(cursor),
+      dateKey,
+      completed: completionSet.has(dateKey)
+    });
+    if (currentWeek.length === 7) {
+      weeks.push(currentWeek);
+      currentWeek = [];
+    }
+    cursor.setDate(cursor.getDate() + 1);
+  }
+  if (currentWeek.length > 0) {
+    weeks.push(currentWeek);
+  }
+
+  return weeks;
+};
+
 const formatHabitTypeLabel = (habit: Habit) =>
   habit.habitType === "avoid" ? "Avoid habit" : "Build habit";
 
@@ -195,6 +270,15 @@ export default function HabitDetailsModal({ habit, isOpen, onClose }: HabitDetai
     ? (completed: boolean) => getTrendStatusLabel(habit, completed)
     : () => "";
 
+  const streaks = useMemo(() => (habit ? computeStreak(habit) : { current: 0, longest: 0 }), [habit]);
+  const heatmapWeeks = useMemo(() => (habit ? buildHeatmapData(habit) : []), [habit]);
+
+  const completionRate = useMemo(() => {
+    if (!trendEntries.length) return 0;
+    const completed = trendEntries.filter((e) => e.completed).length;
+    return Math.round((completed / trendEntries.length) * 100);
+  }, [trendEntries]);
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} ariaLabel="Habit details">
       {habit ? (
@@ -207,6 +291,25 @@ export default function HabitDetailsModal({ habit, isOpen, onClose }: HabitDetai
             <span className="rounded-full border border-slate-800/70 bg-slate-950/60 px-3 py-1 text-xs font-semibold text-slate-300">
               {formatFrequencyLabel(habit.frequency)}
             </span>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <div className="rounded-2xl border border-slate-800/70 bg-slate-950/60 p-3 text-center">
+              <p className="text-lg font-bold text-emerald-300">{streaks.current}</p>
+              <p className="text-[0.65rem] text-slate-500 uppercase">Current streak</p>
+            </div>
+            <div className="rounded-2xl border border-slate-800/70 bg-slate-950/60 p-3 text-center">
+              <p className="text-lg font-bold text-sky-300">{streaks.longest}</p>
+              <p className="text-[0.65rem] text-slate-500 uppercase">Best streak</p>
+            </div>
+            <div className="rounded-2xl border border-slate-800/70 bg-slate-950/60 p-3 text-center">
+              <p className="text-lg font-bold text-amber-300">{totalCompletions}</p>
+              <p className="text-[0.65rem] text-slate-500 uppercase">Total</p>
+            </div>
+            <div className="rounded-2xl border border-slate-800/70 bg-slate-950/60 p-3 text-center">
+              <p className="text-lg font-bold text-cyan-300">{completionRate}%</p>
+              <p className="text-[0.65rem] text-slate-500 uppercase">Rate</p>
+            </div>
           </div>
 
           <div className="grid gap-3 rounded-2xl border border-slate-800/70 bg-slate-950/60 p-4 text-sm text-slate-300">
@@ -225,15 +328,6 @@ export default function HabitDetailsModal({ habit, isOpen, onClose }: HabitDetai
                 Habit type{" "}
                 <span className="font-semibold text-slate-100">
                   {formatHabitTypeLabel(habit)}
-                </span>
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <FiCalendar aria-hidden className="text-sky-300" />
-              <span>
-                Total completions{" "}
-                <span className="font-semibold text-slate-100">
-                  {totalCompletions}
                 </span>
               </span>
             </div>
@@ -272,9 +366,13 @@ export default function HabitDetailsModal({ habit, isOpen, onClose }: HabitDetai
               </span>
             </div>
             {lastCompletion ? (
-              <p className="text-xs text-slate-500">
-                Last completed on {lastCompletion}
-              </p>
+              <div className="flex items-center gap-2">
+                <FiCalendar aria-hidden className="text-sky-300" />
+                <span>
+                  Last completed{" "}
+                  <span className="font-semibold text-slate-100">{lastCompletion}</span>
+                </span>
+              </div>
             ) : null}
             <p className="text-xs text-slate-500">
               Consistency counts scheduled sessions you hit. Streaks only track
@@ -283,8 +381,50 @@ export default function HabitDetailsModal({ habit, isOpen, onClose }: HabitDetai
           </div>
 
           <div className="grid gap-3">
+            <div className="flex items-center gap-2">
+              <FiZap aria-hidden className="text-emerald-300 h-4 w-4" />
+              <h4 className="text-sm font-semibold text-white">Activity (last 90 days)</h4>
+            </div>
+            <div className="rounded-2xl border border-slate-800/70 bg-slate-950/60 p-4 overflow-x-auto">
+              <div className="flex gap-0.5 min-w-fit">
+                <div className="flex flex-col gap-0.5 mr-1">
+                  {dayLabels.map((label, i) => (
+                    <div key={i} className="h-3 w-3 flex items-center justify-center text-[0.45rem] text-slate-500">
+                      {i % 2 === 0 ? label : ""}
+                    </div>
+                  ))}
+                </div>
+                {heatmapWeeks.map((week, wi) => (
+                  <div key={wi} className="flex flex-col gap-0.5">
+                    {week.map((day) => (
+                      <div
+                        key={day.dateKey}
+                        className={`h-3 w-3 rounded-sm transition ${
+                          day.completed
+                            ? "bg-emerald-400 shadow-[0_0_4px_rgba(16,185,129,0.4)]"
+                            : "bg-slate-800/60"
+                        }`}
+                        title={`${day.date.toLocaleDateString()} - ${day.completed ? "Completed" : "Missed"}`}
+                      />
+                    ))}
+                  </div>
+                ))}
+              </div>
+              <div className="flex items-center justify-end gap-2 mt-2 text-[0.55rem] text-slate-500">
+                <span>Less</span>
+                <div className="h-3 w-3 rounded-sm bg-slate-800/60" />
+                <div className="h-3 w-3 rounded-sm bg-emerald-400" />
+                <span>More</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid gap-3">
             <div className="flex items-center justify-between">
-              <h4 className="text-sm font-semibold text-white">Trend</h4>
+              <div className="flex items-center gap-2">
+                <FiTrendingUp aria-hidden className="text-sky-300 h-4 w-4" />
+                <h4 className="text-sm font-semibold text-white">Recent trend</h4>
+              </div>
               <p className="text-xs text-slate-500">Last scheduled sessions</p>
             </div>
             <div className="grid gap-2">
