@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { FiBell, FiCheck, FiLogOut } from "react-icons/fi";
+import { FiBell, FiCheck, FiLogOut, FiSearch } from "react-icons/fi";
 import {
   collection,
   doc,
@@ -11,6 +11,8 @@ import {
 } from "firebase/firestore";
 
 import { useAuth } from "@/components/auth/AuthProvider";
+import SearchModal from "@/components/search/SearchModal";
+import { useSearchData } from "@/hooks/useSearchData";
 import { db } from "@/lib/firebase";
 
 type AppHeaderProps = {
@@ -21,10 +23,23 @@ type AppHeaderProps = {
 export default function AppHeader({ showSignOut, onSignOut }: AppHeaderProps) {
   const { user } = useAuth();
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [notifications, setNotifications] = useState<
     { id: string; title: string; body: string; createdAt?: Date | null; read?: boolean }[]
   >([]);
   const menuRef = useRef<HTMLDivElement | null>(null);
+  const { todos: searchTodos, habits: searchHabits } = useSearchData(user);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key === "k") {
+        event.preventDefault();
+        setIsSearchOpen((prev) => !prev);
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   useEffect(() => {
     if (!user) {
@@ -133,6 +148,27 @@ export default function AppHeader({ showSignOut, onSignOut }: AppHeaderProps) {
           <span className="font-bold text-slate-200">Aura Pulse</span>
         </div>
         <div className="flex items-center gap-3">
+          {user ? (
+            <>
+              <button
+                className="flex h-9 items-center gap-2 rounded-full border border-slate-700/70 px-3 text-sm text-slate-400 transition-all duration-200 ease-out hover:border-slate-500 hover:text-slate-200"
+                onClick={() => setIsSearchOpen(true)}
+                aria-label="Search"
+              >
+                <FiSearch className="h-4 w-4" aria-hidden />
+                <span className="hidden sm:inline text-xs">Search</span>
+                <kbd className="hidden sm:inline-flex items-center rounded border border-slate-700/70 bg-slate-900/60 px-1 py-0.5 text-[0.55rem] text-slate-500">
+                  ⌘K
+                </kbd>
+              </button>
+              <SearchModal
+                isOpen={isSearchOpen}
+                onClose={() => setIsSearchOpen(false)}
+                todos={searchTodos}
+                habits={searchHabits}
+              />
+            </>
+          ) : null}
           {user ? (
             <div className="relative" ref={menuRef}>
               <button

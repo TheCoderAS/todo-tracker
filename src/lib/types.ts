@@ -2,6 +2,7 @@ import type { Timestamp } from "firebase/firestore";
 
 export type TodoStatus = "pending" | "completed";
 export type TodoPriority = "low" | "medium" | "high";
+export type TodoRecurrence = "none" | "daily" | "weekly" | "monthly";
 export type HabitFrequency =
   | "daily"
   | "weekly"
@@ -9,6 +10,12 @@ export type HabitFrequency =
   | "quarterly"
   | "half-yearly"
   | "yearly";
+
+export interface Subtask {
+  id: string;
+  title: string;
+  completed: boolean;
+}
 
 export interface Todo {
   id: string;
@@ -20,6 +27,9 @@ export interface Todo {
   priority: TodoPriority;
   tags: string[];
   description: string;
+  recurrence?: TodoRecurrence;
+  subtasks?: Subtask[];
+  manualOrder?: number;
 }
 
 export interface TodoInput {
@@ -29,6 +39,8 @@ export interface TodoInput {
   priority: TodoPriority;
   tags: string;
   description: string;
+  recurrence: TodoRecurrence;
+  subtasks: Subtask[];
 }
 
 export interface Habit {

@@ -9,9 +9,9 @@ import {
   BsTypeItalic,
   BsTypeStrikethrough
 } from "react-icons/bs";
-import { FiPlus, FiSave, FiX } from "react-icons/fi";
+import { FiCheckSquare, FiPlus, FiRepeat, FiSave, FiSquare, FiTrash2, FiX } from "react-icons/fi";
 
-import type { TodoInput, TodoPriority } from "@/lib/types";
+import type { Subtask, TodoInput, TodoPriority, TodoRecurrence } from "@/lib/types";
 
 const inputClasses =
   "w-full rounded-2xl border border-slate-800/70 bg-slate-950/60 px-4 py-3 text-sm text-slate-100 transition focus:border-emerald-300/50 focus:outline-none focus:ring-1 focus:ring-emerald-300/20";
@@ -28,6 +28,7 @@ type TodoFormProps = {
   scheduleHasError: boolean;
   onChange: (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
   onDescriptionChange: (value: string) => void;
+  onSubtasksChange: (subtasks: Subtask[]) => void;
   onSubmit: (event: FormEvent) => void;
   onCancelEdit: () => void;
 };
@@ -40,10 +41,12 @@ export default function TodoForm({
   scheduleHasError,
   onChange,
   onDescriptionChange,
+  onSubtasksChange,
   onSubmit,
   onCancelEdit
 }: TodoFormProps) {
   const [tagInput, setTagInput] = useState("");
+  const [subtaskInput, setSubtaskInput] = useState("");
   const [isDescriptionOpen, setIsDescriptionOpen] = useState(
     Boolean(form.description)
   );
@@ -114,6 +117,30 @@ export default function TodoForm({
     onDescriptionChange(editor.innerHTML);
   };
 
+  const handleAddSubtask = () => {
+    const trimmed = subtaskInput.trim();
+    if (!trimmed) return;
+    const newSubtask: Subtask = {
+      id: crypto.randomUUID(),
+      title: trimmed,
+      completed: false
+    };
+    onSubtasksChange([...form.subtasks, newSubtask]);
+    setSubtaskInput("");
+  };
+
+  const handleToggleSubtask = (subtaskId: string) => {
+    onSubtasksChange(
+      form.subtasks.map((s) =>
+        s.id === subtaskId ? { ...s, completed: !s.completed } : s
+      )
+    );
+  };
+
+  const handleRemoveSubtask = (subtaskId: string) => {
+    onSubtasksChange(form.subtasks.filter((s) => s.id !== subtaskId));
+  };
+
   useEffect(() => {
     const editor = descriptionRef.current;
     if (!editor) return;
@@ -138,7 +165,7 @@ export default function TodoForm({
             placeholder="What would you like add?"
             value={form.title}
             onChange={onChange}
-            maxLength={24}
+            maxLength={80}
             required
             className={`${inputClasses} ${
               titleHasError ? "border-rose-500/80 text-rose-100" : ""
@@ -176,6 +203,43 @@ export default function TodoForm({
                 aria-invalid={scheduleHasError}
               />
             </label>
+          </div>
+          <div className={labelClasses}>
+            <span className={labelTextClasses}>
+              <FiRepeat className="inline h-3 w-3 mr-1" aria-hidden />
+              Repeat
+            </span>
+            <div className="flex flex-wrap gap-2">
+              {(
+                [
+                  { value: "none", label: "No repeat" },
+                  { value: "daily", label: "Daily" },
+                  { value: "weekly", label: "Weekly" },
+                  { value: "monthly", label: "Monthly" }
+                ] as { value: TodoRecurrence; label: string }[]
+              ).map((option) => {
+                const isActive = form.recurrence === option.value;
+                return (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() =>
+                      onChange({
+                        target: { name: "recurrence", value: option.value }
+                      } as React.ChangeEvent<HTMLSelectElement>)
+                    }
+                    aria-pressed={isActive}
+                    className={`rounded-full border px-4 py-2 text-xs font-semibold transition ${
+                      isActive
+                        ? "border-sky-400/60 bg-sky-400/15 text-sky-100"
+                        : "border-slate-800/80 text-slate-400 hover:border-slate-600/70 hover:text-slate-200"
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                );
+              })}
+            </div>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className={labelClasses}>
@@ -329,6 +393,69 @@ export default function TodoForm({
               </div>
             </label>
           )}
+        </div>
+        <div className="mt-5">
+          <div className={labelClasses}>
+            <span className={labelTextClasses}>Subtasks</span>
+            <div className="grid gap-2">
+              {form.subtasks.map((subtask) => (
+                <div
+                  key={subtask.id}
+                  className="flex items-center gap-2 rounded-2xl border border-slate-800/70 bg-slate-950/60 px-3 py-2"
+                >
+                  <button
+                    type="button"
+                    onClick={() => handleToggleSubtask(subtask.id)}
+                    className="flex-shrink-0 text-slate-400 hover:text-emerald-300 transition"
+                  >
+                    {subtask.completed ? (
+                      <FiCheckSquare className="h-4 w-4 text-emerald-400" aria-hidden />
+                    ) : (
+                      <FiSquare className="h-4 w-4" aria-hidden />
+                    )}
+                  </button>
+                  <span
+                    className={`flex-1 text-sm ${
+                      subtask.completed
+                        ? "text-slate-500 line-through"
+                        : "text-slate-200"
+                    }`}
+                  >
+                    {subtask.title}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveSubtask(subtask.id)}
+                    className="flex-shrink-0 text-slate-500 hover:text-rose-300 transition"
+                  >
+                    <FiTrash2 className="h-3.5 w-3.5" aria-hidden />
+                  </button>
+                </div>
+              ))}
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={subtaskInput}
+                  onChange={(e) => setSubtaskInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      handleAddSubtask();
+                    }
+                  }}
+                  placeholder="Add a subtask"
+                  className={`${inputClasses} flex-1`}
+                />
+                <button
+                  type="button"
+                  onClick={handleAddSubtask}
+                  className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full border border-slate-700/70 text-slate-300 transition hover:border-emerald-400/60 hover:text-emerald-200"
+                >
+                  <FiPlus className="h-4 w-4" aria-hidden />
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
       <div className="sticky bottom-0 -mx-5 mt-6 grid grid-cols-2 gap-2 border-t border-slate-900/60 bg-slate-950/80 px-5 backdrop-blur">

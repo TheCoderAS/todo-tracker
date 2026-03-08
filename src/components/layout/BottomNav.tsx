@@ -1,9 +1,10 @@
 import { Link, useLocation } from "react-router-dom";
-import { FiGrid, FiList, FiUser } from "react-icons/fi";
+import { FiGrid, FiList, FiSettings, FiUser } from "react-icons/fi";
 
 const navItems = [
   { href: "/", label: "Dashboard", icon: FiGrid },
   { href: "/todos", label: "Tasks", icon: FiList },
+  { href: "/settings", label: "Settings", icon: FiSettings },
   { href: "/profile", label: "Profile", icon: FiUser }
 ];
 

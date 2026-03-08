@@ -21,11 +21,13 @@ export type FilterDraft = {
   sortOrder: "asc" | "desc";
   datePreset: "all" | "today" | "tomorrow" | "week" | "spillover" | "upcoming" | "custom";
   selectedDate: string;
+  tags: string[];
 };
 
 type FiltersModalProps = {
   isOpen: boolean;
   filterDraft: FilterDraft;
+  availableTags: string[];
   onClose: () => void;
   onApply: () => void;
   onReset: () => void;
@@ -48,6 +50,7 @@ const priorityOptions: { value: FilterDraft["priority"]; label: string }[] = [
 export default function FiltersModal({
   isOpen,
   filterDraft,
+  availableTags,
   onClose,
   onApply,
   onReset,
@@ -268,6 +271,36 @@ export default function FiltersModal({
               </label>
             ) : null}
           </div>
+
+          {availableTags.length > 0 && (
+            <div className="grid gap-3">
+              <h4 className="text-xs font-semibold text-white">Tags</h4>
+              <div className="flex flex-wrap gap-2">
+                {availableTags.map((tag) => {
+                  const isSelected = filterDraft.tags.includes(tag);
+                  return (
+                    <button
+                      key={tag}
+                      type="button"
+                      className={`flex h-9 items-center justify-center rounded-full border px-3 text-xs font-semibold transition active:scale-95 ${
+                        isSelected
+                          ? "border-cyan-400/60 bg-cyan-400/15 text-cyan-100"
+                          : "border-slate-800/70 bg-slate-950/50 text-slate-300 hover:border-slate-600/70 hover:text-white"
+                      }`}
+                      onClick={() => {
+                        const nextTags = isSelected
+                          ? filterDraft.tags.filter((t) => t !== tag)
+                          : [...filterDraft.tags, tag];
+                        onDraftChange({ ...filterDraft, tags: nextTags });
+                      }}
+                    >
+                      #{tag}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           <div className="grid gap-3">
             <h4 className="text-xs font-semibold text-white">Sort by</h4>

@@ -1,10 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import type { User } from "firebase/auth";
-import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
+import { useMemo } from "react";
 
-import { db } from "@/lib/firebase";
 import { getDateKey, getMonthKey, isHabitScheduledForDate } from "@/lib/habitUtils";
 import type { Habit } from "@/lib/types";
 
@@ -33,19 +30,14 @@ const emptyAnalytics: HabitAnalytics = {
   loading: false
 };
 
-export function useHabitAnalytics(user: User | null): HabitAnalytics {
-  const [analytics, setAnalytics] = useState<HabitAnalytics>({
-    ...emptyAnalytics,
-    loading: true
-  });
+export function useHabitAnalytics(
+  habits: Habit[],
+  isLoading: boolean
+): HabitAnalytics {
+  return useMemo(() => {
+    if (isLoading) return { ...emptyAnalytics, loading: true };
+    if (habits.length === 0) return emptyAnalytics;
 
-  useEffect(() => {
-    if (!user) {
-      setAnalytics(emptyAnalytics);
-      return;
-    }
-
-    let isMounted = true;
     const today = new Date();
     const last7Days = Array.from({ length: 7 }).map((_, index) => {
       const date = new Date(today);
@@ -61,99 +53,66 @@ export function useHabitAnalytics(user: User | null): HabitAnalytics {
       return date;
     });
 
-    setAnalytics((prev) => ({ ...prev, loading: true }));
+    const activeHabits = habits.filter((habit) => !habit.archivedAt);
+    const scheduledToday = activeHabits.filter((habit) =>
+      isHabitScheduledForDate(habit, today)
+    );
+    const completedToday = scheduledToday.filter((habit) =>
+      habit.completionDates?.includes(getDateKey(today, habit.timezone))
+    ).length;
 
-    const habitsQuery = query(
-      collection(db, "users", user.uid, "habits"),
-      orderBy("createdAt", "desc")
+    const weeklyTrend = last7Days.map((date) => {
+      const count = activeHabits.filter(
+        (habit) =>
+          isHabitScheduledForDate(habit, date) &&
+          habit.completionDates?.includes(getDateKey(date, habit.timezone))
+      ).length;
+      return { date, count };
+    });
+
+    const monthMap = new Map(
+      last6Months.map((date) => [getMonthKey(date), { date, count: 0 }])
+    );
+    const yearMap = new Map(
+      last5Years.map((date) => [String(date.getFullYear()), { date, count: 0 }])
     );
 
-    const unsubscribe = onSnapshot(
-      habitsQuery,
-      (snapshot) => {
-        const habits = snapshot.docs.map((docSnapshot) => ({
-          id: docSnapshot.id,
-          ...(docSnapshot.data() as Omit<Habit, "id">)
-        }));
-
-        const activeHabits = habits.filter((habit) => !habit.archivedAt);
-        const scheduledToday = activeHabits.filter((habit) =>
-          isHabitScheduledForDate(habit, today)
-        );
-        const completedToday = scheduledToday.filter((habit) =>
-          habit.completionDates?.includes(getDateKey(today, habit.timezone))
-        ).length;
-
-        const weeklyTrend = last7Days.map((date) => {
-          const count = activeHabits.filter(
-            (habit) =>
-              isHabitScheduledForDate(habit, date) &&
-              habit.completionDates?.includes(getDateKey(date, habit.timezone))
-          ).length;
-          return { date, count };
-        });
-
-        const monthMap = new Map(
-          last6Months.map((date) => [getMonthKey(date), { date, count: 0 }])
-        );
-        const yearMap = new Map(
-          last5Years.map((date) => [String(date.getFullYear()), { date, count: 0 }])
-        );
-
-        activeHabits.forEach((habit) => {
-          habit.completionDates?.forEach((dateKey) => {
-            const completionDate = new Date(`${dateKey}T00:00:00`);
-            if (!isHabitScheduledForDate(habit, completionDate)) return;
-            const monthKey = dateKey.slice(0, 7);
-            const yearKey = dateKey.slice(0, 4);
-            const monthEntry = monthMap.get(monthKey);
-            if (monthEntry) {
-              monthEntry.count += 1;
-            }
-            const yearEntry = yearMap.get(yearKey);
-            if (yearEntry) {
-              yearEntry.count += 1;
-            }
-          });
-        });
-
-        const monthlyTrend = last6Months.map(
-          (date) => monthMap.get(getMonthKey(date)) ?? { date, count: 0 }
-        );
-        const yearlyTrend = last5Years.map(
-          (date) => yearMap.get(String(date.getFullYear())) ?? { date, count: 0 }
-        );
-
-        const completionRate = scheduledToday.length
-          ? Math.round((completedToday / scheduledToday.length) * 100)
-          : 0;
-
-        if (!isMounted) return;
-        setAnalytics({
-          activeHabits: scheduledToday.length,
-          completedToday,
-          completionRate,
-          weeklyTrend,
-          monthlyTrend,
-          yearlyTrend,
-          loading: false
-        });
-      },
-      (error) => {
-        console.error(error);
-        if (isMounted) {
-          setAnalytics((prev) => ({ ...prev, loading: false }));
+    activeHabits.forEach((habit) => {
+      habit.completionDates?.forEach((dateKey) => {
+        const completionDate = new Date(`${dateKey}T00:00:00`);
+        if (!isHabitScheduledForDate(habit, completionDate)) return;
+        const monthKey = dateKey.slice(0, 7);
+        const yearKey = dateKey.slice(0, 4);
+        const monthEntry = monthMap.get(monthKey);
+        if (monthEntry) {
+          monthEntry.count += 1;
         }
-      }
+        const yearEntry = yearMap.get(yearKey);
+        if (yearEntry) {
+          yearEntry.count += 1;
+        }
+      });
+    });
+
+    const monthlyTrend = last6Months.map(
+      (date) => monthMap.get(getMonthKey(date)) ?? { date, count: 0 }
+    );
+    const yearlyTrend = last5Years.map(
+      (date) => yearMap.get(String(date.getFullYear())) ?? { date, count: 0 }
     );
 
-    return () => {
-      isMounted = false;
-      if (typeof unsubscribe === "function") {
-        unsubscribe();
-      }
-    };
-  }, [user]);
+    const completionRate = scheduledToday.length
+      ? Math.round((completedToday / scheduledToday.length) * 100)
+      : 0;
 
-  return analytics;
+    return {
+      activeHabits: scheduledToday.length,
+      completedToday,
+      completionRate,
+      weeklyTrend,
+      monthlyTrend,
+      yearlyTrend,
+      loading: false
+    };
+  }, [habits, isLoading]);
 }

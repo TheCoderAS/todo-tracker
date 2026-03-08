@@ -12,7 +12,8 @@ const defaultFilters: FilterDraft = {
   sortBy: "scheduled",
   sortOrder: "asc",
   datePreset: "all",
-  selectedDate: ""
+  selectedDate: "",
+  tags: []
 };
 
 export const useTodoFilters = (todos: Todo[]) => {
@@ -28,7 +29,14 @@ export const useTodoFilters = (todos: Todo[]) => {
     defaultFilters.datePreset
   );
   const [selectedDate, setSelectedDate] = useState(defaultFilters.selectedDate);
+  const [tagFilter, setTagFilter] = useState<string[]>(defaultFilters.tags);
   const [filterDraft, setFilterDraft] = useState<FilterDraft>(defaultFilters);
+
+  const availableTags = useMemo(() => {
+    const tagSet = new Set<string>();
+    todos.forEach((todo) => todo.tags.forEach((tag) => tagSet.add(tag)));
+    return Array.from(tagSet).sort();
+  }, [todos]);
 
   const handleApplyFilters = () => {
     setStatusFilter(filterDraft.status);
@@ -43,6 +51,7 @@ export const useTodoFilters = (todos: Todo[]) => {
     setSortOrder(filterDraft.sortOrder);
     setDatePreset(filterDraft.datePreset);
     setSelectedDate(filterDraft.selectedDate);
+    setTagFilter(filterDraft.tags);
   };
 
   const handleResetFilters = () => {
@@ -53,6 +62,7 @@ export const useTodoFilters = (todos: Todo[]) => {
     setSortOrder(defaultFilters.sortOrder);
     setDatePreset(defaultFilters.datePreset);
     setSelectedDate(defaultFilters.selectedDate);
+    setTagFilter(defaultFilters.tags);
   };
 
   const handleQuickFilter = (value: "all" | "today" | "completed" | "flagged") => {
@@ -171,7 +181,9 @@ export const useTodoFilters = (todos: Todo[]) => {
       const matchesStatus = statusFilter === "all" || todo.status === statusFilter;
       const matchesPriority = priorityFilter === "all" || todo.priority === priorityFilter;
       const matchesDate = matchesDatePreset(todo);
-      return matchesStatus && matchesPriority && matchesDate;
+      const matchesTags =
+        tagFilter.length === 0 || tagFilter.some((tag) => todo.tags.includes(tag));
+      return matchesStatus && matchesPriority && matchesDate && matchesTags;
     });
 
     if (filteredTodos.length === 0) return [];
@@ -246,7 +258,9 @@ export const useTodoFilters = (todos: Todo[]) => {
             return (aMillis - bMillis) * sortDirection;
           }
           if (sortBy === "manual") {
-            return 0;
+            const aOrder = a.manualOrder ?? Number.MAX_SAFE_INTEGER;
+            const bOrder = b.manualOrder ?? Number.MAX_SAFE_INTEGER;
+            return aOrder - bOrder;
           }
           const aMillis =
             sortBy === "completed" ? a.completedDate?.toMillis() : a.scheduledDate?.toMillis();
@@ -273,7 +287,8 @@ export const useTodoFilters = (todos: Todo[]) => {
     sortBy,
     sortOrder,
     datePreset,
-    selectedDate
+    selectedDate,
+    tagFilter
   ]);
 
   const emptyStateLabel = useMemo(() => {
@@ -286,6 +301,8 @@ export const useTodoFilters = (todos: Todo[]) => {
   return {
     statusFilter,
     priorityFilter,
+    tagFilter,
+    availableTags,
     sortOrder,
     sortBy,
     datePreset,

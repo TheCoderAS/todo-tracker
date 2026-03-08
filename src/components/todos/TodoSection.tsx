@@ -4,11 +4,15 @@ import { useMemo, useState } from "react";
 import {
   FiArrowDown,
   FiArrowUp,
+  FiCheckCircle,
+  FiCheckSquare,
   FiFilter,
   FiFlag,
   FiPlus,
   FiStar,
   FiTarget,
+  FiTrash2,
+  FiX,
   FiZap
 } from "react-icons/fi";
 
@@ -39,6 +43,15 @@ type TodoSectionProps = {
   streakCount: number;
   lastCompletedId: string | null;
   isLoading: boolean;
+  onReorder?: (activeId: string, overId: string) => void;
+  isSelectMode?: boolean;
+  selectedIds?: Set<string>;
+  onToggleSelectMode?: () => void;
+  onToggleSelectId?: (id: string) => void;
+  onSelectAll?: (ids: string[]) => void;
+  onClearSelection?: () => void;
+  onBulkComplete?: () => void;
+  onBulkDelete?: () => void;
 };
 
 export default function TodoSection({
@@ -64,7 +77,16 @@ export default function TodoSection({
   todayStats,
   streakCount,
   lastCompletedId,
-  isLoading
+  isLoading,
+  onReorder,
+  isSelectMode,
+  selectedIds,
+  onToggleSelectMode,
+  onToggleSelectId,
+  onSelectAll,
+  onClearSelection,
+  onBulkComplete,
+  onBulkDelete
 }: TodoSectionProps) {
   const [isFabOpen, setIsFabOpen] = useState(false);
   const quickFilters = useMemo(
@@ -135,7 +157,82 @@ export default function TodoSection({
           >
             <FiFilter aria-hidden />
           </button>
+          {onToggleSelectMode && (
+            <button
+              type="button"
+              className={`flex h-9 w-9 items-center justify-center rounded-full border text-sm transition hover:border-slate-600/70 hover:text-white ${
+                isSelectMode
+                  ? "border-sky-400/60 bg-sky-400/15 text-sky-200"
+                  : "border-slate-800/70 bg-slate-950/40 text-slate-300"
+              }`}
+              onClick={onToggleSelectMode}
+              aria-label={isSelectMode ? "Exit select mode" : "Enter select mode"}
+            >
+              <FiCheckSquare aria-hidden />
+            </button>
+          )}
         </div>
+
+        {isSelectMode && selectedIds && (
+          <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-slate-800/70 bg-slate-950/60 px-4 py-2">
+            <span className="text-xs font-semibold text-slate-300">
+              {selectedIds.size} selected
+            </span>
+            <div className="ml-auto flex items-center gap-2">
+              {onSelectAll && (
+                <button
+                  type="button"
+                  className="text-xs font-semibold text-sky-300 transition hover:text-sky-200"
+                  onClick={() => {
+                    const allIds = groups.flatMap((g) =>
+                      g.items.filter((t) => t.status === "pending").map((t) => t.id)
+                    );
+                    onSelectAll(allIds);
+                  }}
+                >
+                  Select all
+                </button>
+              )}
+              {onClearSelection && selectedIds.size > 0 && (
+                <button
+                  type="button"
+                  className="text-xs font-semibold text-slate-400 transition hover:text-slate-200"
+                  onClick={onClearSelection}
+                >
+                  Clear
+                </button>
+              )}
+              {onBulkComplete && selectedIds.size > 0 && (
+                <button
+                  type="button"
+                  className="flex items-center gap-1 rounded-full bg-emerald-400/15 border border-emerald-400/40 px-3 py-1 text-xs font-semibold text-emerald-200 transition hover:bg-emerald-400/25"
+                  onClick={onBulkComplete}
+                >
+                  <FiCheckCircle aria-hidden />
+                  Complete
+                </button>
+              )}
+              {onBulkDelete && selectedIds.size > 0 && (
+                <button
+                  type="button"
+                  className="flex items-center gap-1 rounded-full bg-rose-400/15 border border-rose-400/40 px-3 py-1 text-xs font-semibold text-rose-200 transition hover:bg-rose-400/25"
+                  onClick={onBulkDelete}
+                >
+                  <FiTrash2 aria-hidden />
+                  Delete
+                </button>
+              )}
+              <button
+                type="button"
+                className="flex h-7 w-7 items-center justify-center rounded-full text-slate-400 transition hover:text-white"
+                onClick={onToggleSelectMode}
+                aria-label="Cancel selection"
+              >
+                <FiX aria-hidden />
+              </button>
+            </div>
+          </div>
+        )}
 
         <div className="grid gap-2 sm:gap-3">
           <div className="flex flex-wrap items-center gap-2 rounded-full border border-slate-800/70 bg-slate-950/40 p-1 text-[0.7rem] font-semibold text-slate-200">
@@ -207,6 +304,11 @@ export default function TodoSection({
           emptyStateLabel={emptyStateLabel}
           lastCompletedId={lastCompletedId}
           isLoading={isLoading}
+          sortBy={sortBy}
+          onReorder={onReorder}
+          isSelectMode={isSelectMode}
+          selectedIds={selectedIds}
+          onToggleSelectId={onToggleSelectId}
         />
       </section>
 

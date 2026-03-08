@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import type { ReactNode } from "react";
-import { FiX } from "react-icons/fi";
+import { FiRotateCcw, FiX } from "react-icons/fi";
 
 export type SnackbarVariant = "success" | "error" | "info";
 
@@ -8,6 +8,7 @@ type SnackbarProps = {
   message: ReactNode;
   variant?: SnackbarVariant;
   onDismiss: () => void;
+  onUndo?: () => void;
 };
 
 const variantStyles: Record<SnackbarVariant, string> = {
@@ -19,15 +20,16 @@ const variantStyles: Record<SnackbarVariant, string> = {
 export default function Snackbar({
   message,
   variant = "info",
-  onDismiss
+  onDismiss,
+  onUndo
 }: SnackbarProps) {
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
       onDismiss();
-    }, 4500);
+    }, onUndo ? 6000 : 4500);
 
     return () => window.clearTimeout(timeoutId);
-  }, [onDismiss]);
+  }, [onDismiss, onUndo]);
 
   return (
     <div
@@ -37,6 +39,19 @@ export default function Snackbar({
       role="status"
     >
       <span className="flex-1">{message}</span>
+      {onUndo ? (
+        <button
+          type="button"
+          onClick={() => {
+            onUndo();
+            onDismiss();
+          }}
+          className="flex items-center gap-1 rounded-full border border-white/20 px-2 py-1 text-xs font-semibold text-current transition hover:bg-white/10"
+        >
+          <FiRotateCcw className="h-3 w-3" />
+          Undo
+        </button>
+      ) : null}
       <button
         type="button"
         onClick={onDismiss}
