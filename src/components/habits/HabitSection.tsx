@@ -1,10 +1,19 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { FiCheckCircle, FiCircle, FiEdit2, FiEye, FiPlus, FiTrash2 } from "react-icons/fi";
+import {
+  FiArchive,
+  FiCheckCircle,
+  FiCircle,
+  FiEdit2,
+  FiEye,
+  FiLink,
+  FiPlus,
+  FiTrash2
+} from "react-icons/fi";
 
 import type { Habit, HabitFrequency } from "@/lib/types";
-import { getDateKey, isHabitScheduledForDate } from "@/lib/habitUtils";
+import { getDateKey, getHabitMilestoneProgress, isHabitScheduledForDate } from "@/lib/habitUtils";
 
 const dayLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
@@ -66,6 +75,22 @@ const formatScheduleSummary = (habit: Habit) => {
   return `Day ${dayOfMonth}`;
 };
 
+const formatHabitTypeLabel = (habit: Habit) =>
+  habit.habitType === "avoid" ? "Avoid" : "Build";
+
+const getCompletionLabels = (habit: Habit, isCompleted: boolean) => {
+  if (habit.habitType === "avoid") {
+    return {
+      status: isCompleted ? "Stayed on track" : "Slipped",
+      action: isCompleted ? "Stayed on track" : "Mark on track"
+    };
+  }
+  return {
+    status: isCompleted ? "Completed today" : "Scheduled for today",
+    action: isCompleted ? "Done today" : "Mark done"
+  };
+};
+
 export default function HabitSection({
   habits,
   onToggleComplete,
@@ -79,22 +104,64 @@ export default function HabitSection({
     "all" | "completed" | "pending" | "archived"
   >("all");
   const [frequencyFilter, setFrequencyFilter] = useState<"all" | HabitFrequency>("all");
+  const [contextTagFilter, setContextTagFilter] = useState("all");
+  const uncategorizedLabel = "Uncategorized";
+  const hasUncategorized = useMemo(
+    () => habits.some((habit) => !(habit.contextTags ?? []).length),
+    [habits]
+  );
+
+  const contextTagOptions = useMemo(() => {
+    const tags = new Set<string>();
+    habits.forEach((habit) => {
+      (habit.contextTags ?? []).forEach((tag) => tags.add(tag));
+    });
+    const options = Array.from(tags).sort();
+    if (hasUncategorized) {
+      options.unshift(uncategorizedLabel);
+    }
+    return options;
+  }, [habits, hasUncategorized, uncategorizedLabel]);
 
   const now = new Date();
   const activeHabits = useMemo(
     () => habits.filter((habit) => !habit.archivedAt),
     [habits]
   );
+  const habitLookup = useMemo(() => {
+    const map = new Map<string, Habit>();
+    habits.forEach((habit) => map.set(habit.id, habit));
+    return map;
+  }, [habits]);
+  const triggerSources = useMemo(() => {
+    const map = new Map<string, Habit[]>();
+    habits.forEach((habit) => {
+      if (!habit.triggerAfterHabitId) return;
+      const sources = map.get(habit.triggerAfterHabitId) ?? [];
+      sources.push(habit);
+      map.set(habit.triggerAfterHabitId, sources);
+    });
+    return map;
+  }, [habits]);
+  const contextFilteredHabits = useMemo(() => {
+    if (contextTagFilter === "all") return activeHabits;
+    if (contextTagFilter === uncategorizedLabel) {
+      return activeHabits.filter((habit) => !(habit.contextTags ?? []).length);
+    }
+    return activeHabits.filter((habit) =>
+      (habit.contextTags ?? []).includes(contextTagFilter)
+    );
+  }, [activeHabits, contextTagFilter, uncategorizedLabel]);
 
   const todayStats = useMemo(() => {
-    const scheduledToday = activeHabits.filter((habit) =>
+    const scheduledToday = contextFilteredHabits.filter((habit) =>
       isHabitScheduledForDate(habit, now)
     );
     const completed = scheduledToday.filter((habit) =>
       habit.completionDates?.includes(getDateKey(now, habit.timezone))
     ).length;
     return { total: scheduledToday.length, completed };
-  }, [activeHabits, now]);
+  }, [contextFilteredHabits, now]);
 
   const filteredHabits = useMemo(() => {
     return habits.filter((habit) => {
@@ -118,9 +185,30 @@ export default function HabitSection({
       if (frequencyFilter !== "all" && habit.frequency !== frequencyFilter) {
         return false;
       }
+      if (contextTagFilter !== "all") {
+        if (
+          contextTagFilter === uncategorizedLabel &&
+          (habit.contextTags ?? []).length
+        ) {
+          return false;
+        }
+        if (
+          contextTagFilter !== uncategorizedLabel &&
+          !(habit.contextTags ?? []).includes(contextTagFilter)
+        ) {
+          return false;
+        }
+      }
       return true;
     });
-  }, [frequencyFilter, habits, now, statusFilter]);
+  }, [
+    contextTagFilter,
+    frequencyFilter,
+    habits,
+    now,
+    statusFilter,
+    uncategorizedLabel
+  ]);
 
   return (
     <section className="grid gap-6">
@@ -204,6 +292,23 @@ export default function HabitSection({
               </select>
             </label>
           </div>
+          <div className="rounded-2xl border border-slate-800/70 bg-slate-950/40 px-2 pr-1 py-1 text-xs text-slate-200">
+            <label className="flex items-center gap-2">
+              <span className="text-slate-400">Context</span>
+              <select
+                value={contextTagFilter}
+                onChange={(event) => setContextTagFilter(event.target.value)}
+                className="rounded-full border border-slate-800/70 bg-slate-950/60 px-2 py-1 text-[0.7rem] text-slate-200"
+              >
+                <option value="all">All</option>
+                {contextTagOptions.map((tag) => (
+                  <option key={tag} value={tag}>
+                    {tag}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
         </div>
 
         <div className="grid gap-3">
@@ -226,13 +331,23 @@ export default function HabitSection({
               );
               const isScheduledToday = isHabitScheduledForDate(habit, now);
               const isArchived = Boolean(habit.archivedAt);
+              const completionLabels = getCompletionLabels(habit, Boolean(isCompleted));
+              const milestoneProgress = getHabitMilestoneProgress(
+                habit.completionDates?.length ?? 0
+              );
+              const triggerTarget = habit.triggerAfterHabitId
+                ? habitLookup.get(habit.triggerAfterHabitId)
+                : null;
+              const triggerIncoming = triggerSources.get(habit.id) ?? [];
+              const visibleTriggerTarget = triggerTarget?.archivedAt ? null : triggerTarget;
+              const visibleTriggerIncoming = triggerIncoming.filter((source) => !source.archivedAt);
               return (
                 <div
                   key={habit.id}
                   className="flex flex-col gap-4 rounded-3xl border border-slate-900/60 bg-slate-950/70 p-5 shadow-lg shadow-slate-950/40"
                 >
-                  <div className="flex flex-wrap items-start justify-between gap-4">
-                    <div className="grid gap-1">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="grid min-w-0 gap-1">
                       <div className="flex flex-wrap items-center gap-2">
                         <h3 className="text-base font-semibold text-white">
                           {habit.title}
@@ -244,14 +359,39 @@ export default function HabitSection({
                         ) : null}
                       </div>
                       <p className="text-xs text-slate-400">
-                        {formatFrequencyLabel(habit.frequency)} •{" "}
+                        {formatHabitTypeLabel(habit)} • {formatFrequencyLabel(habit.frequency)} •{" "}
                         {formatScheduleSummary(habit)} •{" "}
                         {habit.reminderTime
                           ? `Reminds at ${habit.reminderTime}`
                           : "No time"}
                       </p>
+                      <p className="text-xs text-slate-500">
+                        Level {milestoneProgress.level} •{" "}
+                        {milestoneProgress.nextMilestone
+                          ? `${milestoneProgress.nextMilestone} completions to next milestone`
+                          : "Milestones mastered"}
+                      </p>
+                      {visibleTriggerTarget || visibleTriggerIncoming.length ? (
+                        <div className="flex flex-wrap items-center gap-2 text-[0.65rem] text-slate-400">
+                          {visibleTriggerIncoming.length ? (
+                            <span className="inline-flex items-center gap-1 rounded-full border border-slate-800/70 bg-slate-900/60 px-2 py-0.5 text-slate-300">
+                              <FiLink aria-hidden className="text-slate-400" />
+                              After{" "}
+                              {visibleTriggerIncoming
+                                .map((source) => source.title)
+                                .join(", ")}
+                            </span>
+                          ) : null}
+                          {visibleTriggerTarget ? (
+                            <span className="inline-flex items-center gap-1 rounded-full border border-slate-800/70 bg-slate-900/60 px-2 py-0.5 text-slate-300">
+                              <FiLink aria-hidden className="text-slate-400" />
+                              Next {visibleTriggerTarget.title}
+                            </span>
+                          ) : null}
+                        </div>
+                      ) : null}
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 sm:justify-end">
                       <button
                         type="button"
                         className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-800/70 text-slate-300 transition hover:border-slate-600/80 hover:text-white"
@@ -271,20 +411,24 @@ export default function HabitSection({
                       </button>
                       <button
                         type="button"
-                        className="flex h-9 w-9 items-center justify-center rounded-full border border-rose-400/30 text-rose-200 transition hover:border-rose-300/70 hover:text-rose-100"
+                        className={`flex h-9 w-9 items-center justify-center rounded-full border text-slate-300 transition ${
+                          isArchived
+                            ? "border-rose-400/30 text-rose-200 hover:border-rose-300/70 hover:text-rose-100"
+                            : "border-slate-800/70 hover:border-slate-600/80 hover:text-white"
+                        }`}
                         onClick={() => onDelete(habit)}
-                        aria-label="Delete habit"
+                        aria-label={isArchived ? "Delete habit" : "Archive habit"}
                       >
-                        <FiTrash2 aria-hidden />
+                        {isArchived ? <FiTrash2 aria-hidden /> : <FiArchive aria-hidden />}
                       </button>
                     </div>
                   </div>
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <p className="text-xs text-slate-400">
                       {isCompleted
-                        ? "Completed today"
+                        ? completionLabels.status
                         : isScheduledToday
-                        ? "Scheduled for today"
+                        ? completionLabels.status
                         : "Not scheduled today"}
                     </p>
                     {isScheduledToday ? (
@@ -303,7 +447,7 @@ export default function HabitSection({
                         ) : (
                           <FiCircle aria-hidden className="text-slate-500" />
                         )}
-                        {isCompleted ? "Done today" : "Mark done"}
+                        {completionLabels.action}
                       </button>
                     ) : null}
                   </div>

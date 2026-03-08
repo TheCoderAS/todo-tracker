@@ -1,15 +1,16 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import type { ChangeEvent, FormEvent } from "react";
 import { FiPlus, FiX } from "react-icons/fi";
 
-import type { HabitFrequency, HabitInput } from "@/lib/types";
+import type { Habit, HabitFrequency, HabitInput, HabitType } from "@/lib/types";
 
 const inputClasses =
-  "w-full rounded-2xl border border-slate-800/70 bg-slate-950/60 px-4 py-3 text-sm text-slate-100 transition focus:border-emerald-300/50 focus:outline-none focus:ring-1 focus:ring-emerald-300/20";
+  "w-full rounded-2xl border border-slate-800/70 bg-slate-950/55 px-3.5 py-2.5 text-sm text-slate-100 shadow-sm transition-colors duration-200 ease-out focus:border-emerald-300/60 focus:bg-slate-950/70 focus:outline-none focus:ring-2 focus:ring-emerald-300/15";
 
-const labelClasses = "flex flex-col gap-2";
-const labelTextClasses = "text-xs font-semibold capitalize text-slate-300";
+const labelClasses = "flex flex-col gap-1.5";
+const labelTextClasses = "text-[0.7rem] font-semibold uppercase tracking-wide text-slate-400";
 
 const days = [
   { id: 0, label: "Sun" },
@@ -43,10 +44,23 @@ const frequencyOptions: { value: HabitFrequency; label: string }[] = [
   { value: "yearly", label: "Yearly" }
 ];
 
+const habitTypeOptions: { value: HabitType; label: string; helper: string }[] = [
+  { value: "positive", label: "Build", helper: "Do something you want more of." },
+  { value: "avoid", label: "Avoid", helper: "Stay on track by avoiding a habit." }
+];
+
 type HabitFormProps = {
   form: HabitInput;
+  graceMissesInput: string;
+  habits: Habit[];
   isEditing?: boolean;
-  onChange: (event: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
+  onChange: (
+    event:
+      | ChangeEvent<HTMLInputElement | HTMLSelectElement>
+      | { target: { name: string; value: string[] } }
+  ) => void;
+  onGraceMissesChange: (value: string) => void;
+  onGraceMissesBlur: () => void;
   onToggleDay: (dayIndex: number) => void;
   onDayOfMonthChange: (dayOfMonth: number) => void;
   onMonthChange: (month: number) => void;
@@ -56,17 +70,31 @@ type HabitFormProps = {
 
 export default function HabitForm({
   form,
+  graceMissesInput,
+  habits,
   isEditing = false,
   onChange,
+  onGraceMissesChange,
+  onGraceMissesBlur,
   onToggleDay,
   onDayOfMonthChange,
   onMonthChange,
   onSubmit,
   onCancel
 }: HabitFormProps) {
+  const [contextTagInput, setContextTagInput] = useState("");
+  const contextTags = useMemo(() => form.contextTags ?? [], [form.contextTags]);
+
   const showWeeklyDays = form.frequency === "weekly";
   const showMonthlyDay = form.frequency === "monthly";
   const showYearlySchedule = form.frequency === "yearly";
+  const habitOptions = useMemo(
+    () =>
+      habits
+        .filter((habit) => !habit.archivedAt)
+        .sort((a, b) => a.title.localeCompare(b.title)),
+    [habits]
+  );
   const dayOfMonthValue = showYearlySchedule
     ? form.reminderDays.length >= 2
       ? form.reminderDays[1]
@@ -80,11 +108,34 @@ export default function HabitForm({
       : new Date().getMonth() + 1
     : new Date().getMonth() + 1;
 
+  const updateContextTags = (nextTags: string[]) => {
+    onChange({
+      target: {
+        name: "contextTags",
+        value: nextTags
+      }
+    });
+  };
+
+  const handleContextTagAdd = (value: string) => {
+    const trimmed = value.trim().toLowerCase();
+    if (!trimmed) return;
+    if (contextTags.includes(trimmed)) return;
+    updateContextTags([...contextTags, trimmed]);
+    setContextTagInput("");
+  };
+
+  const handleContextTagRemove = (value: string) => {
+    updateContextTags(contextTags.filter((tag) => tag !== value));
+  };
+
   return (
     <form className="grid gap-5" onSubmit={onSubmit}>
-      <h2 className="text-xl font-semibold text-white">
-        {isEditing ? "Edit habit" : "Add a new habit"}
-      </h2>
+      <div className="modal-header">
+        <h2 className="text-xl font-semibold text-white">
+          {isEditing ? "Edit habit" : "Add a new habit"}
+        </h2>
+      </div>
       <label className={labelClasses}>
         <span className={labelTextClasses}>Title</span>
         <input
@@ -97,7 +148,56 @@ export default function HabitForm({
           className={inputClasses}
         />
       </label>
+      <div className={labelClasses}>
+        <span className={labelTextClasses}>Context tags</span>
+        <div className="flex flex-wrap gap-2 rounded-2xl border border-slate-800/70 bg-slate-950/55 px-3 py-3 shadow-sm transition-colors duration-200 ease-out focus-within:border-emerald-300/50 focus-within:bg-slate-950/70 focus-within:ring-2 focus-within:ring-emerald-300/10">
+          {contextTags.map((tag) => (
+            <button
+              key={tag}
+              type="button"
+              className="flex items-center gap-2 rounded-full border border-slate-700/80 bg-slate-900/60 px-3 py-1 text-xs text-slate-200 transition hover:border-emerald-300/80 hover:text-emerald-100"
+              onClick={() => handleContextTagRemove(tag)}
+            >
+              {tag}
+              <span className="text-[0.65rem] text-slate-400">×</span>
+            </button>
+          ))}
+          <input
+            name="contextTags"
+            placeholder="Add context tag"
+            value={contextTagInput}
+            onChange={(event) => setContextTagInput(event.target.value)}
+            onBlur={() => handleContextTagAdd(contextTagInput)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" || event.key === "Tab") {
+                event.preventDefault();
+                handleContextTagAdd(contextTagInput);
+              }
+            }}
+            enterKeyHint="done"
+            className="min-w-[140px] flex-1 bg-transparent text-sm text-slate-100 outline-none"
+          />
+        </div>
+      </div>
       <div className="grid gap-4 sm:grid-cols-2">
+        <label className={labelClasses}>
+          <span className={labelTextClasses}>Habit type</span>
+          <select
+            name="habitType"
+            value={form.habitType}
+            onChange={onChange}
+            className={inputClasses}
+          >
+            {habitTypeOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+          <span className="text-[0.65rem] text-slate-500">
+            {habitTypeOptions.find((option) => option.value === form.habitType)?.helper}
+          </span>
+        </label>
         <label className={labelClasses}>
           <span className={labelTextClasses}>Frequency</span>
           <select
@@ -114,6 +214,19 @@ export default function HabitForm({
           </select>
         </label>
         <label className={labelClasses}>
+          <span className={labelTextClasses}>Grace misses per week</span>
+          <input
+            name="graceMisses"
+            type="number"
+            min={0}
+            max={7}
+            value={graceMissesInput}
+            onChange={(event) => onGraceMissesChange(event.target.value)}
+            onBlur={onGraceMissesBlur}
+            className={inputClasses}
+          />
+        </label>
+        <label className={labelClasses}>
           <span className={labelTextClasses}>Reminder time</span>
           <input
             name="reminderTime"
@@ -123,6 +236,25 @@ export default function HabitForm({
             required
             className={inputClasses}
           />
+        </label>
+        <label className={labelClasses}>
+          <span className={labelTextClasses}>Trigger next habit</span>
+          <select
+            name="triggerAfterHabitId"
+            value={form.triggerAfterHabitId ?? ""}
+            onChange={onChange}
+            className={inputClasses}
+          >
+            <option value="">No linked habit</option>
+            {habitOptions.map((habit) => (
+              <option key={habit.id} value={habit.id}>
+                {habit.title}
+              </option>
+            ))}
+          </select>
+          <span className="text-[0.65rem] text-slate-500">
+            Choose a habit to prompt right after this one is completed.
+          </span>
         </label>
       </div>
       {showWeeklyDays ? (

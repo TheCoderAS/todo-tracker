@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import { FiCalendar, FiCheckCircle, FiClock, FiTrendingUp, FiZap } from "react-icons/fi";
 
 import Modal from "@/components/ui/Modal";
-import { getDateKey } from "@/lib/habitUtils";
+import { getDateKey, getHabitMilestoneProgress, isHabitScheduledForDate } from "@/lib/habitUtils";
 import type { Habit, HabitFrequency } from "@/lib/types";
 
 type HabitDetailsModalProps = {
@@ -18,6 +18,13 @@ type TrendEntry = {
   label: string;
   dateKey: string;
   completed: boolean;
+};
+
+const getTrendStatusLabel = (habit: Habit, completed: boolean) => {
+  if (habit.habitType === "avoid") {
+    return completed ? "Stayed on track" : "Slipped";
+  }
+  return completed ? "Completed" : "Scheduled";
 };
 
 const formatFrequencyLabel = (frequency: HabitFrequency) => {
@@ -118,6 +125,7 @@ const buildTrendEntries = (habit: Habit): TrendEntry[] => {
   return occurrences
     .map((date) => {
       const dateKey = getDateKey(date, habit.timezone);
+      const isSkipped = habit.skippedDates?.includes(dateKey) ?? false;
       return {
         date,
         dateKey,
@@ -126,7 +134,7 @@ const buildTrendEntries = (habit: Habit): TrendEntry[] => {
           day: "numeric",
           year: "numeric"
         }),
-        completed: habit.completionDates?.includes(dateKey) ?? false
+        completed: (habit.completionDates?.includes(dateKey) ?? false) && !isSkipped
       };
     })
     .reverse();
@@ -207,12 +215,60 @@ const buildHeatmapData = (habit: Habit) => {
   return weeks;
 };
 
+const formatHabitTypeLabel = (habit: Habit) =>
+  habit.habitType === "avoid" ? "Avoid habit" : "Build habit";
+
 export default function HabitDetailsModal({ habit, isOpen, onClose }: HabitDetailsModalProps) {
   const trendEntries = useMemo(() => (habit ? buildTrendEntries(habit) : []), [habit]);
   const totalCompletions = habit?.completionDates?.length ?? 0;
   const lastCompletion = habit?.completionDates?.length
     ? habit?.completionDates[habit.completionDates.length - 1]
     : null;
+  const milestoneProgress = useMemo(
+    () => getHabitMilestoneProgress(totalCompletions),
+    [totalCompletions]
+  );
+  const { rollingCompletionRate, rollingCompleted, rollingScheduled, rollingWindowDays } =
+    useMemo(() => {
+      const windowDays = 30;
+      if (!habit) {
+        return {
+          rollingCompletionRate: 0,
+          rollingCompleted: 0,
+          rollingScheduled: 0,
+          rollingWindowDays: windowDays
+        };
+      }
+
+      const today = new Date();
+      const dates = Array.from({ length: windowDays }).map((_, index) => {
+        const date = new Date(today);
+        date.setDate(today.getDate() - index);
+        return date;
+      });
+      let scheduled = 0;
+      let completed = 0;
+
+      dates.forEach((date) => {
+        if (!isHabitScheduledForDate(habit, date)) return;
+        const dateKey = getDateKey(date, habit.timezone);
+        if (habit.skippedDates?.includes(dateKey)) return;
+        scheduled += 1;
+        if (habit.completionDates?.includes(dateKey)) {
+          completed += 1;
+        }
+      });
+
+      return {
+        rollingCompletionRate: scheduled ? Math.round((completed / scheduled) * 100) : 0,
+        rollingCompleted: completed,
+        rollingScheduled: scheduled,
+        rollingWindowDays: windowDays
+      };
+    }, [habit]);
+  const trendStatusLabel = habit
+    ? (completed: boolean) => getTrendStatusLabel(habit, completed)
+    : () => "";
 
   const streaks = useMemo(() => (habit ? computeStreak(habit) : { current: 0, longest: 0 }), [habit]);
   const heatmapWeeks = useMemo(() => (habit ? buildHeatmapData(habit) : []), [habit]);
@@ -227,7 +283,7 @@ export default function HabitDetailsModal({ habit, isOpen, onClose }: HabitDetai
     <Modal isOpen={isOpen} onClose={onClose} ariaLabel="Habit details">
       {habit ? (
         <div className="grid gap-6">
-          <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="modal-header flex flex-wrap items-center justify-between gap-3">
             <div>
               <p className="text-xs font-semibold uppercase text-slate-500">Habit details</p>
               <h3 className="text-xl font-semibold text-white">{habit.title}</h3>
@@ -266,6 +322,49 @@ export default function HabitDetailsModal({ habit, isOpen, onClose }: HabitDetai
                 </span>
               </span>
             </div>
+            <div className="flex items-center gap-2">
+              <FiCalendar aria-hidden className="text-sky-300" />
+              <span>
+                Habit type{" "}
+                <span className="font-semibold text-slate-100">
+                  {formatHabitTypeLabel(habit)}
+                </span>
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <FiCheckCircle aria-hidden className="text-emerald-300" />
+              <span>
+                Level{" "}
+                <span className="font-semibold text-slate-100">
+                  {milestoneProgress.level}
+                </span>{" "}
+                {milestoneProgress.nextMilestone ? (
+                  <span className="text-slate-400">
+                    • Next milestone at {milestoneProgress.nextMilestone} completions
+                  </span>
+                ) : (
+                  <span className="text-slate-400">• Milestones mastered</span>
+                )}
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <FiCheckCircle aria-hidden className="text-emerald-300" />
+              <span>
+                Consistency (last {rollingWindowDays} days){" "}
+                <span className="font-semibold text-slate-100">
+                  {rollingCompletionRate}% ({rollingCompleted}/{rollingScheduled})
+                </span>
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <FiCalendar aria-hidden className="text-sky-300" />
+              <span>
+                Grace misses per week{" "}
+                <span className="font-semibold text-slate-100">
+                  {habit.graceMisses ?? 0}
+                </span>
+              </span>
+            </div>
             {lastCompletion ? (
               <div className="flex items-center gap-2">
                 <FiCalendar aria-hidden className="text-sky-300" />
@@ -275,6 +374,10 @@ export default function HabitDetailsModal({ habit, isOpen, onClose }: HabitDetai
                 </span>
               </div>
             ) : null}
+            <p className="text-xs text-slate-500">
+              Consistency counts scheduled sessions you hit. Streaks only track
+              consecutive wins.
+            </p>
           </div>
 
           <div className="grid gap-3">
@@ -339,7 +442,7 @@ export default function HabitDetailsModal({ habit, isOpen, onClose }: HabitDetai
                     }`}
                   >
                     <FiCheckCircle aria-hidden className="text-[0.7rem]" />
-                    {entry.completed ? "Completed" : "Scheduled"}
+                    {trendStatusLabel(entry.completed)}
                   </span>
                 </div>
               ))}

@@ -17,6 +17,7 @@ import {
 } from "@/lib/todoFormatters";
 import type { Todo, TodoInput, TodoRecurrence } from "@/lib/types";
 import type { SnackbarVariant } from "@/components/ui/Snackbar";
+import { normalizeTitle } from "@/hooks/todos/useTodoFormState";
 
 type SnackbarState = {
   message: string;
@@ -113,6 +114,7 @@ export function useTodoActions({
         scheduledTime: todo.scheduledDate ? formatTimeInput(todo.scheduledDate) : "",
         priority: todo.priority,
         tags: todo.tags.join(", "),
+        contextTags: todo.contextTags ?? [],
         description: todo.description ?? "",
         recurrence: todo.recurrence ?? "none",
         subtasks: todo.subtasks ?? []
@@ -170,16 +172,19 @@ export function useTodoActions({
       setActionLoading(true);
       try {
         const todoRef = doc(db, "users", user.uid, "todos", todo.id);
-        const nextStatus = todo.status === "completed" ? "pending" : "completed";
+        const nextStatus = todo.status === "pending" ? "completed" : "pending";
         await updateDoc(todoRef, {
           status: nextStatus,
-          completedDate: nextStatus === "completed" ? serverTimestamp() : null
+          completedDate: nextStatus === "completed" ? serverTimestamp() : null,
+          skippedAt: null,
+          updatedAt: serverTimestamp()
         });
         if (selectedTodo?.id === todo.id) {
           setSelectedTodo({
             ...selectedTodo,
             status: nextStatus,
-            completedDate: nextStatus === "completed" ? Timestamp.now() : null
+            completedDate: nextStatus === "completed" ? Timestamp.now() : null,
+            skippedAt: null
           });
         }
         if (nextStatus === "completed") {
@@ -196,9 +201,11 @@ export function useTodoActions({
               priority: todo.priority,
               status: "pending",
               completedDate: null,
+              skippedAt: null,
               recurrence: todo.recurrence,
               author_uid: user.uid,
               tags: todo.tags,
+              contextTags: todo.contextTags ?? [],
               description: todo.description
             });
           }
@@ -248,6 +255,83 @@ export function useTodoActions({
     [user, setSnackbar]
   );
 
+  const handleRescheduleTodo = useCallback(
+    async (todo: Todo) => {
+      if (!user) {
+        setSnackbar({ message: "Sign in to update todos.", variant: "error" });
+        return;
+      }
+      const baseDate = todo.scheduledDate?.toDate() ?? new Date();
+      const nextDate = new Date(baseDate);
+      nextDate.setDate(baseDate.getDate() + 1);
+      setActionLoading(true);
+      try {
+        await updateDoc(doc(db, "users", user.uid, "todos", todo.id), {
+          scheduledDate: Timestamp.fromDate(nextDate),
+          status: "pending",
+          completedDate: null,
+          skippedAt: null,
+          updatedAt: serverTimestamp()
+        });
+        setSnackbar({ message: "Todo rescheduled for tomorrow.", variant: "success" });
+      } catch (error) {
+        console.error(error);
+        setSnackbar({ message: "Unable to reschedule todo.", variant: "error" });
+      } finally {
+        setActionLoading(false);
+      }
+    },
+    [user, setSnackbar]
+  );
+
+  const handleSkipTodo = useCallback(
+    async (todo: Todo) => {
+      if (!user) {
+        setSnackbar({ message: "Sign in to update todos.", variant: "error" });
+        return;
+      }
+      setActionLoading(true);
+      try {
+        await updateDoc(doc(db, "users", user.uid, "todos", todo.id), {
+          status: "skipped",
+          completedDate: null,
+          skippedAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        });
+        setSnackbar({ message: "Todo marked as skipped.", variant: "info" });
+      } catch (error) {
+        console.error(error);
+        setSnackbar({ message: "Unable to skip todo.", variant: "error" });
+      } finally {
+        setActionLoading(false);
+      }
+    },
+    [user, setSnackbar]
+  );
+
+  const handleArchiveTodo = useCallback(
+    async (todo: Todo) => {
+      if (!user) {
+        setSnackbar({ message: "Sign in to update todos.", variant: "error" });
+        return;
+      }
+      setActionLoading(true);
+      try {
+        await updateDoc(doc(db, "users", user.uid, "todos", todo.id), {
+          archivedAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        });
+        setSnackbar({ message: "Todo archived.", variant: "info" });
+      } catch (error) {
+        console.error(error);
+        setSnackbar({ message: "Unable to archive todo.", variant: "error" });
+      } finally {
+        setActionLoading(false);
+      }
+    },
+    [user, setSnackbar]
+  );
+
   const handleSubmitTodo = useCallback(
     async (event: React.FormEvent) => {
       event.preventDefault();
@@ -259,7 +343,8 @@ export function useTodoActions({
         return;
       }
 
-      if (!form.title.trim()) {
+      const normalizedTitle = normalizeTitle(form.title);
+      if (!normalizedTitle) {
         setTitleHasError(true);
         setActionLoading(false);
         return;
@@ -274,18 +359,9 @@ export function useTodoActions({
         return;
       }
 
-      const scheduledDateValue = new Date(`${form.scheduledDate}T${form.scheduledTime}`);
-      if (scheduledDateValue.getTime() < Date.now() && !editingId) {
-        setSnackbar({
-          message: "Scheduled time is in the past. Please pick a future time.",
-          variant: "error"
-        });
-        setScheduleHasError(true);
-        setActionLoading(false);
-        return;
-      }
-
-      const scheduledDate = Timestamp.fromDate(scheduledDateValue);
+      const scheduledDate = Timestamp.fromDate(
+        new Date(`${form.scheduledDate}T${form.scheduledTime}`)
+      );
       const recurrence = form.recurrence === "none" ? null : form.recurrence;
       const parsedTags = form.tags
         .split(",")
@@ -297,15 +373,17 @@ export function useTodoActions({
           const todoRef = doc(db, "users", user.uid, "todos", editingId);
           const existing = todos.find((todo) => todo.id === editingId);
           await updateDoc(todoRef, {
-            title: form.title.trim(),
+            title: normalizedTitle,
             scheduledDate,
             priority: form.priority,
             tags: parsedTags,
+            contextTags: form.contextTags,
             description: form.description,
             recurrence: recurrence ?? null,
             subtasks: form.subtasks,
             status: "pending",
             completedDate: null,
+            skippedAt: null,
             author_uid: user.uid,
             updatedAt: serverTimestamp()
           });
@@ -317,16 +395,18 @@ export function useTodoActions({
           });
         } else {
           await addDoc(collection(db, "users", user.uid, "todos"), {
-            title: form.title.trim(),
+            title: normalizedTitle,
             scheduledDate,
             createdAt: serverTimestamp(),
             priority: form.priority,
             status: "pending",
             completedDate: null,
+            skippedAt: null,
             recurrence: recurrence ?? null,
             subtasks: form.subtasks,
             author_uid: user.uid,
             tags: parsedTags,
+            contextTags: form.contextTags,
             description: form.description
           });
           setSnackbar({ message: "Todo added to your list.", variant: "success" });
@@ -448,6 +528,9 @@ export function useTodoActions({
     handleDeleteTodo,
     handleToggleStatus,
     handleToggleFlag,
+    handleRescheduleTodo,
+    handleSkipTodo,
+    handleArchiveTodo,
     handleSubmitTodo,
     handleReorder
   };

@@ -1,6 +1,7 @@
 import { useAuth } from "@/components/auth/AuthProvider";
 import CompletedTargetCard from "@/components/dashboard/CompletedTargetCard";
 import HabitAnalyticsCard from "@/components/dashboard/HabitAnalyticsCard";
+import HabitConsistencyCard from "@/components/dashboard/HabitConsistencyCard";
 import HabitTrendChart from "@/components/dashboard/HabitTrendChart";
 import ProductivityScoreCard from "@/components/dashboard/ProductivityScoreCard";
 import WeeklyCompletionChart from "@/components/dashboard/WeeklyCompletionChart";
@@ -33,6 +34,10 @@ export default function DashboardPage() {
     activeHabits,
     completedToday: habitsCompletedToday,
     completionRate,
+    rollingWindowDays,
+    rollingWindowCompletionRate,
+    rollingWindowCompleted,
+    rollingWindowScheduled,
     weeklyTrend,
     monthlyTrend,
     yearlyTrend,
@@ -42,18 +47,28 @@ export default function DashboardPage() {
   return (
     <section className="grid gap-6">
       <OnboardingModal isOpen={showOnboarding} onComplete={completeOnboarding} />
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2">
         <CompletedTargetCard
           completed={todayCompleted}
           target={todayTarget}
           loading={analyticsLoading}
         />
-        <WeeklyCompletionChart onTime={onTimeCompletions} spillover={spilloverCompletions} />
+        <WeeklyCompletionChart
+          onTime={onTimeCompletions}
+          spillover={spilloverCompletions}
+        />
         <HabitAnalyticsCard
           activeHabits={activeHabits}
           completedToday={habitsCompletedToday}
           completionRate={completionRate}
           weeklyTrend={weeklyTrend}
+          loading={habitLoading}
+        />
+        <HabitConsistencyCard
+          days={rollingWindowDays}
+          completed={rollingWindowCompleted}
+          scheduled={rollingWindowScheduled}
+          completionRate={rollingWindowCompletionRate}
           loading={habitLoading}
         />
       </div>

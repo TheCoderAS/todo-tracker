@@ -14,11 +14,11 @@ import { FiCheckSquare, FiPlus, FiRepeat, FiSave, FiSquare, FiTrash2, FiX } from
 import type { Subtask, TodoInput, TodoPriority, TodoRecurrence } from "@/lib/types";
 
 const inputClasses =
-  "w-full rounded-2xl border border-slate-800/70 bg-slate-950/60 px-4 py-3 text-sm text-slate-100 transition focus:border-emerald-300/50 focus:outline-none focus:ring-1 focus:ring-emerald-300/20";
+  "w-full rounded-2xl border border-slate-800/70 bg-slate-950/55 px-3.5 py-2.5 text-sm text-slate-100 shadow-sm transition-colors duration-200 ease-out focus:border-emerald-300/60 focus:bg-slate-950/70 focus:outline-none focus:ring-2 focus:ring-emerald-300/15";
 
-const labelClasses = "flex flex-col gap-2";
+const labelClasses = "flex flex-col gap-1.5";
 const labelTextClasses =
-  "text-xs font-semibold capitalize text-slate-300";
+  "text-[0.7rem] font-semibold uppercase tracking-wide text-slate-400";
 
 type TodoFormProps = {
   form: TodoInput;
@@ -26,7 +26,11 @@ type TodoFormProps = {
   isEditing: boolean;
   titleHasError: boolean;
   scheduleHasError: boolean;
-  onChange: (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
+  onChange: (
+    event:
+      | React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+      | { target: { name: string; value: string[] } }
+  ) => void;
   onDescriptionChange: (value: string) => void;
   onSubtasksChange: (subtasks: Subtask[]) => void;
   onSubmit: (event: FormEvent) => void;
@@ -47,14 +51,11 @@ export default function TodoForm({
 }: TodoFormProps) {
   const [tagInput, setTagInput] = useState("");
   const [subtaskInput, setSubtaskInput] = useState("");
+  const [contextTagInput, setContextTagInput] = useState("");
   const [isDescriptionOpen, setIsDescriptionOpen] = useState(
     Boolean(form.description)
   );
   const descriptionRef = useRef<HTMLDivElement | null>(null);
-  const tagSuggestions = useMemo(
-    () => ["focus", "design", "deep-work", "review", "research", "follow-up"],
-    []
-  );
   const tags = useMemo(
     () =>
       form.tags
@@ -63,12 +64,7 @@ export default function TodoForm({
         .filter(Boolean),
     [form.tags]
   );
-  const suggestedTags = useMemo(() => {
-    if (!tagInput.trim()) return tagSuggestions;
-    return tagSuggestions.filter((suggestion) =>
-      suggestion.toLowerCase().includes(tagInput.toLowerCase())
-    );
-  }, [tagInput, tagSuggestions]);
+  const contextTags = useMemo(() => form.contextTags ?? [], [form.contextTags]);
 
   const updateTags = (nextTags: string[]) => {
     onChange({
@@ -89,6 +85,27 @@ export default function TodoForm({
 
   const handleTagRemove = (value: string) => {
     updateTags(tags.filter((tag) => tag !== value));
+  };
+
+  const updateContextTags = (nextTags: string[]) => {
+    onChange({
+      target: {
+        name: "contextTags",
+        value: nextTags
+      }
+    });
+  };
+
+  const handleContextTagAdd = (value: string) => {
+    const trimmed = value.trim().toLowerCase();
+    if (!trimmed) return;
+    if (contextTags.includes(trimmed)) return;
+    updateContextTags([...contextTags, trimmed]);
+    setContextTagInput("");
+  };
+
+  const handleContextTagRemove = (value: string) => {
+    updateContextTags(contextTags.filter((tag) => tag !== value));
   };
 
   useEffect(() => {
@@ -150,13 +167,12 @@ export default function TodoForm({
   }, [form.description]);
 
   return (
-    <form
-      className="grid gap-5"
-      onSubmit={onSubmit}
-    >
-      <h2 className="text-xl font-semibold text-white">
-        {isEditing ? "Edit todo" : "Add a new todo"}
-      </h2>
+    <form className="grid gap-5" onSubmit={onSubmit}>
+      <div className="modal-header">
+        <h2 className="text-xl font-semibold text-white">
+          {isEditing ? "Edit todo" : "Add a new todo"}
+        </h2>
+      </div>
       <div>
         <label className={labelClasses}>
           <span className={labelTextClasses}>Title</span>
@@ -165,7 +181,7 @@ export default function TodoForm({
             placeholder="What would you like add?"
             value={form.title}
             onChange={onChange}
-            maxLength={80}
+            maxLength={40}
             required
             className={`${inputClasses} ${
               titleHasError ? "border-rose-500/80 text-rose-100" : ""
@@ -277,7 +293,7 @@ export default function TodoForm({
             </div>
             <div className={labelClasses}>
               <span className={labelTextClasses}>Tags</span>
-              <div className="flex flex-wrap gap-2 rounded-2xl border border-slate-800/70 bg-slate-950/60 px-3 py-3">
+              <div className="flex flex-wrap gap-2 rounded-2xl border border-slate-800/70 bg-slate-950/55 px-3 py-3 shadow-sm transition-colors duration-200 ease-out focus-within:border-emerald-300/50 focus-within:bg-slate-950/70 focus-within:ring-2 focus-within:ring-emerald-300/10">
                 {tags.map((tag) => (
                   <button
                     key={tag}
@@ -305,18 +321,37 @@ export default function TodoForm({
                   className="min-w-[120px] flex-1 bg-transparent text-sm text-slate-100 outline-none"
                 />
               </div>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {suggestedTags.map((tag) => (
-                  <button
-                    key={tag}
-                    type="button"
-                    onClick={() => handleTagAdd(tag)}
-                    className="rounded-full border border-slate-800/80 px-3 py-1 text-xs text-slate-400 transition hover:border-slate-500/70 hover:text-slate-200"
-                  >
-                    {tag}
-                  </button>
-                ))}
-              </div>
+            </div>
+          </div>
+          <div className={labelClasses}>
+            <span className={labelTextClasses}>Context tags</span>
+            <div className="flex flex-wrap gap-2 rounded-2xl border border-slate-800/70 bg-slate-950/55 px-3 py-3 shadow-sm transition-colors duration-200 ease-out focus-within:border-emerald-300/50 focus-within:bg-slate-950/70 focus-within:ring-2 focus-within:ring-emerald-300/10">
+              {contextTags.map((tag) => (
+                <button
+                  key={tag}
+                  type="button"
+                  className="flex items-center gap-2 rounded-full border border-slate-700/80 bg-slate-900/60 px-3 py-1 text-xs text-slate-200 transition hover:border-emerald-300/80 hover:text-emerald-100"
+                  onClick={() => handleContextTagRemove(tag)}
+                >
+                  {tag}
+                  <span className="text-[0.65rem] text-slate-400">×</span>
+                </button>
+              ))}
+              <input
+                name="contextTags"
+                placeholder="Add context tag"
+                value={contextTagInput}
+                onChange={(event) => setContextTagInput(event.target.value)}
+                onBlur={() => handleContextTagAdd(contextTagInput)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === "Tab") {
+                    event.preventDefault();
+                    handleContextTagAdd(contextTagInput);
+                  }
+                }}
+                enterKeyHint="done"
+                className="min-w-[140px] flex-1 bg-transparent text-sm text-slate-100 outline-none"
+              />
             </div>
           </div>
         </div>
@@ -332,7 +367,7 @@ export default function TodoForm({
           ) : (
             <label className={labelClasses}>
               <span className={labelTextClasses}>Description</span>
-              <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-slate-800/70 bg-slate-950/60 px-3 py-2">
+              <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-slate-800/70 bg-slate-950/55 px-3 py-2 shadow-sm transition-colors duration-200 ease-out focus-within:border-emerald-300/50 focus-within:bg-slate-950/70 focus-within:ring-2 focus-within:ring-emerald-300/10">
                 <button
                   type="button"
                   className="flex items-center gap-2 rounded-full border border-slate-700/70 px-3 py-1 text-xs font-semibold text-slate-200 transition hover:border-emerald-400/70 hover:text-emerald-100"

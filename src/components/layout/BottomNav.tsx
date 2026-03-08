@@ -1,17 +1,16 @@
 import { Link, useLocation } from "react-router-dom";
-import { FiGrid, FiList, FiSettings, FiUser } from "react-icons/fi";
+import { FiGrid, FiList, FiRepeat, FiSettings } from "react-icons/fi";
 
 const navItems = [
   { href: "/", label: "Dashboard", icon: FiGrid },
   { href: "/todos", label: "Tasks", icon: FiList },
-  { href: "/settings", label: "Settings", icon: FiSettings },
-  { href: "/profile", label: "Profile", icon: FiUser }
+  { href: "/routines", label: "Routines", icon: FiRepeat },
+  { href: "/settings", label: "Settings", icon: FiSettings }
 ];
 
 export default function BottomNav() {
   const location = useLocation();
   const pathname = location.pathname;
-
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-20 border-t border-slate-900/60 bg-gradient-to-r from-slate-950/95 via-slate-950/90 to-slate-950/95 px-6 py-2 backdrop-blur">
       <div className="mx-auto flex w-full max-w-6xl items-center justify-around gap-4">

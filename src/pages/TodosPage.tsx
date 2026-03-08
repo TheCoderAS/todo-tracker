@@ -6,12 +6,18 @@ import TodoSection from "@/components/todos/TodoSection";
 import HabitForm from "@/components/habits/HabitForm";
 import HabitDetailsModal from "@/components/habits/HabitDetailsModal";
 import HabitSection from "@/components/habits/HabitSection";
+import FocusBlockPanel from "@/components/focus/FocusBlockPanel";
+import ReviewPanel, { type MissedHabitEntry } from "@/components/review/ReviewPanel";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import Modal from "@/components/ui/Modal";
 import OverlayLoader from "@/components/ui/OverlayLoader";
 import Snackbar, { type SnackbarVariant } from "@/components/ui/Snackbar";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { formatDateDisplay } from "@/lib/todoFormatters";
+import {
+  getDateKey,
+  isHabitScheduledForDate
+} from "@/lib/habitUtils";
 import { useHabitsData } from "@/hooks/todos/useHabitsData";
 import { useTabState } from "@/hooks/todos/useTabState";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
@@ -20,11 +26,13 @@ import { useTodosData } from "@/hooks/todos/useTodosData";
 import { useTodoFormState, priorities } from "@/hooks/todos/useTodoFormState";
 import { useTodoActions } from "@/hooks/todos/useTodoActions";
 import { useHabitActions } from "@/hooks/todos/useHabitActions";
+import { useFocusBlocksData } from "@/hooks/focus/useFocusBlocksData";
 
 export default function TodosPage() {
   const { user, loading } = useAuth();
   const { todos, isInitialLoad } = useTodosData(user);
   const { habits, isInitialLoad: isHabitInitialLoad } = useHabitsData(user);
+  const { activeBlock, isInitialLoad: isFocusInitialLoad } = useFocusBlocksData(user);
   const { activeTab, setTab } = useTabState();
 
   const [snackbar, setSnackbar] = useState<{
@@ -50,6 +58,8 @@ export default function TodosPage() {
     datePreset,
     selectedDate,
     filterDraft,
+    contextTagFilter,
+    contextTagOptions,
     groupedTodos,
     todayStats,
     streakCount,
@@ -57,6 +67,7 @@ export default function TodosPage() {
     setSortBy,
     setSortOrder,
     setFilterDraft,
+    setContextTagFilter,
     handleApplyFilters,
     handleResetFilters,
     handleQuickFilter
@@ -78,7 +89,51 @@ export default function TodosPage() {
     setIsFormOpen: todoForm.setIsFormOpen
   });
 
-  const habitActions = useHabitActions({ user, setSnackbar });
+  const habitActions = useHabitActions({ user, habits, setSnackbar });
+
+  const overdueTodos = useMemo(() => {
+    const now = new Date();
+    return todos
+      .filter(
+        (todo) =>
+          !todo.archivedAt &&
+          todo.status === "pending" &&
+          todo.scheduledDate &&
+          todo.scheduledDate.toDate() < now
+      )
+      .sort(
+        (a, b) =>
+          (a.scheduledDate?.toMillis() ?? 0) - (b.scheduledDate?.toMillis() ?? 0)
+      );
+  }, [todos]);
+
+  const reviewWindowDays = 7;
+
+  const missedHabits = useMemo<MissedHabitEntry[]>(() => {
+    const today = new Date();
+    const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const dates = Array.from({ length: reviewWindowDays }).map((_, index) => {
+      const date = new Date(startOfToday);
+      date.setDate(startOfToday.getDate() - (index + 1));
+      return date;
+    });
+    const entries: MissedHabitEntry[] = [];
+    habits
+      .filter((habit) => !habit.archivedAt)
+      .forEach((habit) => {
+        const createdAtDate = habit.createdAt?.toDate?.();
+        dates.forEach((date) => {
+          if (createdAtDate && date < createdAtDate) return;
+          if (!isHabitScheduledForDate(habit, date)) return;
+          const dateKey = getDateKey(date, habit.timezone);
+          const isCompleted = habit.completionDates?.includes(dateKey);
+          const isSkipped = habit.skippedDates?.includes(dateKey);
+          if (isCompleted || isSkipped) return;
+          entries.push({ habit, date, dateKey });
+        });
+      });
+    return entries.sort((a, b) => b.date.getTime() - a.date.getTime());
+  }, [habits]);
 
   const openFilterModal = () => {
     setFilterDraft({
@@ -101,7 +156,7 @@ export default function TodosPage() {
           handler: () => {
             if (activeTab === "todos") {
               todoForm.openCreateModal();
-            } else {
+            } else if (activeTab === "habits") {
               habitActions.openHabitModal();
             }
           },
@@ -115,7 +170,9 @@ export default function TodosPage() {
           description: "Open filters"
         },
         { key: "1", handler: () => setTab("todos"), description: "Switch to Todos" },
-        { key: "2", handler: () => setTab("habits"), description: "Switch to Habits" }
+        { key: "2", handler: () => setTab("habits"), description: "Switch to Habits" },
+        { key: "3", handler: () => setTab("focus"), description: "Switch to Focus" },
+        { key: "4", handler: () => setTab("review"), description: "Switch to Review" }
       ],
       [activeTab]
     )
@@ -123,6 +180,7 @@ export default function TodosPage() {
 
   const isLoading = loading || isInitialLoad;
   const isHabitLoading = loading || isHabitInitialLoad;
+  const isFocusLoading = loading || isFocusInitialLoad;
   const isAnyActionLoading = todoActions.actionLoading || habitActions.habitActionLoading;
 
   return (
@@ -145,6 +203,24 @@ export default function TodosPage() {
           onClick={() => setTab("habits")}
         >
           Habits
+        </button>
+        <button
+          type="button"
+          className={`flex-1 rounded-full px-4 py-2 text-center transition sm:flex-none ${
+            activeTab === "focus" ? "bg-sky-500/20 text-sky-200" : "text-slate-400"
+          }`}
+          onClick={() => setTab("focus")}
+        >
+          Focus
+        </button>
+        <button
+          type="button"
+          className={`flex-1 rounded-full px-4 py-2 text-center transition sm:flex-none ${
+            activeTab === "review" ? "bg-sky-500/20 text-sky-200" : "text-slate-400"
+          }`}
+          onClick={() => setTab("review")}
+        >
+          Review
         </button>
       </div>
 
@@ -169,6 +245,9 @@ export default function TodosPage() {
             onQuickFilter={handleQuickFilter}
             onSortByChange={setSortBy}
             onSortOrderChange={setSortOrder}
+            contextTagFilter={contextTagFilter}
+            contextTagOptions={contextTagOptions}
+            onContextTagChange={setContextTagFilter}
             emptyStateLabel={emptyStateLabel}
             todayStats={todayStats}
             streakCount={streakCount}
@@ -230,7 +309,7 @@ export default function TodosPage() {
             onCancel={() => todoActions.setConfirmDeleteId(null)}
           />
         </div>
-      ) : (
+      ) : activeTab === "habits" ? (
         <div key="habits" className="tab-transition">
           <HabitSection
             habits={habits}
@@ -248,8 +327,12 @@ export default function TodosPage() {
           >
             <HabitForm
               form={habitActions.habitForm}
+              graceMissesInput={habitActions.graceMissesInput}
+              habits={habits.filter((habit) => habit.id !== habitActions.editingHabitId)}
               isEditing={Boolean(habitActions.editingHabitId)}
               onChange={habitActions.handleHabitFormChange}
+              onGraceMissesChange={habitActions.handleGraceMissesChange}
+              onGraceMissesBlur={habitActions.handleGraceMissesBlur}
               onToggleDay={habitActions.handleHabitDayToggle}
               onDayOfMonthChange={habitActions.handleHabitDayOfMonthChange}
               onMonthChange={habitActions.handleHabitMonthChange}
@@ -263,19 +346,78 @@ export default function TodosPage() {
             onClose={() => habitActions.setSelectedHabit(null)}
           />
           <ConfirmDialog
-            isOpen={Boolean(habitActions.confirmHabitDeleteId)}
-            title="Delete this habit?"
-            description="This will archive the habit and keep its history."
-            confirmLabel="Archive habit"
+            isOpen={Boolean(habitActions.confirmHabitDelete)}
+            title={
+              habitActions.confirmHabitDelete?.archivedAt
+                ? "Delete this habit permanently?"
+                : "Delete this habit?"
+            }
+            description={
+              habitActions.confirmHabitDelete?.archivedAt
+                ? "This action cannot be undone."
+                : "This will archive the habit and keep its history."
+            }
+            confirmLabel={
+              habitActions.confirmHabitDelete?.archivedAt
+                ? "Delete habit"
+                : "Archive habit"
+            }
             cancelLabel="Cancel"
             isLoading={habitActions.habitActionLoading}
             onConfirm={() => {
-              if (habitActions.confirmHabitDeleteId) {
-                habitActions.handleDeleteHabit(habitActions.confirmHabitDeleteId);
+              if (habitActions.confirmHabitDelete) {
+                habitActions.handleDeleteHabit(habitActions.confirmHabitDelete);
               }
-              habitActions.setConfirmHabitDeleteId(null);
+              habitActions.setConfirmHabitDelete(null);
             }}
-            onCancel={() => habitActions.setConfirmHabitDeleteId(null)}
+            onCancel={() => habitActions.setConfirmHabitDelete(null)}
+          />
+          <ConfirmDialog
+            isOpen={Boolean(habitActions.linkedHabitPrompt)}
+            title={
+              habitActions.linkedHabitPrompt
+                ? `Start "${habitActions.linkedHabitPrompt.target.title}"?`
+                : "Start next habit?"
+            }
+            description={
+              habitActions.linkedHabitPrompt
+                ? `You completed "${habitActions.linkedHabitPrompt.source.title}". Want to jump into the next habit in your chain?`
+                : "Want to start the linked habit?"
+            }
+            confirmLabel="View habit"
+            cancelLabel="Not now"
+            onConfirm={() => {
+              if (habitActions.linkedHabitPrompt) {
+                habitActions.setSelectedHabit(habitActions.linkedHabitPrompt.target);
+                setTab("habits");
+              }
+              habitActions.dismissLinkedHabitPrompt();
+            }}
+            onCancel={() => habitActions.dismissLinkedHabitPrompt()}
+          />
+        </div>
+      ) : activeTab === "focus" ? (
+        <div key="focus" className="tab-transition">
+          <FocusBlockPanel
+            user={user}
+            todos={todos}
+            habits={habits}
+            activeBlock={activeBlock}
+            loading={isFocusLoading}
+            onNotify={(message, variant) => setSnackbar({ message, variant })}
+          />
+        </div>
+      ) : (
+        <div key="review" className="tab-transition">
+          <ReviewPanel
+            overdueTodos={overdueTodos}
+            missedHabits={missedHabits}
+            onRescheduleTodo={todoActions.handleRescheduleTodo}
+            onSkipTodo={todoActions.handleSkipTodo}
+            onArchiveTodo={todoActions.handleArchiveTodo}
+            onRescheduleHabit={habitActions.handleRescheduleHabit}
+            onSkipHabit={habitActions.handleSkipHabit}
+            onArchiveHabit={habitActions.handleArchiveHabit}
           />
         </div>
       )}

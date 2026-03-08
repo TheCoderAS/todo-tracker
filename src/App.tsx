@@ -6,7 +6,7 @@ import PwaManager from "@/components/pwa/PwaManager";
 import AppLayout from "@/layouts/AppLayout";
 import AuthPage from "@/pages/auth/AuthPage";
 import DashboardPage from "@/pages/DashboardPage";
-import ProfilePage from "@/pages/ProfilePage";
+import RoutinesPage from "@/pages/RoutinesPage";
 import SettingsPage from "@/pages/SettingsPage";
 import TodosPage from "@/pages/TodosPage";
 
@@ -27,8 +27,8 @@ export default function App() {
           <Route element={<ProtectedLayout />}>
             <Route path="/" element={<DashboardPage />} />
             <Route path="/todos" element={<TodosPage />} />
+            <Route path="/routines" element={<RoutinesPage />} />
             <Route path="/settings" element={<SettingsPage />} />
-            <Route path="/profile" element={<ProfilePage />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

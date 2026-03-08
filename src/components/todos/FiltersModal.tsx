@@ -37,7 +37,8 @@ type FiltersModalProps = {
 const statusOptions: { value: FilterDraft["status"]; label: string }[] = [
   { value: "all", label: "All" },
   { value: "pending", label: "Pending" },
-  { value: "completed", label: "Completed" }
+  { value: "completed", label: "Completed" },
+  { value: "skipped", label: "Skipped" }
 ];
 
 const priorityOptions: { value: FilterDraft["priority"]; label: string }[] = [
@@ -123,7 +124,7 @@ export default function FiltersModal({
   return (
     <Modal isOpen={isOpen} onClose={onClose} ariaLabel="Filter todos" variant="bottom-sheet">
       <div className="grid gap-6">
-        <div className="flex items-center justify-between gap-4">
+        <div className="modal-header flex items-center justify-between gap-4">
           <div>
             <p className="text-xs font-semibold uppercase text-slate-500">
               Filter & sorting
@@ -254,7 +255,7 @@ export default function FiltersModal({
               ))}
             </div>
             {showDatePicker ? (
-              <label className="grid gap-2 text-xs font-semibold text-slate-300">
+              <label className="grid gap-1.5 text-[0.7rem] font-semibold uppercase tracking-wide text-slate-400">
                 Choose date
                 <input
                   type="date"

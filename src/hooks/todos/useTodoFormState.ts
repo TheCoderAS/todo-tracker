@@ -8,6 +8,7 @@ const defaultForm: TodoInput = {
   scheduledTime: "",
   priority: "medium",
   tags: "",
+  contextTags: [],
   description: "",
   recurrence: "none",
   subtasks: []
@@ -40,6 +41,12 @@ export const getDefaultSchedule = () => {
 
 export { formatDateValue, formatTimeValue };
 
+export const normalizeTitle = (value: string) => {
+  const trimmed = value.trim();
+  if (!trimmed) return "";
+  return `${trimmed.charAt(0).toUpperCase()}${trimmed.slice(1)}`;
+};
+
 export const priorities: TodoPriority[] = ["low", "medium", "high"];
 
 export function useTodoFormState() {
@@ -69,15 +76,23 @@ export function useTodoFormState() {
   }, [resetForm]);
 
   const handleFormChange = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    (
+      event:
+        | React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+        | { target: { name: string; value: string[] } }
+    ) => {
       const { name, value } = event.target;
-      let nextValue = value;
+      if (name === "contextTags" && Array.isArray(value)) {
+        setForm((prev) => ({ ...prev, contextTags: value }));
+        return;
+      }
+      let nextValue: string | number = value as string;
       if (name === "tags") {
-        nextValue = value.toLowerCase();
+        nextValue = (value as string).toLowerCase();
       }
       if (name === "title") {
-        nextValue = value.slice(0, 80);
-        if (nextValue.trim()) {
+        nextValue = (value as string).slice(0, 40);
+        if ((nextValue as string).trim() && (nextValue as string).trim().length <= 40) {
           setTitleHasError(false);
         }
       }

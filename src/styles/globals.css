@@ -11,6 +11,19 @@
     overflow-x: hidden;
   }
 
+  html.theme-light {
+    color-scheme: light;
+    filter: invert(1) hue-rotate(180deg);
+  }
+
+  html.theme-light body {
+    background-image: radial-gradient(circle at top, #e2e8f0 0%, #f8fafc 55%);
+  }
+
+  html.theme-light .no-invert {
+    filter: invert(1) hue-rotate(180deg);
+  }
+
   html {
     scroll-behavior: smooth;
   }
@@ -80,6 +93,14 @@
 
 .floating-menu {
   animation: floatMenu 320ms ease-out;
+}
+
+.modal-header {
+  margin: -1.5rem -1.5rem 0;
+  padding: 1.5rem 1.5rem 1rem;
+  border-bottom: 1px solid rgba(30, 41, 59, 0.7);
+  background: rgba(2, 6, 23, 0.95);
+  backdrop-filter: blur(12px);
 }
 
 .page-transition {

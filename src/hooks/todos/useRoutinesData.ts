@@ -5,40 +5,43 @@ import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
 import type { User } from "firebase/auth";
 
 import { db } from "@/lib/firebase";
-import type { Todo } from "@/lib/types";
+import type { Routine } from "@/lib/types";
 
-export const useTodosData = (user: User | null | undefined) => {
-  const [todos, setTodos] = useState<Todo[]>([]);
+export const useRoutinesData = (user: User | null | undefined) => {
+  const [routines, setRoutines] = useState<Routine[]>([]);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   useEffect(() => {
     if (!user) {
-      setTodos([]);
+      setRoutines([]);
       setIsInitialLoad(false);
       return;
     }
 
     setIsInitialLoad(true);
-    const todosQuery = query(
-      collection(db, "users", user.uid, "todos"),
+    const routinesQuery = query(
+      collection(db, "users", user.uid, "routines"),
       orderBy("createdAt", "desc")
     );
 
     let isFirstSnapshot = true;
-    const unsubscribe = onSnapshot(todosQuery, (snapshot) => {
+    const unsubscribe = onSnapshot(routinesQuery, (snapshot) => {
       const data = snapshot.docs.map((docSnapshot) => {
-        const todo = docSnapshot.data() as Omit<Todo, "id">;
+        const routine = docSnapshot.data() as Omit<Routine, "id">;
+        const items =
+          routine.items?.map((item) => ({
+            ...item,
+            tags: item.tags ?? [],
+            contextTags: item.contextTags ?? [],
+            description: item.description ?? ""
+          })) ?? [];
         return {
           id: docSnapshot.id,
-          ...todo,
-          archivedAt: todo.archivedAt ?? null,
-          skippedAt: todo.skippedAt ?? null,
-          tags: todo.tags ?? [],
-          contextTags: todo.contextTags ?? [],
-          description: todo.description ?? ""
+          ...routine,
+          items
         };
       });
-      setTodos(data);
+      setRoutines(data);
       if (isFirstSnapshot) {
         setIsInitialLoad(false);
         isFirstSnapshot = false;
@@ -48,5 +51,5 @@ export const useTodosData = (user: User | null | undefined) => {
     return () => unsubscribe();
   }, [user]);
 
-  return { todos, isInitialLoad };
+  return { routines, isInitialLoad };
 };

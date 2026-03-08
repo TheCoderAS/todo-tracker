@@ -70,6 +70,8 @@ export function useCompletionAnalytics(
     if (isLoading) return { ...emptyAnalytics, loading: true };
     if (todos.length === 0) return emptyAnalytics;
 
+    const activeTodos = todos.filter((todo) => !todo.archivedAt);
+
     const today = new Date();
     const days = Array.from({ length: 30 }).map((_, index) => {
       const date = new Date(today);
@@ -85,7 +87,7 @@ export function useCompletionAnalytics(
 
     const weeklyBreakdown = days.map((date) => {
       const { start, end } = buildDayRange(date);
-      const completedTodos = todos.filter(
+      const completedTodos = activeTodos.filter(
         (todo) =>
           todo.status === "completed" && inRange(todo.completedDate, start, end)
       );
@@ -105,11 +107,13 @@ export function useCompletionAnalytics(
     });
 
     const { start: todayStart, end: todayEnd } = buildDayRange(today);
-    const todayTarget = todos.filter((todo) =>
-      inRange(todo.scheduledDate, todayStart, todayEnd)
+    const todayTarget = activeTodos.filter(
+      (todo) =>
+        todo.status !== "skipped" &&
+        inRange(todo.scheduledDate, todayStart, todayEnd)
     ).length;
 
-    const todayCompletedTodos = todos.filter(
+    const todayCompletedTodos = activeTodos.filter(
       (todo) =>
         todo.status === "completed" &&
         inRange(todo.completedDate, todayStart, todayEnd)
@@ -133,7 +137,7 @@ export function useCompletionAnalytics(
       low: { completed: 0, total: 0 }
     };
 
-    todos.forEach((todo) => {
+    activeTodos.forEach((todo) => {
       if (todo.priority && priorityCounts[todo.priority]) {
         priorityCounts[todo.priority].total += 1;
       }
@@ -157,8 +161,8 @@ export function useCompletionAnalytics(
       total: priorityCounts[p].total
     }));
 
-    const totalCompleted = todos.filter((t) => t.status === "completed").length;
-    const totalTodos = todos.length;
+    const totalCompleted = activeTodos.filter((t) => t.status === "completed").length;
+    const totalTodos = activeTodos.filter((t) => t.status !== "skipped").length;
     const productivityScore =
       totalTodos > 0 ? Math.round((totalCompleted / totalTodos) * 100) : 0;
 
