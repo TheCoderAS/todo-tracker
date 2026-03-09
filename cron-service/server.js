@@ -133,6 +133,7 @@ const sendDueTodayNotifications = async () => {
       .doc(uid)
       .collection("todos")
       .where("status", "==", "pending")
+      .where("archivedAt", "==", null)
       .where("scheduledDate", ">=", start)
       .where("scheduledDate", "<=", end)
       .get();
@@ -208,6 +209,7 @@ const sendHabitReminders = async () => {
 
     for (const habitDoc of habitsSnapshot.docs) {
       const habit = habitDoc.data();
+      if (habit.archivedAt) continue;
       const reminderTime = habit.reminderTime;
       const reminderDays = habit.reminderDays || [];
       const timezone = habit.timezone || "UTC";
@@ -221,6 +223,7 @@ const sendHabitReminders = async () => {
       if (!reminderDays.includes(weekdayIndex)) continue;
       if (habit.lastNotifiedDate === dateKey) continue;
       if (habit.completionDates?.includes(dateKey)) continue;
+      if (habit.skippedDates?.includes(dateKey)) continue;
 
       const [hour, minute] = reminderTime.split(":").map((value) => Number(value));
       if (Number.isNaN(hour) || Number.isNaN(minute)) continue;
