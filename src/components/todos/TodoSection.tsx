@@ -7,10 +7,7 @@ import {
   FiCheckCircle,
   FiCheckSquare,
   FiFilter,
-  FiFlag,
   FiPlus,
-  FiStar,
-  FiTarget,
   FiTrash2,
   FiX,
   FiZap

@@ -671,9 +671,9 @@ export default function SettingsPage() {
                 Save repeatable sequences so you can launch them in one tap.
               </p>
               <ol className="mt-3 list-decimal space-y-2 pl-4 text-sm text-slate-200">
-                <li>Open Routines and choose "Add routine" from the toolbar.</li>
+                <li>Open Routines and choose &ldquo;Add routine&rdquo; from the toolbar.</li>
                 <li>Add each step as a template task with tags and descriptions.</li>
-                <li>Save the routine, then run it to add tasks to today's plan.</li>
+                <li>Save the routine, then run it to add tasks to today&rsquo;s plan.</li>
                 <li>Open the routine list anytime to update or delete steps.</li>
               </ol>
             </div>
