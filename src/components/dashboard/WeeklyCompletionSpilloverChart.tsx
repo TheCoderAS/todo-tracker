@@ -29,10 +29,7 @@ export default function WeeklyCompletionSpilloverChart({
     return data.slice(-days);
   }, [data, period]);
   const maxCompletion = useMemo(() => {
-    return Math.max(
-      1,
-      ...visibleData.map((entry) => entry.onTime + entry.spillover)
-    );
+    return Math.max(1, ...visibleData.map((entry) => entry.onTime + entry.spillover));
   }, [visibleData]);
 
   return (
@@ -89,15 +86,23 @@ export default function WeeklyCompletionSpilloverChart({
         </div>
         <div
           className="relative z-10 grid gap-3 pt-3"
-          style={{ gridTemplateColumns: `repeat(${visibleData.length}, minmax(0, 1fr))` }}
+          style={{
+            gridTemplateColumns: `repeat(${visibleData.length}, minmax(0, 1fr))`
+          }}
         >
           {visibleData.map((entry) => {
             const total = entry.onTime + entry.spillover;
             const onTimeHeight = Math.max((entry.onTime / maxCompletion) * 100, 4);
-            const spilloverHeight = Math.max((entry.spillover / maxCompletion) * 100, 4);
+            const spilloverHeight = Math.max(
+              (entry.spillover / maxCompletion) * 100,
+              4
+            );
             const isEmpty = total === 0;
             return (
-              <div key={entry.date.toISOString()} className="flex flex-col items-center gap-2">
+              <div
+                key={entry.date.toISOString()}
+                className="flex flex-col items-center gap-2"
+              >
                 <div className="flex h-32 w-full items-end justify-center gap-2">
                   <div className="flex h-full w-4 items-end rounded-full bg-slate-900/60">
                     <div

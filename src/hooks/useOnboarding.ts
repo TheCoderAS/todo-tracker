@@ -24,7 +24,9 @@ export function useOnboarding(user: User | null) {
     let cancelled = false;
     const check = async () => {
       try {
-        const snap = await getDoc(doc(db, "users", user.uid, "settings", "preferences"));
+        const snap = await getDoc(
+          doc(db, "users", user.uid, "settings", "preferences")
+        );
         if (cancelled) return;
         const data = snap.data();
         if (data?.onboardingCompleted) {
@@ -39,7 +41,9 @@ export function useOnboarding(user: User | null) {
       }
     };
     check();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [user]);
 
   const completeOnboarding = async () => {

@@ -16,16 +16,24 @@ export default function WeeklySummaryCard({
   const totalOnTime = last7.reduce((sum, d) => sum + d.onTime, 0);
   const totalSpillover = last7.reduce((sum, d) => sum + d.spillover, 0);
 
-  const avgPerDay = last7.length > 0 ? Math.round(totalCompleted / last7.length * 10) / 10 : 0;
+  const avgPerDay =
+    last7.length > 0 ? Math.round((totalCompleted / last7.length) * 10) / 10 : 0;
 
-  const bestDay = last7.reduce((best, curr) => {
-    const currTotal = curr.onTime + curr.spillover;
-    const bestTotal = best.onTime + best.spillover;
-    return currTotal > bestTotal ? curr : best;
-  }, last7[0] ?? { date: new Date(), onTime: 0, spillover: 0 });
+  const bestDay = last7.reduce(
+    (best, curr) => {
+      const currTotal = curr.onTime + curr.spillover;
+      const bestTotal = best.onTime + best.spillover;
+      return currTotal > bestTotal ? curr : best;
+    },
+    last7[0] ?? { date: new Date(), onTime: 0, spillover: 0 }
+  );
 
   const bestDayLabel = bestDay?.date
-    ? bestDay.date.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })
+    ? bestDay.date.toLocaleDateString(undefined, {
+        weekday: "short",
+        month: "short",
+        day: "numeric"
+      })
     : "—";
 
   return (

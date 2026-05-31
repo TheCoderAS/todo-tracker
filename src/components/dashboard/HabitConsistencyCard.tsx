@@ -31,12 +31,8 @@ export default function HabitConsistencyCard({
       <p className="text-xs uppercase text-sky-200/80">Consistency score</p>
       <div className="mt-4 flex flex-wrap items-center justify-between gap-4">
         <div>
-          <p className="text-4xl font-semibold text-white">
-            {completionRate}%
-          </p>
-          <p className="mt-2 text-sm font-medium text-sky-100/80">
-            {statusMessage}
-          </p>
+          <p className="text-4xl font-semibold text-white">{completionRate}%</p>
+          <p className="mt-2 text-sm font-medium text-sky-100/80">{statusMessage}</p>
           <p className="mt-3 text-xs text-slate-400">
             Based on scheduled sessions over the last {days} days.
           </p>
@@ -50,8 +46,8 @@ export default function HabitConsistencyCard({
         </div>
       </div>
       <p className="mt-4 text-xs text-slate-400">
-        Consistency reflects how often you hit scheduled sessions. Streaks only
-        track consecutive wins.
+        Consistency reflects how often you hit scheduled sessions. Streaks only track
+        consecutive wins.
       </p>
       {loading ? (
         <p className="mt-3 text-xs uppercase text-slate-500">Updating...</p>

@@ -85,7 +85,9 @@ export default function AuthForm({
             <Field
               label="First name"
               icon={<FiUser className="h-4 w-4 text-slate-400" />}
-              controlClassName={fieldErrors.firstName ? "border-rose-500/70" : undefined}
+              controlClassName={
+                fieldErrors.firstName ? "border-rose-500/70" : undefined
+              }
             >
               <TextInput
                 name="firstName"
@@ -128,7 +130,10 @@ export default function AuthForm({
 
         {mode === "signup" ? (
           <>
-            <Field label="Phone number" icon={<FiPhone className="h-4 w-4 text-slate-400" />}>
+            <Field
+              label="Phone number"
+              icon={<FiPhone className="h-4 w-4 text-slate-400" />}
+            >
               <TextInput
                 name="phone"
                 type="tel"

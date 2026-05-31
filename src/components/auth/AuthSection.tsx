@@ -1,6 +1,9 @@
 "use client";
 
-import AuthForm, { type AuthFormState, type AuthMode } from "@/components/auth/AuthForm";
+import AuthForm, {
+  type AuthFormState,
+  type AuthMode
+} from "@/components/auth/AuthForm";
 import AuthIntro from "@/components/auth/AuthIntro";
 
 type AuthSectionProps = {

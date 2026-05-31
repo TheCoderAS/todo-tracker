@@ -24,9 +24,12 @@ export default function Snackbar({
   onUndo
 }: SnackbarProps) {
   useEffect(() => {
-    const timeoutId = window.setTimeout(() => {
-      onDismiss();
-    }, onUndo ? 6000 : 4500);
+    const timeoutId = window.setTimeout(
+      () => {
+        onDismiss();
+      },
+      onUndo ? 6000 : 4500
+    );
 
     return () => window.clearTimeout(timeoutId);
   }, [onDismiss, onUndo]);

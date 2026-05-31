@@ -34,9 +34,7 @@ export default function CompletedTargetCard({
   return (
     <div className="group relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-slate-950/90 via-slate-950/70 to-emerald-950/30 p-6 transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_0_55px_rgba(16,185,129,0.2)]">
       <div className="absolute -right-12 -top-10 h-32 w-32 rounded-full bg-emerald-400/20 blur-3xl transition-opacity duration-500 group-hover:opacity-90" />
-      <p className="text-xs uppercase text-emerald-200/70">
-        Task momentum
-      </p>
+      <p className="text-xs uppercase text-emerald-200/70">Task momentum</p>
       <div className="mt-4 flex flex-wrap items-end justify-between gap-6">
         <div>
           <p className="text-4xl font-semibold text-white sm:text-5xl">
@@ -74,9 +72,7 @@ export default function CompletedTargetCard({
         </div>
       </div>
       {loading ? (
-        <p className="mt-3 text-xs uppercase text-slate-500">
-          Updating...
-        </p>
+        <p className="mt-3 text-xs uppercase text-slate-500">Updating...</p>
       ) : null}
     </div>
   );

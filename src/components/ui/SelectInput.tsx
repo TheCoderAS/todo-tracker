@@ -9,6 +9,9 @@ type SelectInputProps = SelectHTMLAttributes<HTMLSelectElement> & {
 
 export default function SelectInput({ className, ...props }: SelectInputProps) {
   return (
-    <select className={`${selectClasses}${className ? ` ${className}` : ""}`} {...props} />
+    <select
+      className={`${selectClasses}${className ? ` ${className}` : ""}`}
+      {...props}
+    />
   );
 }

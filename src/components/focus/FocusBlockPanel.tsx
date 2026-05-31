@@ -41,17 +41,14 @@ const getHabitCompletionStatus = (habit: Habit, today: Date) => {
   return habit.completionDates?.includes(key);
 };
 
-const getCompletionMetrics = (
-  block: FocusBlock,
-  todos: Todo[],
-  habits: Habit[]
-) => {
+const getCompletionMetrics = (block: FocusBlock, todos: Todo[], habits: Habit[]) => {
   const selectedTodos = todos.filter((todo) => block.selectedTodoIds.includes(todo.id));
   const selectedHabits = habits.filter((habit) =>
     block.selectedHabitIds.includes(habit.id)
   );
-  const completedTodos = selectedTodos.filter((todo) => todo.status === "completed")
-    .length;
+  const completedTodos = selectedTodos.filter(
+    (todo) => todo.status === "completed"
+  ).length;
   const today = new Date();
   const completedHabits = selectedHabits.filter((habit) =>
     getHabitCompletionStatus(habit, today)
@@ -146,6 +143,14 @@ export default function FocusBlockPanel({
     if (!end) return null;
     return end.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   }, [activeBlock, tick]);
+
+  const elapsedPercent = useMemo(() => {
+    if (!activeBlock) return 0;
+    const totalSeconds = activeBlock.durationMinutes * 60;
+    if (totalSeconds <= 0) return 100;
+    const elapsed = totalSeconds - remainingSeconds;
+    return Math.min(100, Math.max(0, (elapsed / totalSeconds) * 100));
+  }, [activeBlock, remainingSeconds]);
 
   const handleTodoToggle = (todoId: string) => {
     setSelectedTodoIds((prev) =>
@@ -261,6 +266,19 @@ export default function FocusBlockPanel({
             <p className="mt-1 text-3xl font-semibold text-emerald-100">
               {formatDuration(remainingSeconds)}
             </p>
+            <div
+              className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-emerald-950/60"
+              role="progressbar"
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={Math.round(elapsedPercent)}
+              aria-label="Focus block progress"
+            >
+              <div
+                className="h-full rounded-full bg-emerald-400 transition-[width] duration-1000 ease-linear"
+                style={{ width: `${elapsedPercent}%` }}
+              />
+            </div>
             <p className="mt-1 text-xs text-emerald-200/70">
               {remainingSeconds > 0 ? "Stay focused" : "Block finished"}
             </p>
@@ -280,13 +298,17 @@ export default function FocusBlockPanel({
             <div className="mt-4 space-y-3">
               {activeBlockTodos.length ? (
                 <div>
-                  <p className="text-xs font-semibold uppercase text-slate-400">Todos</p>
+                  <p className="text-xs font-semibold uppercase text-slate-400">
+                    Todos
+                  </p>
                   <ul className="mt-2 space-y-1 text-sm text-slate-100">
                     {activeBlockTodos.map((todo) => (
                       <li key={todo.id} className="flex items-center gap-2">
                         <span
                           className={`h-2 w-2 rounded-full ${
-                            todo.status === "completed" ? "bg-emerald-400" : "bg-slate-500"
+                            todo.status === "completed"
+                              ? "bg-emerald-400"
+                              : "bg-slate-500"
                           }`}
                         />
                         <span>{todo.title}</span>
@@ -297,7 +319,9 @@ export default function FocusBlockPanel({
               ) : null}
               {activeBlockHabits.length ? (
                 <div>
-                  <p className="text-xs font-semibold uppercase text-slate-400">Habits</p>
+                  <p className="text-xs font-semibold uppercase text-slate-400">
+                    Habits
+                  </p>
                   <ul className="mt-2 space-y-1 text-sm text-slate-100">
                     {activeBlockHabits.map((habit) => (
                       <li key={habit.id} className="flex items-center gap-2">
@@ -319,8 +343,11 @@ export default function FocusBlockPanel({
               <div className="flex items-center justify-between">
                 <span>Todos completed</span>
                 <span className="font-semibold text-white">
-                  {activeBlockTodos.filter((todo) => todo.status === "completed").length} / {" "}
-                  {activeBlockTodos.length}
+                  {
+                    activeBlockTodos.filter((todo) => todo.status === "completed")
+                      .length
+                  }{" "}
+                  / {activeBlockTodos.length}
                 </span>
               </div>
               <div className="flex items-center justify-between">
@@ -389,7 +416,7 @@ export default function FocusBlockPanel({
                     className="flex items-center gap-3 rounded-xl border border-transparent bg-slate-950/30 px-3 py-2 transition hover:border-slate-700"
                   >
                     <input
-                  type="checkbox"
+                      type="checkbox"
                       checked={selectedTodoIds.includes(todo.id)}
                       onChange={() => handleTodoToggle(todo.id)}
                       className="h-4 w-4 rounded border-slate-600 bg-slate-950 text-emerald-400 focus:ring-emerald-300/30"
@@ -432,9 +459,7 @@ export default function FocusBlockPanel({
                   min={minDuration}
                   max={maxDuration}
                   value={durationInput}
-                  onChange={(event) =>
-                    setDurationInput(event.target.value)
-                  }
+                  onChange={(event) => setDurationInput(event.target.value)}
                   onBlur={() => {
                     if (!durationInput.trim()) {
                       setDurationInput(String(minDuration));
@@ -464,7 +489,9 @@ export default function FocusBlockPanel({
               Start focus block
             </button>
             {loading ? (
-              <p className="mt-3 text-xs uppercase text-slate-500">Syncing focus data…</p>
+              <p className="mt-3 text-xs uppercase text-slate-500">
+                Syncing focus data…
+              </p>
             ) : null}
           </div>
         </div>

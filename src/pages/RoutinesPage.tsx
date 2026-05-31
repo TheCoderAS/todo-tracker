@@ -78,7 +78,9 @@ export default function RoutinesPage() {
   const [isRoutineFormOpen, setIsRoutineFormOpen] = useState(false);
   const [editingRoutineId, setEditingRoutineId] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
-  const [confirmRoutineDelete, setConfirmRoutineDelete] = useState<Routine | null>(null);
+  const [confirmRoutineDelete, setConfirmRoutineDelete] = useState<Routine | null>(
+    null
+  );
   const [snackbar, setSnackbar] = useState<{
     message: string;
     variant: SnackbarVariant;
@@ -286,7 +288,11 @@ export default function RoutinesPage() {
         onRun={handleRunRoutine}
         isLoading={isRoutineLoading}
       />
-      <Modal isOpen={isRoutineFormOpen} onClose={closeRoutineModal} ariaLabel="Routine form">
+      <Modal
+        isOpen={isRoutineFormOpen}
+        onClose={closeRoutineModal}
+        ariaLabel="Routine form"
+      >
         <RoutineForm
           form={routineForm}
           priorities={priorities}

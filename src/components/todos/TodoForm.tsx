@@ -9,8 +9,17 @@ import {
   BsTypeItalic,
   BsTypeStrikethrough
 } from "react-icons/bs";
-import { FiCheckSquare, FiPlus, FiRepeat, FiSave, FiSquare, FiTrash2, FiX } from "react-icons/fi";
+import {
+  FiCheckSquare,
+  FiPlus,
+  FiRepeat,
+  FiSave,
+  FiSquare,
+  FiTrash2,
+  FiX
+} from "react-icons/fi";
 
+import { sanitizeHtml } from "@/lib/sanitizeHtml";
 import type { Subtask, TodoInput, TodoPriority, TodoRecurrence } from "@/lib/types";
 
 const inputClasses =
@@ -52,9 +61,7 @@ export default function TodoForm({
   const [tagInput, setTagInput] = useState("");
   const [subtaskInput, setSubtaskInput] = useState("");
   const [contextTagInput, setContextTagInput] = useState("");
-  const [isDescriptionOpen, setIsDescriptionOpen] = useState(
-    Boolean(form.description)
-  );
+  const [isDescriptionOpen, setIsDescriptionOpen] = useState(Boolean(form.description));
   const descriptionRef = useRef<HTMLDivElement | null>(null);
   const tags = useMemo(
     () =>
@@ -125,13 +132,15 @@ export default function TodoForm({
     const editor = descriptionRef.current;
     if (!editor) return;
     editor.focus();
-    document.execCommand(type === "ordered" ? "insertOrderedList" : "insertUnorderedList");
+    document.execCommand(
+      type === "ordered" ? "insertOrderedList" : "insertUnorderedList"
+    );
   };
 
   const handleDescriptionInput = () => {
     const editor = descriptionRef.current;
     if (!editor) return;
-    onDescriptionChange(editor.innerHTML);
+    onDescriptionChange(sanitizeHtml(editor.innerHTML));
   };
 
   const handleAddSubtask = () => {
@@ -267,8 +276,8 @@ export default function TodoForm({
                     priority === "high"
                       ? "border-rose-400/60 text-rose-200 shadow-[0_0_16px_rgba(244,63,94,0.35)]"
                       : priority === "medium"
-                      ? "border-amber-400/60 text-amber-200 shadow-[0_0_16px_rgba(251,191,36,0.25)]"
-                      : "border-emerald-400/60 text-emerald-200 shadow-[0_0_16px_rgba(16,185,129,0.25)]";
+                        ? "border-amber-400/60 text-amber-200 shadow-[0_0_16px_rgba(251,191,36,0.25)]"
+                        : "border-emerald-400/60 text-emerald-200 shadow-[0_0_16px_rgba(16,185,129,0.25)]";
                   return (
                     <button
                       key={priority}

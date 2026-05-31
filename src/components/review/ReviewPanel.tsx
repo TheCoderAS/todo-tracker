@@ -51,9 +51,7 @@ export default function ReviewPanel({
 
       <div className="grid gap-4">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-slate-200">
-            Overdue todos
-          </h3>
+          <h3 className="text-sm font-semibold text-slate-200">Overdue todos</h3>
           <span className="text-xs text-slate-400">{overdueTodos.length} items</span>
         </div>
         {overdueTodos.length ? (
@@ -127,7 +125,9 @@ export default function ReviewPanel({
               >
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="text-base font-semibold text-white">{entry.habit.title}</p>
+                    <p className="text-base font-semibold text-white">
+                      {entry.habit.title}
+                    </p>
                     <div className="mt-1 flex items-center gap-2 text-xs text-slate-300">
                       <FiCalendar aria-hidden className="text-slate-400" />
                       <span>Missed on {formatHabitDate(entry.date)}</span>

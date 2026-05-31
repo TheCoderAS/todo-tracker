@@ -47,8 +47,8 @@ export default class ErrorBoundary extends Component<
       >
         <h1 className="text-xl font-semibold">Something went wrong</h1>
         <p className="max-w-md text-sm text-slate-400">
-          An unexpected error interrupted the app. Reloading usually fixes it. If
-          the problem continues, please report it.
+          An unexpected error interrupted the app. Reloading usually fixes it. If the
+          problem continues, please report it.
         </p>
         <button
           type="button"

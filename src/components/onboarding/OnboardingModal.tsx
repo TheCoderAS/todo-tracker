@@ -1,5 +1,13 @@
 import { useState } from "react";
-import { FiArrowRight, FiCheck, FiGrid, FiList, FiRepeat, FiSearch, FiZap } from "react-icons/fi";
+import {
+  FiArrowRight,
+  FiCheck,
+  FiGrid,
+  FiList,
+  FiRepeat,
+  FiSearch,
+  FiZap
+} from "react-icons/fi";
 
 import Modal from "@/components/ui/Modal";
 
@@ -70,7 +78,9 @@ export default function OnboardingModal({ isOpen, onComplete }: OnboardingModalP
 
         <div className="grid gap-2">
           <h2 className="text-xl font-bold text-white">{current.title}</h2>
-          <p className="mx-auto max-w-sm text-sm text-slate-400">{current.description}</p>
+          <p className="mx-auto max-w-sm text-sm text-slate-400">
+            {current.description}
+          </p>
         </div>
 
         <div className="flex items-center justify-center gap-1.5">
@@ -81,8 +91,8 @@ export default function OnboardingModal({ isOpen, onComplete }: OnboardingModalP
                 i === step
                   ? "w-6 bg-emerald-400"
                   : i < step
-                  ? "w-1.5 bg-emerald-400/40"
-                  : "w-1.5 bg-slate-700"
+                    ? "w-1.5 bg-emerald-400/40"
+                    : "w-1.5 bg-slate-700"
               }`}
             />
           ))}

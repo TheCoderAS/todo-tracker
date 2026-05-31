@@ -8,5 +8,10 @@ type TextInputProps = InputHTMLAttributes<HTMLInputElement> & {
 };
 
 export default function TextInput({ className, ...props }: TextInputProps) {
-  return <input className={`${inputClasses}${className ? ` ${className}` : ""}`} {...props} />;
+  return (
+    <input
+      className={`${inputClasses}${className ? ` ${className}` : ""}`}
+      {...props}
+    />
+  );
 }

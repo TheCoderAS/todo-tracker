@@ -85,7 +85,12 @@ const isMonthIntervalMatch = (
 };
 
 export const isHabitScheduledForDate = (
-  habit: { frequency: string; reminderDays?: number[]; timezone?: string | null; createdAt?: any },
+  habit: {
+    frequency: string;
+    reminderDays?: number[];
+    timezone?: string | null;
+    createdAt?: any;
+  },
   date: Date
 ) => {
   const parts = getDateParts(date, habit.timezone ?? null);
@@ -109,7 +114,12 @@ export const isHabitScheduledForDate = (
     const dayOfMonth = reminderDays[0] ?? parts.day;
     return (
       parts.day === clampDay(parts.year, parts.month, dayOfMonth) &&
-      isMonthIntervalMatch(parts, habit.createdAt?.toDate?.() ?? null, 3, habit.timezone)
+      isMonthIntervalMatch(
+        parts,
+        habit.createdAt?.toDate?.() ?? null,
+        3,
+        habit.timezone
+      )
     );
   }
 
@@ -117,34 +127,23 @@ export const isHabitScheduledForDate = (
     const dayOfMonth = reminderDays[0] ?? parts.day;
     return (
       parts.day === clampDay(parts.year, parts.month, dayOfMonth) &&
-      isMonthIntervalMatch(parts, habit.createdAt?.toDate?.() ?? null, 6, habit.timezone)
+      isMonthIntervalMatch(
+        parts,
+        habit.createdAt?.toDate?.() ?? null,
+        6,
+        habit.timezone
+      )
     );
   }
 
   const { month, day } = getYearlySchedule(reminderDays, parts.month, parts.day);
-  return (
-    parts.month === month &&
-    parts.day === clampDay(parts.year, month, day)
-  );
+  return parts.month === month && parts.day === clampDay(parts.year, month, day);
 };
 
 export const getLocalTimeZone = () =>
   Intl.DateTimeFormat().resolvedOptions().timeZone ?? null;
 
-export const habitMilestones = [
-  1,
-  5,
-  10,
-  20,
-  35,
-  50,
-  75,
-  100,
-  150,
-  200,
-  300,
-  500
-];
+export const habitMilestones = [1, 5, 10, 20, 35, 50, 75, 100, 150, 200, 300, 500];
 
 export const getHabitMilestoneProgress = (totalCompletions: number) => {
   const safeTotal = Math.max(totalCompletions, 0);

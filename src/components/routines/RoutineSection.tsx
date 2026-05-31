@@ -28,9 +28,7 @@ export default function RoutineSection({
     <section className="grid gap-5">
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-3xl border border-slate-900/70 bg-gradient-to-br from-slate-900/80 via-slate-950/90 to-slate-950/80 p-5 shadow-xl shadow-slate-950/40">
         <div>
-          <p className="text-xs font-semibold uppercase text-slate-500">
-            Routines
-          </p>
+          <p className="text-xs font-semibold uppercase text-slate-500">Routines</p>
           <p className="text-lg font-semibold text-white">
             {routines.length} saved routine{routines.length === 1 ? "" : "s"}
           </p>
@@ -63,7 +61,8 @@ export default function RoutineSection({
                 <div>
                   <h3 className="text-lg font-semibold text-white">{routine.title}</h3>
                   <p className="text-xs text-slate-400">
-                    {routine.items.length} template item{routine.items.length === 1 ? "" : "s"}
+                    {routine.items.length} template item
+                    {routine.items.length === 1 ? "" : "s"}
                   </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
@@ -103,7 +102,9 @@ export default function RoutineSection({
                       className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-slate-900/80 bg-slate-950/80 px-4 py-3"
                     >
                       <div>
-                        <p className="text-sm font-semibold text-slate-100">{item.title}</p>
+                        <p className="text-sm font-semibold text-slate-100">
+                          {item.title}
+                        </p>
                         <p className="text-xs text-slate-500">
                           {formatPriorityLabel(item.priority)} priority
                           {item.contextTags.length

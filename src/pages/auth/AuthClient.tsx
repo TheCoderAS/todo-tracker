@@ -117,7 +117,10 @@ export default function AuthClient() {
         console.error(secondaryError);
       }
       setAuthError("Unable to sign in with email/password.");
-      setSnackbar({ message: "Unable to sign in with email/password.", variant: "error" });
+      setSnackbar({
+        message: "Unable to sign in with email/password.",
+        variant: "error"
+      });
       console.error(error);
     } finally {
       setActionLoading(false);
@@ -145,7 +148,10 @@ export default function AuthClient() {
         author_uid: credential.user.uid,
         createdAt: serverTimestamp()
       });
-      setSnackbar({ message: "Account created! Welcome to Aura Pulse.", variant: "success" });
+      setSnackbar({
+        message: "Account created! Welcome to Aura Pulse.",
+        variant: "success"
+      });
       resetAuthForm();
       navigate(nextPath, { replace: true });
     } catch (error) {
@@ -186,7 +192,11 @@ export default function AuthClient() {
               });
               return;
             }
-            const result = await signInWithEmailAndPassword(auth, email, authForm.password);
+            const result = await signInWithEmailAndPassword(
+              auth,
+              email,
+              authForm.password
+            );
             if (pendingCredential) {
               await linkWithCredential(result.user, pendingCredential);
             }
@@ -217,7 +227,10 @@ export default function AuthClient() {
     setAuthError(null);
     if (!authForm.email.trim()) {
       setAuthError("Enter your email to reset your password.");
-      setSnackbar({ message: "Enter your email to reset your password.", variant: "error" });
+      setSnackbar({
+        message: "Enter your email to reset your password.",
+        variant: "error"
+      });
       return;
     }
     setActionLoading(true);

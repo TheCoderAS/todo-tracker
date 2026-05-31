@@ -19,7 +19,14 @@ export type FilterDraft = {
   priority: "all" | TodoPriority;
   sortBy: "scheduled" | "completed" | "priority" | "created" | "manual";
   sortOrder: "asc" | "desc";
-  datePreset: "all" | "today" | "tomorrow" | "week" | "spillover" | "upcoming" | "custom";
+  datePreset:
+    | "all"
+    | "today"
+    | "tomorrow"
+    | "week"
+    | "spillover"
+    | "upcoming"
+    | "custom";
   selectedDate: string;
   tags: string[];
 };
@@ -60,7 +67,9 @@ export default function FiltersModal({
   const [applyBounce, setApplyBounce] = useState(false);
   const showDatePicker = filterDraft.datePreset === "custom";
 
-  const sortByOptions = useMemo<Array<{ value: FilterDraft["sortBy"]; label: string }>>(() => {
+  const sortByOptions = useMemo<
+    Array<{ value: FilterDraft["sortBy"]; label: string }>
+  >(() => {
     const base: Array<{ value: FilterDraft["sortBy"]; label: string }> = [
       { value: "scheduled", label: "Scheduled date" },
       { value: "created", label: "Created date" },
@@ -122,7 +131,12 @@ export default function FiltersModal({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} ariaLabel="Filter todos" variant="bottom-sheet">
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      ariaLabel="Filter todos"
+      variant="bottom-sheet"
+    >
       <div className="grid gap-6">
         <div className="modal-header flex items-center justify-between gap-4">
           <div>
@@ -184,8 +198,8 @@ export default function FiltersModal({
                             ? filterDraft.sortBy
                             : "completed"
                           : filterDraft.sortBy === "completed"
-                          ? "scheduled"
-                          : filterDraft.sortBy
+                            ? "scheduled"
+                            : filterDraft.sortBy
                     })
                   }
                 >
@@ -246,7 +260,8 @@ export default function FiltersModal({
                     onDraftChange({
                       ...filterDraft,
                       datePreset: option.value,
-                      selectedDate: option.value === "custom" ? filterDraft.selectedDate : ""
+                      selectedDate:
+                        option.value === "custom" ? filterDraft.selectedDate : ""
                     })
                   }
                 >
@@ -308,15 +323,15 @@ export default function FiltersModal({
             <div className="grid gap-3 rounded-2xl border border-slate-800/60 bg-slate-950/60 p-3">
               <div className="flex flex-wrap gap-2">
                 {sortByOptions.map((option) => (
-                <button
-                  key={option.value}
-                  type="button"
-                  className={`flex h-9 items-center justify-center rounded-full border px-3 text-xs font-semibold transition active:scale-95 ${
-                    filterDraft.sortBy === option.value
-                      ? "border-sky-400/60 bg-sky-400/15 text-sky-100"
-                      : "border-slate-800/70 bg-slate-950/50 text-slate-300 hover:border-slate-600/70 hover:text-white"
-                  }`}
-                  onClick={() =>
+                  <button
+                    key={option.value}
+                    type="button"
+                    className={`flex h-9 items-center justify-center rounded-full border px-3 text-xs font-semibold transition active:scale-95 ${
+                      filterDraft.sortBy === option.value
+                        ? "border-sky-400/60 bg-sky-400/15 text-sky-100"
+                        : "border-slate-800/70 bg-slate-950/50 text-slate-300 hover:border-slate-600/70 hover:text-white"
+                    }`}
+                    onClick={() =>
                       onDraftChange({
                         ...filterDraft,
                         sortBy: option.value

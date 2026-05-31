@@ -34,6 +34,7 @@ import {
 
 import Modal from "@/components/ui/Modal";
 import SortableTodoCard from "@/components/todos/SortableTodoCard";
+import { sanitizeHtml } from "@/lib/sanitizeHtml";
 import type { Todo } from "@/lib/types";
 
 type TodoListProps = {
@@ -92,7 +93,8 @@ export default function TodoList({
   const [countdown, setCountdown] = useState("00:00:00");
   const [showCompleted, setShowCompleted] = useState(false);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
-  const isEmpty = groups.length === 0 || groups.every((group) => group.items.length === 0);
+  const isEmpty =
+    groups.length === 0 || groups.every((group) => group.items.length === 0);
 
   const totalItems = useMemo(
     () => groups.reduce((sum, g) => sum + g.items.length, 0),
@@ -126,10 +128,7 @@ export default function TodoList({
   const looksLikeHtml = (value: string) => /<\/?[a-z][\s\S]*>/i.test(value);
 
   const escapeHtml = (value: string) =>
-    value
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;");
+    value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
   const formatInlineMarkdown = (value: string) =>
     escapeHtml(value)
@@ -183,16 +182,15 @@ export default function TodoList({
   };
 
   const formatDescriptionHtml = (value: string) =>
-    looksLikeHtml(value) ? value : markdownToHtml(value);
+    sanitizeHtml(looksLikeHtml(value) ? value : markdownToHtml(value));
 
   const countListItems = (value: string) => {
     if (!value) return 0;
     if (looksLikeHtml(value)) {
       return value.match(/<li>/g)?.length ?? 0;
     }
-    return value
-      .split(/\r?\n/)
-      .filter((line) => /^\s*(?:[-*]|\d+\.)\s+/.test(line)).length;
+    return value.split(/\r?\n/).filter((line) => /^\s*(?:[-*]|\d+\.)\s+/.test(line))
+      .length;
   };
 
   const now = new Date();
@@ -231,23 +229,28 @@ export default function TodoList({
       const completedItems = group.items.filter(
         (todo) => todo.status === "completed" || todo.status === "skipped"
       );
-      if (pendingItems.length) pendingGroups.push({ title: group.title, items: pendingItems });
+      if (pendingItems.length)
+        pendingGroups.push({ title: group.title, items: pendingItems });
       if (completedItems.length)
         completedGroups.push({ title: group.title, items: completedItems });
     });
     return { pendingGroups, completedGroups };
   }, [groups]);
 
-  const hasCompleted = groupSplit.completedGroups.some((group) => group.items.length > 0);
+  const hasCompleted = groupSplit.completedGroups.some(
+    (group) => group.items.length > 0
+  );
 
   const truncatedPendingGroups = useMemo(() => {
     let remaining = visibleCount;
-    return groupSplit.pendingGroups.map((group) => {
-      if (remaining <= 0) return { ...group, items: [] };
-      const items = group.items.slice(0, remaining);
-      remaining -= items.length;
-      return { ...group, items };
-    }).filter((g) => g.items.length > 0);
+    return groupSplit.pendingGroups
+      .map((group) => {
+        if (remaining <= 0) return { ...group, items: [] };
+        const items = group.items.slice(0, remaining);
+        remaining -= items.length;
+        return { ...group, items };
+      })
+      .filter((g) => g.items.length > 0);
   }, [groupSplit.pendingGroups, visibleCount]);
 
   useEffect(() => {
@@ -314,8 +317,8 @@ export default function TodoList({
       diffHours > 3
         ? "text-emerald-300"
         : diffHours > 1
-        ? "text-amber-300"
-        : "text-rose-300";
+          ? "text-amber-300"
+          : "text-rose-300";
     return { label: `Due in ${hours}h ${minutes}m`, className };
   };
 
@@ -330,7 +333,10 @@ export default function TodoList({
       ? (scheduledDate.getTime() - Date.now()) / 3600000
       : null;
     const isDueSoon =
-      todo.status === "pending" && diffHours !== null && diffHours > 0 && diffHours <= 3;
+      todo.status === "pending" &&
+      diffHours !== null &&
+      diffHours > 0 &&
+      diffHours <= 3;
     const isCompleted = todo.status === "completed";
     const isSkipped = todo.status === "skipped";
     const shouldCelebrate = todo.id === lastCompletedId;
@@ -338,10 +344,10 @@ export default function TodoList({
     const cardTone = isOverdue
       ? "glow-rose"
       : isDueSoon
-      ? "glow-amber"
-      : isCompleted
-      ? "glow-emerald"
-      : "status-ring";
+        ? "glow-amber"
+        : isCompleted
+          ? "glow-emerald"
+          : "status-ring";
     const isSelected = isSelectMode && selectedIds?.has(todo.id);
     const handleCardClick = () => {
       if (isSelectMode && onToggleSelectId) {
@@ -351,7 +357,7 @@ export default function TodoList({
       }
     };
     return (
-      <article
+      <div
         className={`flex flex-col gap-4 rounded-3xl border bg-gradient-to-br from-slate-900/80 via-slate-950/90 to-slate-950/80 px-5 py-4 transition hover:border-slate-700/70 ${cardTone} ${
           isCompleted || isSkipped ? "opacity-70" : ""
         } ${isDueSoon ? "amber-pulse" : ""} ${isSelected ? "border-sky-400/60 ring-1 ring-sky-400/30" : "border-slate-900/60"}`}
@@ -377,7 +383,13 @@ export default function TodoList({
               >
                 {isSelected && (
                   <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                    <path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path
+                      d="M2 6l3 3 5-5"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
                   </svg>
                 )}
               </div>
@@ -389,8 +401,8 @@ export default function TodoList({
                 isCompleted
                   ? "line-through decoration-emerald-400/70"
                   : isSkipped
-                  ? "line-through decoration-slate-500/70"
-                  : ""
+                    ? "line-through decoration-slate-500/70"
+                    : ""
               }`}
             >
               {todo.title}
@@ -423,9 +435,7 @@ export default function TodoList({
                 onToggleFlag(todo);
               }}
               aria-label={
-                todo.priority === "high"
-                  ? "Remove priority flag"
-                  : "Flag as priority"
+                todo.priority === "high" ? "Remove priority flag" : "Flag as priority"
               }
             >
               <FiFlag aria-hidden />
@@ -436,8 +446,8 @@ export default function TodoList({
                 isCompleted
                   ? "text-emerald-200"
                   : isSkipped
-                  ? "text-slate-400"
-                  : "text-slate-300 hover:text-white"
+                    ? "text-slate-400"
+                    : "text-slate-300 hover:text-white"
               } ${shouldCelebrate ? "celebrate-pop" : ""}`}
               onClick={(event) => {
                 event.stopPropagation();
@@ -483,7 +493,7 @@ export default function TodoList({
             </span>
           ) : null}
         </div>
-      </article>
+      </div>
     );
   };
 
@@ -555,7 +565,9 @@ export default function TodoList({
           <div className="grid gap-6">
             <div className="modal-header flex items-start justify-between gap-4">
               <div className="grid gap-2">
-                <h3 className="text-lg font-semibold text-white">{selectedTodo.title}</h3>
+                <h3 className="text-lg font-semibold text-white">
+                  {selectedTodo.title}
+                </h3>
                 <div className="flex flex-wrap items-center gap-2 text-xs text-slate-400">
                   <span
                     className={`flex items-center gap-1 rounded-full bg-slate-950/70 px-2 py-1 ${priorityIconStyles[selectedTodo.priority]}`}
@@ -589,81 +601,83 @@ export default function TodoList({
             <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-6">
               <div className="grid gap-5">
                 <div className="grid gap-3 text-xs text-slate-300">
-                <div className="flex items-center gap-2">
-                  <FiCalendar aria-hidden className="text-slate-400" />
-                  <span>{formatDate(selectedTodo.scheduledDate)}</span>
-                </div>
-                {selectedTodo.status === "pending" ? (
                   <div className="flex items-center gap-2">
-                    <FiWatch aria-hidden className="text-slate-400" />
-                    <span>{countdown}</span>
+                    <FiCalendar aria-hidden className="text-slate-400" />
+                    <span>{formatDate(selectedTodo.scheduledDate)}</span>
                   </div>
-                ) : null}
-                <div className="flex items-center gap-2">
-                  <FiTag aria-hidden className="text-slate-400" />
-                  <span>{selectedTodo.tags.length ? selectedTodo.tags.join(", ") : "—"}</span>
+                  {selectedTodo.status === "pending" ? (
+                    <div className="flex items-center gap-2">
+                      <FiWatch aria-hidden className="text-slate-400" />
+                      <span>{countdown}</span>
+                    </div>
+                  ) : null}
+                  <div className="flex items-center gap-2">
+                    <FiTag aria-hidden className="text-slate-400" />
+                    <span>
+                      {selectedTodo.tags.length ? selectedTodo.tags.join(", ") : "—"}
+                    </span>
+                  </div>
+                </div>
+                <div className="grid gap-2 text-sm text-slate-200">
+                  <p className="text-xs font-semibold capitalize text-slate-300">
+                    Description
+                  </p>
+                  {selectedTodo.description?.trim() ? (
+                    <div
+                      className="space-y-2 text-sm text-slate-200 [&_em]:text-slate-100 [&_ol]:list-decimal [&_ol]:pl-5 [&_s]:line-through [&_strike]:line-through [&_strong]:text-white [&_ul]:list-disc [&_ul]:pl-5"
+                      dangerouslySetInnerHTML={{
+                        __html: formatDescriptionHtml(selectedTodo.description)
+                      }}
+                    />
+                  ) : (
+                    <p className="text-xs text-slate-400">No description provided.</p>
+                  )}
                 </div>
               </div>
-              <div className="grid gap-2 text-sm text-slate-200">
-                <p className="text-xs font-semibold capitalize text-slate-300">
-                  Description
-                </p>
-                {selectedTodo.description?.trim() ? (
-                  <div
-                    className="space-y-2 text-sm text-slate-200 [&_em]:text-slate-100 [&_ol]:list-decimal [&_ol]:pl-5 [&_s]:line-through [&_strike]:line-through [&_strong]:text-white [&_ul]:list-disc [&_ul]:pl-5"
-                    dangerouslySetInnerHTML={{
-                      __html: formatDescriptionHtml(selectedTodo.description)
-                    }}
-                  />
-                ) : (
-                  <p className="text-xs text-slate-400">No description provided.</p>
-                )}
-              </div>
-            </div>
               <div className="flex min-w-[3.5rem] flex-col items-center gap-2 text-slate-200">
-              <button
-                type="button"
-                className="flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-700/70 text-slate-200 transition hover:border-slate-500"
-                onClick={() => {
-                  onEdit(selectedTodo);
-                  onSelectTodo(null);
-                }}
-                aria-label="Edit todo"
-              >
-                <FiEdit2 aria-hidden />
-              </button>
-              <button
-                type="button"
-                className="flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-700/70 text-slate-200 transition hover:border-slate-500"
-                onClick={() => {
-                  onToggleStatus(selectedTodo);
-                }}
-                aria-label={
-                  selectedTodo.status === "pending"
-                    ? "Mark todo as completed"
-                    : "Mark todo as pending"
-                }
-              >
-                {selectedTodo.status === "completed" ? (
-                  <FiCircle aria-hidden />
-                ) : selectedTodo.status === "skipped" ? (
-                  <FiXCircle aria-hidden />
-                ) : (
-                  <FiCheckCircle aria-hidden />
-                )}
-              </button>
-              <button
-                type="button"
-                className="flex h-11 w-11 items-center justify-center rounded-2xl border border-rose-400/40 text-rose-100 transition hover:border-rose-300"
-                onClick={() => {
-                  onDelete(selectedTodo.id);
-                  onSelectTodo(null);
-                }}
-                aria-label="Delete todo"
-              >
-                <FiTrash2 aria-hidden />
-              </button>
-            </div>
+                <button
+                  type="button"
+                  className="flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-700/70 text-slate-200 transition hover:border-slate-500"
+                  onClick={() => {
+                    onEdit(selectedTodo);
+                    onSelectTodo(null);
+                  }}
+                  aria-label="Edit todo"
+                >
+                  <FiEdit2 aria-hidden />
+                </button>
+                <button
+                  type="button"
+                  className="flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-700/70 text-slate-200 transition hover:border-slate-500"
+                  onClick={() => {
+                    onToggleStatus(selectedTodo);
+                  }}
+                  aria-label={
+                    selectedTodo.status === "pending"
+                      ? "Mark todo as completed"
+                      : "Mark todo as pending"
+                  }
+                >
+                  {selectedTodo.status === "completed" ? (
+                    <FiCircle aria-hidden />
+                  ) : selectedTodo.status === "skipped" ? (
+                    <FiXCircle aria-hidden />
+                  ) : (
+                    <FiCheckCircle aria-hidden />
+                  )}
+                </button>
+                <button
+                  type="button"
+                  className="flex h-11 w-11 items-center justify-center rounded-2xl border border-rose-400/40 text-rose-100 transition hover:border-rose-300"
+                  onClick={() => {
+                    onDelete(selectedTodo.id);
+                    onSelectTodo(null);
+                  }}
+                  aria-label="Delete todo"
+                >
+                  <FiTrash2 aria-hidden />
+                </button>
+              </div>
             </div>
           </div>
         ) : null}
@@ -674,7 +688,11 @@ export default function TodoList({
   return (
     <div className="grid gap-6">
       {isManualSort ? (
-        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
           {listContent}
         </DndContext>
       ) : (

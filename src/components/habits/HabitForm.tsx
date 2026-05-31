@@ -10,7 +10,8 @@ const inputClasses =
   "w-full rounded-2xl border border-slate-800/70 bg-slate-950/55 px-3.5 py-2.5 text-sm text-slate-100 shadow-sm transition-colors duration-200 ease-out focus:border-emerald-300/60 focus:bg-slate-950/70 focus:outline-none focus:ring-2 focus:ring-emerald-300/15";
 
 const labelClasses = "flex flex-col gap-1.5";
-const labelTextClasses = "text-[0.7rem] font-semibold uppercase tracking-wide text-slate-400";
+const labelTextClasses =
+  "text-[0.7rem] font-semibold uppercase tracking-wide text-slate-400";
 
 const days = [
   { id: 0, label: "Sun" },
@@ -98,10 +99,10 @@ export default function HabitForm({
   const dayOfMonthValue = showYearlySchedule
     ? form.reminderDays.length >= 2
       ? form.reminderDays[1]
-      : form.reminderDays[0] ?? new Date().getDate()
+      : (form.reminderDays[0] ?? new Date().getDate())
     : form.reminderDays.length > 0
-    ? form.reminderDays[0]
-    : new Date().getDate();
+      ? form.reminderDays[0]
+      : new Date().getDate();
   const monthValue = showYearlySchedule
     ? form.reminderDays.length >= 2
       ? form.reminderDays[0]

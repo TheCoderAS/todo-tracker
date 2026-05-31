@@ -25,7 +25,13 @@ export default function AppHeader({ showSignOut, onSignOut }: AppHeaderProps) {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [notifications, setNotifications] = useState<
-    { id: string; title: string; body: string; createdAt?: Date | null; read?: boolean }[]
+    {
+      id: string;
+      title: string;
+      body: string;
+      createdAt?: Date | null;
+      read?: boolean;
+    }[]
   >([]);
   const menuRef = useRef<HTMLDivElement | null>(null);
   const { todos: searchTodos, habits: searchHabits } = useSearchData(user);

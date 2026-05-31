@@ -277,7 +277,8 @@ export function useHabitActions({ user, habits, setSnackbar }: UseHabitActionsOp
         : skippedDates.filter((date) => date !== todayKey);
       const milestoneProgress = getHabitMilestoneProgress(nextDates.length);
       const lastNotifiedLevel = habit.lastLevelNotified ?? 0;
-      const shouldCelebrate = !isCompleted && milestoneProgress.level > lastNotifiedLevel;
+      const shouldCelebrate =
+        !isCompleted && milestoneProgress.level > lastNotifiedLevel;
       setActionLoading(true);
       try {
         await updateDoc(doc(db, "users", user.uid, "habits", habit.id), {
@@ -290,8 +291,8 @@ export function useHabitActions({ user, habits, setSnackbar }: UseHabitActionsOp
           message: isCompleted
             ? "Habit reset for today."
             : shouldCelebrate
-            ? `Level up! You're now level ${milestoneProgress.level}.`
-            : "Nice work! Habit completed.",
+              ? `Level up! You're now level ${milestoneProgress.level}.`
+              : "Nice work! Habit completed.",
           variant: "success"
         });
         if (!isCompleted && habit.triggerAfterHabitId) {
@@ -331,7 +332,8 @@ export function useHabitActions({ user, habits, setSnackbar }: UseHabitActionsOp
       const milestoneProgress = getHabitMilestoneProgress(nextCompletionDates.length);
       const lastNotifiedLevel = habit.lastLevelNotified ?? 0;
       const shouldCelebrate =
-        !completionDates.includes(dateKey) && milestoneProgress.level > lastNotifiedLevel;
+        !completionDates.includes(dateKey) &&
+        milestoneProgress.level > lastNotifiedLevel;
       setActionLoading(true);
       try {
         await updateDoc(doc(db, "users", user.uid, "habits", habit.id), {
@@ -348,7 +350,10 @@ export function useHabitActions({ user, habits, setSnackbar }: UseHabitActionsOp
         });
       } catch (error) {
         console.error(error);
-        setSnackbar({ message: "Unable to reschedule habit session.", variant: "error" });
+        setSnackbar({
+          message: "Unable to reschedule habit session.",
+          variant: "error"
+        });
       } finally {
         setActionLoading(false);
       }
@@ -412,26 +417,23 @@ export function useHabitActions({ user, habits, setSnackbar }: UseHabitActionsOp
     [user, setSnackbar]
   );
 
-  const handleEditHabit = useCallback(
-    (habit: Habit) => {
-      setEditingHabitId(habit.id);
-      setHabitForm({
-        title: habit.title,
-        habitType: habit.habitType ?? "positive",
-        reminderTime: habit.reminderTime,
-        reminderDays: habit.reminderDays?.length
-          ? habit.reminderDays
-          : getDefaultReminderDays(habit.frequency),
-        frequency: habit.frequency,
-        graceMisses: habit.graceMisses ?? 0,
-        contextTags: habit.contextTags ?? [],
-        triggerAfterHabitId: habit.triggerAfterHabitId ?? null
-      });
-      setGraceMissesInput(String(habit.graceMisses ?? 0));
-      setIsHabitFormOpen(true);
-    },
-    []
-  );
+  const handleEditHabit = useCallback((habit: Habit) => {
+    setEditingHabitId(habit.id);
+    setHabitForm({
+      title: habit.title,
+      habitType: habit.habitType ?? "positive",
+      reminderTime: habit.reminderTime,
+      reminderDays: habit.reminderDays?.length
+        ? habit.reminderDays
+        : getDefaultReminderDays(habit.frequency),
+      frequency: habit.frequency,
+      graceMisses: habit.graceMisses ?? 0,
+      contextTags: habit.contextTags ?? [],
+      triggerAfterHabitId: habit.triggerAfterHabitId ?? null
+    });
+    setGraceMissesInput(String(habit.graceMisses ?? 0));
+    setIsHabitFormOpen(true);
+  }, []);
 
   const handleDeleteHabitRequest = useCallback((habit: Habit) => {
     setConfirmHabitDelete(habit);

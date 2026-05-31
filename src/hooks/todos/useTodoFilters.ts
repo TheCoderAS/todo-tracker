@@ -64,8 +64,8 @@ export const useTodoFilters = (todos: Todo[]) => {
       filterDraft.status === "completed"
         ? filterDraft.sortBy
         : filterDraft.sortBy === "completed"
-        ? "scheduled"
-        : filterDraft.sortBy;
+          ? "scheduled"
+          : filterDraft.sortBy;
     setSortBy(nextSortBy);
     setSortOrder(filterDraft.sortOrder);
     setDatePreset(filterDraft.datePreset);
@@ -133,7 +133,9 @@ export const useTodoFilters = (todos: Todo[]) => {
     return {
       total: visibleTodos.length,
       completed,
-      percent: visibleTodos.length ? Math.round((completed / visibleTodos.length) * 100) : 0
+      percent: visibleTodos.length
+        ? Math.round((completed / visibleTodos.length) * 100)
+        : 0
     };
   }, [activeTodos]);
 
@@ -199,7 +201,8 @@ export const useTodoFilters = (todos: Todo[]) => {
 
     const filteredTodos = activeTodos.filter((todo) => {
       const matchesStatus = statusFilter === "all" || todo.status === statusFilter;
-      const matchesPriority = priorityFilter === "all" || todo.priority === priorityFilter;
+      const matchesPriority =
+        priorityFilter === "all" || todo.priority === priorityFilter;
       const matchesDate = matchesDatePreset(todo);
       const matchesTags =
         tagFilter.length === 0 || tagFilter.some((tag) => todo.tags.includes(tag));
@@ -208,7 +211,13 @@ export const useTodoFilters = (todos: Todo[]) => {
         (contextTagFilter === uncategorizedLabel
           ? !(todo.contextTags ?? []).length
           : (todo.contextTags ?? []).includes(contextTagFilter));
-      return matchesStatus && matchesPriority && matchesDate && matchesTags && matchesContextTag;
+      return (
+        matchesStatus &&
+        matchesPriority &&
+        matchesDate &&
+        matchesTags &&
+        matchesContextTag
+      );
     });
 
     if (filteredTodos.length === 0) return [];
@@ -275,7 +284,9 @@ export const useTodoFilters = (todos: Todo[]) => {
         items: group.items.sort((a, b) => {
           if (sortBy === "priority") {
             const priorityOrder = { low: 3, medium: 2, high: 1 };
-            return (priorityOrder[a.priority] - priorityOrder[b.priority]) * sortDirection;
+            return (
+              (priorityOrder[a.priority] - priorityOrder[b.priority]) * sortDirection
+            );
           }
           if (sortBy === "created") {
             const aMillis = a.createdAt?.toMillis() ?? 0;
@@ -288,9 +299,13 @@ export const useTodoFilters = (todos: Todo[]) => {
             return aOrder - bOrder;
           }
           const aMillis =
-            sortBy === "completed" ? a.completedDate?.toMillis() : a.scheduledDate?.toMillis();
+            sortBy === "completed"
+              ? a.completedDate?.toMillis()
+              : a.scheduledDate?.toMillis();
           const bMillis =
-            sortBy === "completed" ? b.completedDate?.toMillis() : b.scheduledDate?.toMillis();
+            sortBy === "completed"
+              ? b.completedDate?.toMillis()
+              : b.scheduledDate?.toMillis();
           if (!aMillis || !bMillis) return 0;
           return (aMillis - bMillis) * sortDirection;
         })

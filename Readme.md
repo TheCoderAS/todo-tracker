@@ -9,15 +9,29 @@ reminders (see `cron-service/`).
 ## Features
 
 - **Todos** — priorities, tags, context tags, descriptions, subtasks,
-  recurrence (daily/weekly/monthly), skip/complete/archive, drag-and-drop order.
+  recurrence (daily/weekly/monthly), skip/complete/archive, drag-and-drop order,
+  and bulk select/complete/delete.
+- **Natural-language quick add** — type `Gym tomorrow at 6pm #health !high` and
+  the task is parsed into a scheduled, tagged, prioritized todo.
 - **Habits** — daily through yearly frequencies, reminders, streaks and
   milestones, grace misses, and habit chaining.
 - **Routines** — reusable task templates you can launch into today's list.
-- **Focus blocks** — timed sessions over selected todos/habits with metrics.
+- **Focus blocks** — timed sessions over selected todos/habits with a live
+  countdown, progress bar, and completion metrics.
 - **Dashboard analytics** — completion trends, productivity score, habit
   consistency, weekly summaries.
-- **Search**, **onboarding**, **PWA install + offline cache**, and **push
-  notifications** via Firebase Cloud Messaging.
+- **Data export** — download todos/habits as JSON or CSV, or export scheduled
+  tasks as an `.ics` calendar file for Google/Apple/Outlook Calendar.
+- **Search**, **onboarding**, **PWA install + offline (IndexedDB) cache**, and
+  **push notifications** via Firebase Cloud Messaging.
+
+## Security notes
+
+- Rich-text descriptions are sanitized against an allow-list of formatting tags
+  (`src/lib/sanitizeHtml.ts`) before being stored or rendered, preventing stored
+  XSS through the contentEditable editors.
+- Firestore and Realtime Database rules scope every document to its authenticated
+  owner (`users/{uid}/**`); see `firestore.rules` and `database.rules.json`.
 
 ## Tech stack
 
