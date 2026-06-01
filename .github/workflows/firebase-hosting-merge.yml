@@ -57,17 +57,19 @@ jobs:
           VITE_NOTIFICATION_PING_INTERVAL_MINUTES: ${{secrets.NEXT_PUBLIC_NOTIFICATION_PING_INTERVAL_MINUTES}}
           VITE_NOTIFICATION_SUMMARY_INTERVAL_MINUTES: ${{secrets.NEXT_PUBLIC_NOTIFICATION_SUMMARY_INTERVAL_MINUTES}}
       # Runs after the Hosting deploy so a rules failure cannot block the app
-      # release. The Hosting action only publishes the static site, so Firestore,
-      # Realtime Database, and Storage rules/indexes must be deployed separately.
+      # release. The Hosting action only publishes the static site, so Firestore
+      # and Realtime Database rules/indexes must be deployed separately.
       # Requires the deploy service account to have the Service Usage Consumer
-      # role (roles/serviceusage.serviceUsageConsumer) so the Firebase CLI can
-      # run its API-enablement prechecks for Firestore and Storage.
-      - name: Deploy Firestore, Realtime Database & Storage rules
+      # role (roles/serviceusage.serviceUsageConsumer) for the CLI's API
+      # prechecks. Storage is omitted: the firebasestorage.googleapis.com API is
+      # not enabled on the project (and storage.rules denies all access anyway).
+      # To re-add: enable that API in the console, then append `storage` below.
+      - name: Deploy Firestore & Realtime Database rules
         run: |
           printf '%s' "$FIREBASE_SERVICE_ACCOUNT_NEXT_GEN_TRACK" > "$RUNNER_TEMP/service-account.json"
           export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/service-account.json"
           npx --yes firebase-tools deploy \
-            --only firestore:rules,firestore:indexes,database,storage \
+            --only firestore:rules,firestore:indexes,database \
             --project next-gen-track \
             --non-interactive \
             --force
