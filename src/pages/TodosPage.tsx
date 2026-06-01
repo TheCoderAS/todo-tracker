@@ -187,7 +187,7 @@ export default function TodosPage() {
     todoActions.actionLoading || habitActions.habitActionLoading;
 
   return (
-    <section className="flex flex-col gap-6">
+    <section className="flex flex-col gap-4">
       <div className="surface-card flex w-full p-1 text-xs font-medium">
         {(
           [
