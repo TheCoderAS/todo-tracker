@@ -289,7 +289,7 @@ export default function HabitSection({
                 setFrequencyFilter(event.target.value as "all" | HabitFrequency)
               }
               aria-label="Filter by frequency"
-              className="h-8 rounded-full border border-slate-800/70 bg-slate-950/60 px-2 text-xs text-slate-200 focus:border-slate-500 focus:outline-none"
+              className="h-8 rounded-full border-none bg-transparent px-1 text-xs text-slate-200 focus:outline-none"
             >
               <option value="all">All</option>
               <option value="daily">Daily</option>
@@ -304,7 +304,7 @@ export default function HabitSection({
               value={contextTagFilter}
               onChange={(event) => setContextTagFilter(event.target.value)}
               aria-label="Filter by context tag"
-              className="h-8 rounded-full border border-slate-800/70 bg-slate-950/60 px-2 text-xs text-slate-200 focus:border-slate-500 focus:outline-none"
+              className="h-8 rounded-full border-none bg-transparent px-1 text-xs text-slate-200 focus:outline-none"
             >
               <option value="all">All</option>
               {contextTagOptions.map((tag) => (
