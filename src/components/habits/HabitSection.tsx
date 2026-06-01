@@ -255,18 +255,18 @@ export default function HabitSection({
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="flex w-full flex-wrap items-center gap-2 rounded-full border border-slate-800/70 bg-slate-950/40 p-1 text-[0.7rem] font-semibold text-slate-200">
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto rounded-full border border-slate-800/70 bg-slate-950/40 p-1 text-xs font-semibold text-slate-200">
             {[
               { id: "all", label: "Active" },
-              { id: "completed", label: "Done today" },
-              { id: "pending", label: "Pending today" },
+              { id: "completed", label: "Done" },
+              { id: "pending", label: "Pending" },
               { id: "archived", label: "Archived" }
             ].map((option) => (
               <button
                 key={option.id}
                 type="button"
-                className={`rounded-full px-3 py-1 transition ${
+                className={`whitespace-nowrap rounded-full px-3 py-1.5 transition ${
                   statusFilter === option.id
                     ? "bg-sky-400/20 text-sky-100"
                     : "text-slate-400 hover:text-white"
@@ -281,41 +281,39 @@ export default function HabitSection({
               </button>
             ))}
           </div>
-          <div className="rounded-2xl border border-slate-800/70 bg-slate-950/40 px-2 pr-1 py-1 text-xs text-slate-200">
-            <label className="flex items-center gap-2">
-              <span className="text-slate-400">Frequency</span>
-              <select
-                value={frequencyFilter}
-                onChange={(event) =>
-                  setFrequencyFilter(event.target.value as "all" | HabitFrequency)
-                }
-                className="rounded-full border border-slate-800/70 bg-slate-950/60 px-2 py-1 text-[0.7rem] text-slate-200"
-              >
-                <option value="all">All</option>
-                <option value="daily">Daily</option>
-                <option value="weekly">Weekly</option>
-                <option value="monthly">Monthly</option>
-                <option value="yearly">Yearly</option>
-              </select>
-            </label>
-          </div>
-          <div className="rounded-2xl border border-slate-800/70 bg-slate-950/40 px-2 pr-1 py-1 text-xs text-slate-200">
-            <label className="flex items-center gap-2">
-              <span className="text-slate-400">Context</span>
-              <select
-                value={contextTagFilter}
-                onChange={(event) => setContextTagFilter(event.target.value)}
-                className="rounded-full border border-slate-800/70 bg-slate-950/60 px-2 py-1 text-[0.7rem] text-slate-200"
-              >
-                <option value="all">All</option>
-                {contextTagOptions.map((tag) => (
-                  <option key={tag} value={tag}>
-                    {tag}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
+          <label className="flex h-10 items-center gap-1.5 rounded-full border border-slate-800/70 bg-slate-950/40 pl-3 pr-1 text-xs text-slate-400">
+            <span className="hidden sm:inline">Frequency</span>
+            <select
+              value={frequencyFilter}
+              onChange={(event) =>
+                setFrequencyFilter(event.target.value as "all" | HabitFrequency)
+              }
+              aria-label="Filter by frequency"
+              className="h-8 rounded-full border border-slate-800/70 bg-slate-950/60 px-2 text-xs text-slate-200 focus:border-slate-500 focus:outline-none"
+            >
+              <option value="all">All</option>
+              <option value="daily">Daily</option>
+              <option value="weekly">Weekly</option>
+              <option value="monthly">Monthly</option>
+              <option value="yearly">Yearly</option>
+            </select>
+          </label>
+          <label className="flex h-10 items-center gap-1.5 rounded-full border border-slate-800/70 bg-slate-950/40 pl-3 pr-1 text-xs text-slate-400">
+            <span className="hidden sm:inline">Context</span>
+            <select
+              value={contextTagFilter}
+              onChange={(event) => setContextTagFilter(event.target.value)}
+              aria-label="Filter by context tag"
+              className="h-8 rounded-full border border-slate-800/70 bg-slate-950/60 px-2 text-xs text-slate-200 focus:border-slate-500 focus:outline-none"
+            >
+              <option value="all">All</option>
+              {contextTagOptions.map((tag) => (
+                <option key={tag} value={tag}>
+                  {tag}
+                </option>
+              ))}
+            </select>
+          </label>
         </div>
 
         <div className="grid gap-3">
