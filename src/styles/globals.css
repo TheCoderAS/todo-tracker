@@ -77,6 +77,14 @@
 
   html {
     scroll-behavior: smooth;
+    /* Compact density: Tailwind sizing is rem-based, so shrinking the root font
+       scales text, padding, margins, and gaps together for a tighter, cleaner
+       layout without editing every utility class. */
+    font-size: 14.5px;
+  }
+
+  body {
+    line-height: 1.45;
   }
 
   select {
@@ -198,7 +206,10 @@
 .page-transition {
   position: relative;
   animation: pageEnter 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
-  will-change: opacity, transform;
+  /* No transform here: a lingering transform on this page wrapper would become
+     the containing block for position:fixed children (e.g. the FAB), making
+     them scroll with the page. Animate opacity only. */
+  will-change: opacity;
 }
 
 .tab-transition {
@@ -285,11 +296,9 @@
 @keyframes pageEnter {
   0% {
     opacity: 0;
-    transform: translateY(8px);
   }
   100% {
     opacity: 1;
-    transform: translateY(0);
   }
 }
 

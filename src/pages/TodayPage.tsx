@@ -156,7 +156,7 @@ export default function TodayPage() {
     user?.displayName?.split(" ")[0] || user?.email?.split("@")[0] || "there";
 
   return (
-    <section className="grid gap-5 pb-4">
+    <section className="grid gap-4 pb-4">
       <OnboardingModal isOpen={showOnboarding} onComplete={completeOnboarding} />
 
       <header>

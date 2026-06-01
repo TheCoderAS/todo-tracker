@@ -218,8 +218,8 @@ export default function HabitSection({
   ]);
 
   return (
-    <section className="grid gap-6">
-      <section className="grid gap-5">
+    <section className="grid gap-4">
+      <section className="grid gap-4">
         <div className="grid gap-4 rounded-3xl border border-slate-900/70 bg-gradient-to-br from-slate-900/80 via-slate-950/90 to-slate-950/80 p-5 shadow-xl shadow-slate-950/40">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
@@ -289,7 +289,7 @@ export default function HabitSection({
                 setFrequencyFilter(event.target.value as "all" | HabitFrequency)
               }
               aria-label="Filter by frequency"
-              className="h-8 rounded-full border border-slate-800/70 bg-slate-950/60 px-2 text-xs text-slate-200 focus:border-slate-500 focus:outline-none"
+              className="h-8 rounded-full border-none bg-transparent px-1 text-xs text-slate-200 focus:outline-none"
             >
               <option value="all">All</option>
               <option value="daily">Daily</option>
@@ -304,7 +304,7 @@ export default function HabitSection({
               value={contextTagFilter}
               onChange={(event) => setContextTagFilter(event.target.value)}
               aria-label="Filter by context tag"
-              className="h-8 rounded-full border border-slate-800/70 bg-slate-950/60 px-2 text-xs text-slate-200 focus:border-slate-500 focus:outline-none"
+              className="h-8 rounded-full border-none bg-transparent px-1 text-xs text-slate-200 focus:outline-none"
             >
               <option value="all">All</option>
               {contextTagOptions.map((tag) => (
