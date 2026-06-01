@@ -34,6 +34,7 @@ import {
 
 import Modal from "@/components/ui/Modal";
 import SortableTodoCard from "@/components/todos/SortableTodoCard";
+import SwipeRow from "@/components/ui/SwipeRow";
 import { sanitizeHtml } from "@/lib/sanitizeHtml";
 import type { Todo } from "@/lib/types";
 
@@ -518,7 +519,33 @@ export default function TodoList({
         ) : (
           <div className="grid gap-3">
             {group.items.map((todo) => (
-              <div key={todo.id}>{renderCard(todo)}</div>
+              <SwipeRow
+                key={todo.id}
+                disabled={isSelectMode}
+                left={
+                  todo.status === "pending"
+                    ? {
+                        icon: <FiCheckCircle aria-hidden />,
+                        label: "Complete",
+                        className: "bg-emerald-500/80",
+                        onAction: () => onToggleStatus(todo)
+                      }
+                    : {
+                        icon: <FiCircle aria-hidden />,
+                        label: "Reopen",
+                        className: "bg-slate-600/80",
+                        onAction: () => onToggleStatus(todo)
+                      }
+                }
+                right={{
+                  icon: <FiTrash2 aria-hidden />,
+                  label: "Delete",
+                  className: "bg-rose-500/80",
+                  onAction: () => onDelete(todo.id)
+                }}
+              >
+                {renderCard(todo)}
+              </SwipeRow>
             ))}
           </div>
         )}

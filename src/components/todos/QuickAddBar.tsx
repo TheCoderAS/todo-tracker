@@ -25,21 +25,21 @@ export default function QuickAddBar({ onQuickAdd, disabled }: QuickAddBarProps) 
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex items-center gap-2 rounded-2xl border border-slate-800/70 bg-slate-950/55 px-3 py-2 shadow-sm transition-colors duration-200 ease-out focus-within:border-emerald-300/50 focus-within:bg-slate-950/70 focus-within:ring-2 focus-within:ring-emerald-300/10"
+      className="surface-card flex items-center gap-2 px-3 py-2 transition-colors duration-200 ease-out focus-within:border-[var(--accent)]"
     >
-      <FiZap aria-hidden className="flex-shrink-0 text-emerald-300/80" />
+      <FiZap aria-hidden className="flex-shrink-0 text-[var(--accent)]" />
       <input
         type="text"
         value={value}
         onChange={(event) => setValue(event.target.value)}
         placeholder="Quick add — e.g. Gym tomorrow at 6pm #health !high"
         aria-label="Quick add a todo using natural language"
-        className="min-w-0 flex-1 bg-transparent text-sm text-slate-100 placeholder-slate-500 outline-none"
+        className="min-w-0 flex-1 bg-transparent text-sm text-[var(--text)] placeholder:text-faint outline-none"
       />
       <button
         type="submit"
         disabled={disabled || !value.trim()}
-        className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border border-emerald-400/50 text-emerald-200 transition hover:border-emerald-300/70 hover:bg-emerald-400/10 disabled:cursor-not-allowed disabled:opacity-40"
+        className="btn-pop flex h-8 w-8 flex-shrink-0 items-center justify-center disabled:cursor-not-allowed disabled:opacity-40"
         aria-label="Add todo"
       >
         <FiPlus className="h-4 w-4" aria-hidden />

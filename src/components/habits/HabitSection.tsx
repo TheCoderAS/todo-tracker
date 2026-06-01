@@ -472,10 +472,10 @@ export default function HabitSection({
         </div>
       </section>
 
-      <div className="fixed bottom-[calc(6.5rem+env(safe-area-inset-bottom))] right-6 z-30 flex flex-col items-end gap-3 sm:bottom-8 sm:right-10 xl:right-[calc((100vw-72rem)/2+1.5rem)]">
+      <div className="fixed bottom-[calc(7.5rem+env(safe-area-inset-bottom))] right-5 z-30 flex flex-col items-end gap-3 sm:bottom-10 sm:right-10 xl:right-[calc((100vw-72rem)/2+1.5rem)]">
         <button
           type="button"
-          className="glow-emerald flex h-14 w-14 items-center justify-center rounded-full bg-sky-400 text-3xl font-medium text-slate-950 shadow-xl shadow-slate-950/40 transition hover:scale-[1.02] hover:bg-sky-300"
+          className="btn-pop flex h-14 w-14 items-center justify-center rounded-full text-3xl"
           onClick={onOpenCreate}
           aria-label="Add habit"
         >

@@ -188,43 +188,28 @@ export default function TodosPage() {
 
   return (
     <section className="flex flex-col gap-6">
-      <div className="flex w-full rounded-full border border-slate-800/70 bg-slate-900/60 p-1 text-xs font-medium">
-        <button
-          type="button"
-          className={`flex-1 rounded-full px-4 py-2 text-center transition sm:flex-none ${
-            activeTab === "todos" ? "bg-sky-500/20 text-sky-200" : "text-slate-400"
-          }`}
-          onClick={() => setTab("todos")}
-        >
-          Todos
-        </button>
-        <button
-          type="button"
-          className={`flex-1 rounded-full px-4 py-2 text-center transition sm:flex-none ${
-            activeTab === "habits" ? "bg-sky-500/20 text-sky-200" : "text-slate-400"
-          }`}
-          onClick={() => setTab("habits")}
-        >
-          Habits
-        </button>
-        <button
-          type="button"
-          className={`flex-1 rounded-full px-4 py-2 text-center transition sm:flex-none ${
-            activeTab === "focus" ? "bg-sky-500/20 text-sky-200" : "text-slate-400"
-          }`}
-          onClick={() => setTab("focus")}
-        >
-          Focus
-        </button>
-        <button
-          type="button"
-          className={`flex-1 rounded-full px-4 py-2 text-center transition sm:flex-none ${
-            activeTab === "review" ? "bg-sky-500/20 text-sky-200" : "text-slate-400"
-          }`}
-          onClick={() => setTab("review")}
-        >
-          Review
-        </button>
+      <div className="surface-card flex w-full p-1 text-xs font-medium">
+        {(
+          [
+            { id: "todos", label: "Todos" },
+            { id: "habits", label: "Habits" },
+            { id: "focus", label: "Focus" },
+            { id: "review", label: "Review" }
+          ] as const
+        ).map((t) => (
+          <button
+            key={t.id}
+            type="button"
+            className={`flex-1 rounded-full px-4 py-2 text-center transition ${
+              activeTab === t.id
+                ? "gradient-brand text-white shadow-pop"
+                : "text-muted hover:text-[var(--text)]"
+            }`}
+            onClick={() => setTab(t.id)}
+          >
+            {t.label}
+          </button>
+        ))}
       </div>
 
       {activeTab === "todos" ? (

@@ -313,34 +313,34 @@ export default function TodoSection({
         />
       </section>
 
-      <div className="fixed bottom-[calc(6.5rem+env(safe-area-inset-bottom))] right-6 z-30 flex flex-col items-end gap-3 sm:bottom-8 sm:right-10 xl:right-[calc((100vw-72rem)/2+1.5rem)]">
+      <div className="fixed bottom-[calc(7.5rem+env(safe-area-inset-bottom))] right-5 z-30 flex flex-col items-end gap-3 sm:bottom-10 sm:right-10 xl:right-[calc((100vw-72rem)/2+1.5rem)]">
         {isFabOpen ? (
-          <div className="floating-menu grid gap-2 rounded-3xl border border-slate-800/70 bg-slate-950/90 p-3 shadow-2xl shadow-slate-950/50">
+          <div className="floating-menu surface-card-strong grid gap-2 p-3 shadow-pop">
             <button
               type="button"
-              className="flex w-full items-center gap-3 rounded-2xl px-3 py-2 text-sm font-medium text-slate-100 transition hover:bg-slate-900/70"
+              className="flex w-full items-center gap-3 rounded-2xl px-3 py-2 text-sm font-medium text-[var(--text)] transition hover:bg-[var(--surface-soft)]"
               onClick={() => {
                 onOpenCreate();
                 setIsFabOpen(false);
               }}
             >
-              <FiPlus aria-hidden className="text-emerald-300" />
+              <FiPlus aria-hidden className="text-[var(--accent)]" />
               Task
             </button>
             <button
               type="button"
-              className="flex w-full items-center gap-3 rounded-2xl px-3 py-2 text-sm font-medium text-slate-400"
+              className="flex w-full items-center gap-3 rounded-2xl px-3 py-2 text-sm font-medium text-faint"
               aria-disabled="true"
               disabled
             >
-              <FiZap aria-hidden className="text-amber-300" />
+              <FiZap aria-hidden className="text-[var(--warning)]" />
               Reminder
             </button>
           </div>
         ) : null}
         <button
           type="button"
-          className="glow-emerald flex h-14 w-14 items-center justify-center rounded-full bg-emerald-400 text-3xl font-medium text-slate-950 shadow-xl shadow-slate-950/40 transition hover:scale-[1.02] hover:bg-emerald-300"
+          className="btn-pop flex h-14 w-14 items-center justify-center rounded-full text-3xl"
           onClick={() => setIsFabOpen((prev) => !prev)}
           aria-label="Quick add menu"
           aria-expanded={isFabOpen}
