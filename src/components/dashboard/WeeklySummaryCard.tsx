@@ -48,19 +48,19 @@ export default function WeeklySummaryCard({
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <div className="rounded-2xl border border-slate-800/70 bg-slate-950/60 p-3 text-center">
           <p className="text-lg font-bold text-emerald-300">{totalOnTime}</p>
-          <p className="text-[0.6rem] text-slate-500 uppercase">On time</p>
+          <p className="text-[0.7rem] uppercase tracking-wide text-slate-500">On time</p>
         </div>
         <div className="rounded-2xl border border-slate-800/70 bg-slate-950/60 p-3 text-center">
           <p className="text-lg font-bold text-amber-300">{totalSpillover}</p>
-          <p className="text-[0.6rem] text-slate-500 uppercase">Spillover</p>
+          <p className="text-[0.7rem] uppercase tracking-wide text-slate-500">Spillover</p>
         </div>
         <div className="rounded-2xl border border-slate-800/70 bg-slate-950/60 p-3 text-center">
           <p className="text-lg font-bold text-sky-300">{avgPerDay}</p>
-          <p className="text-[0.6rem] text-slate-500 uppercase">Avg/day</p>
+          <p className="text-[0.7rem] uppercase tracking-wide text-slate-500">Avg/day</p>
         </div>
         <div className="rounded-2xl border border-slate-800/70 bg-slate-950/60 p-3 text-center">
           <p className="text-sm font-bold text-cyan-300 truncate">{bestDayLabel}</p>
-          <p className="text-[0.6rem] text-slate-500 uppercase">Best day</p>
+          <p className="text-[0.7rem] uppercase tracking-wide text-slate-500">Best day</p>
         </div>
       </div>
 

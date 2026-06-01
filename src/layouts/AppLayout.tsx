@@ -62,7 +62,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
       <AppHeader showSignOut onSignOut={() => setShowConfirm(true)} />
-      <main className="relative mx-auto flex min-h-screen max-w-6xl flex-col gap-10 px-6 pb-24 pt-20 text-slate-100">
+      <main className="relative mx-auto flex min-h-screen max-w-6xl flex-col gap-6 px-4 pb-[calc(7rem+env(safe-area-inset-bottom))] pt-[calc(5rem+env(safe-area-inset-top))] text-slate-100 sm:gap-10 sm:px-6">
         <div key={location.pathname} className="page-transition">
           {children}
         </div>

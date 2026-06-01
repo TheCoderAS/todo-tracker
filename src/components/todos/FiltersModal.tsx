@@ -165,10 +165,10 @@ export default function FiltersModal({
               <button
                 key={preset.id}
                 type="button"
-                className="flex items-center gap-2 rounded-full border border-slate-800/70 bg-slate-950/60 px-3 py-1 text-[0.7rem] font-semibold text-slate-200 transition hover:border-slate-600/70 hover:text-white active:scale-95"
+                className="flex items-center gap-2 rounded-full border border-slate-800/70 bg-slate-950/60 px-3 py-2 text-xs font-semibold text-slate-200 transition hover:border-slate-600/70 hover:text-white active:scale-95"
                 onClick={preset.apply}
               >
-                <FiFilter aria-hidden className="text-[0.7rem] text-slate-400" />
+                <FiFilter aria-hidden className="text-xs text-slate-400" />
                 {preset.label}
               </button>
             ))}

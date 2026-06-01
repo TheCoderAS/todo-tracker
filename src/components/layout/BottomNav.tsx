@@ -12,7 +12,7 @@ export default function BottomNav() {
   const location = useLocation();
   const pathname = location.pathname;
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-20 border-t border-slate-900/60 bg-gradient-to-r from-slate-950/95 via-slate-950/90 to-slate-950/95 px-6 py-2 backdrop-blur">
+    <nav className="fixed bottom-0 left-0 right-0 z-20 border-t border-slate-900/60 bg-gradient-to-r from-slate-950/95 via-slate-950/90 to-slate-950/95 px-6 py-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] backdrop-blur">
       <div className="mx-auto flex w-full max-w-6xl items-center justify-around gap-4">
         {navItems.map(({ href, label, icon: Icon }) => {
           const isActive =
