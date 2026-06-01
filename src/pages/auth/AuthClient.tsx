@@ -149,7 +149,7 @@ export default function AuthClient() {
         createdAt: serverTimestamp()
       });
       setSnackbar({
-        message: "Account created! Welcome to Aura Pulse.",
+        message: "Account created! Welcome to NizKarya.",
         variant: "success"
       });
       resetAuthForm();

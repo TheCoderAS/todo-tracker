@@ -25,7 +25,7 @@ export const buildIcsCalendar = (todos: Todo[], now: Date = new Date()): string 
   const lines: string[] = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
-    "PRODID:-//Aura Pulse//Todo Export//EN",
+    "PRODID:-//NizKarya//Todo Export//EN",
     "CALSCALE:GREGORIAN"
   ];
 
@@ -36,7 +36,7 @@ export const buildIcsCalendar = (todos: Todo[], now: Date = new Date()): string 
       const end = new Date(start.getTime() + 60 * 60 * 1000);
       lines.push(
         "BEGIN:VEVENT",
-        `UID:${todo.id}@aura-pulse`,
+        `UID:${todo.id}@nizkarya`,
         `DTSTAMP:${stamp}`,
         `DTSTART:${toIcsDate(start)}`,
         `DTEND:${toIcsDate(end)}`,

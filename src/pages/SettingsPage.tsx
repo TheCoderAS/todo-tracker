@@ -335,7 +335,7 @@ export default function SettingsPage() {
         <div className="grid gap-3 lg:grid-cols-2">
           <SettingCard
             icon={<FiInfo aria-hidden />}
-            title="About Aura Pulse"
+            title="About NizKarya"
             description="Read the app vision, version details, and team info."
             action={
               <button

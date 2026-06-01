@@ -12,7 +12,7 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 messaging.onBackgroundMessage((payload) => {
-  const title = payload?.data?.title || "Aura Pulse";
+  const title = payload?.data?.title || "NizKarya";
   const body = payload?.data?.body || "You have updates waiting.";
   const url = payload?.data?.url || "/todos";
   const notificationId =
@@ -32,8 +32,8 @@ messaging.onBackgroundMessage((payload) => {
   });
 });
 
-const CACHE_NAME = "aura-pulse-v2";
-const CORE_ASSETS = ["/", "/manifest.json", "/aura-pulse.png", "/favicon-96x96.png"];
+const CACHE_NAME = "nizkarya-v3";
+const CORE_ASSETS = ["/", "/manifest.json", "/nizkarya.png", "/favicon-96x96.png"];
 
 self.addEventListener("install", (event) => {
   self.skipWaiting();

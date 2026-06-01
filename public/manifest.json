@@ -1,7 +1,7 @@
 {
-  "name": "Aura Pulse",
-  "short_name": "Aura Pulse",
-  "description": "Aura Pulse is a next-gen daily productivity hub for tasks, events, schedules, fitness tracking, and goal management.",
+  "name": "NizKarya — Own your day",
+  "short_name": "NizKarya",
+  "description": "Plan tasks, build habits, run routines, and stay in flow with focus sessions. NizKarya helps you own your day and finish what matters.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
@@ -9,9 +9,10 @@
   "theme_color": "#0a0a1a",
   "icons": [
     {
-      "src": "/aura-pulse.png",
+      "src": "/nizkarya.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "/favicon-96x96.png",

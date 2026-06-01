@@ -8,7 +8,7 @@ const triggerDownload = (content: string, mimeType: string, extension: string) =
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement("a");
   anchor.href = url;
-  anchor.download = `aura-pulse-export-${new Date().toISOString().split("T")[0]}.${extension}`;
+  anchor.download = `nizkarya-export-${new Date().toISOString().split("T")[0]}.${extension}`;
   anchor.click();
   URL.revokeObjectURL(url);
 };

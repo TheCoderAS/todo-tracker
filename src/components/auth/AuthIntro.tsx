@@ -26,14 +26,14 @@ export default function AuthIntro() {
   return (
     <Card className="bg-slate-900/50">
       <span className="inline-flex items-center gap-2 rounded-full border border-brand-500/30 bg-brand-500/10 px-4 py-1 text-xs font-medium uppercase text-brand-200">
-        Modern workspace
+        NizKarya · Own your day
       </span>
       <h2 className="mt-6 text-3xl font-semibold text-white">
-        A more focused way to manage every task
+        Plan your day. Own your work.
       </h2>
       <p className="mt-3 max-w-xl text-sm text-slate-300">
-        Aura Pulse keeps your goals organized in one space. Sign in to pick up where you
-        left off, or create a personalized workspace in minutes.
+        NizKarya keeps your tasks, habits, and routines in one focused space. Sign in
+        to pick up where you left off, or create your workspace in minutes.
       </p>
       <div className="mt-8 grid gap-4">
         {features.map((feature) => (

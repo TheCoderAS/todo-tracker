@@ -19,7 +19,7 @@ export default function AboutModal({
     <Modal isOpen={isOpen} onClose={onClose} ariaLabel="About">
       <div className="grid gap-4">
         <div className="modal-header flex flex-wrap items-center justify-between gap-3">
-          <h3 className="text-lg font-semibold text-white">About Aura Pulse</h3>
+          <h3 className="text-lg font-semibold text-white">About NizKarya</h3>
           <button
             type="button"
             onClick={onClose}
@@ -34,12 +34,13 @@ export default function AboutModal({
           <p className="text-sm text-slate-100">
             {appName} v{appVersion}
           </p>
+          <p className="mt-1 text-xs text-faint">Own your day.</p>
         </div>
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="rounded-2xl border border-slate-800/70 bg-slate-950/70 p-4">
             <p className="text-xs uppercase text-slate-400">Developer</p>
-            <p className="text-sm text-slate-100">Aura Pulse Studio</p>
-            <p className="text-xs text-slate-500">hello@aurapulse.app</p>
+            <p className="text-sm text-slate-100">NizKarya Studio</p>
+            <p className="text-xs text-slate-500">hello@nizkarya.app</p>
           </div>
           <div className="rounded-2xl border border-slate-800/70 bg-slate-950/70 p-4">
             <p className="text-xs uppercase text-slate-400">App details</p>
@@ -53,7 +54,7 @@ export default function AboutModal({
           <p className="text-xs uppercase text-slate-400">Vision &amp; mission</p>
           <p className="text-sm text-slate-100">
             Empower people to build calm, consistent momentum through intentional
-            planning, mindful habits, and clear daily focus. Aura Pulse exists to make
+            planning, mindful habits, and clear daily focus. NizKarya exists to make
             progress feel lighter, clearer, and repeatable.
           </p>
         </div>
