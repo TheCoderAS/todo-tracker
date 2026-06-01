@@ -1,7 +1,7 @@
-# Aura Pulse
+# NizKarya — Own your day
 
-A next-gen daily productivity PWA for tasks, habits, routines, focus sessions,
-and analytics. Built with **React 18 + TypeScript + Vite**, styled with
+A fast, focused daily-productivity PWA for tasks, habits, routines, focus
+sessions, and analytics. Built with **React 18 + TypeScript + Vite**, styled with
 **Tailwind CSS**, and backed by **Firebase** (Auth, Cloud Firestore, and Cloud
 Messaging). A standalone Node/Express cron service sends scheduled push
 reminders (see `cron-service/`).

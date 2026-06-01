@@ -122,7 +122,7 @@ export default function AuthForm({
           <TextInput
             name="email"
             type="email"
-            placeholder="jane@aurapulse.com"
+            placeholder="jane@nizkarya.com"
             value={form.email}
             onChange={onChange}
           />

@@ -178,7 +178,7 @@ export default function PwaManager() {
           (window.crypto?.randomUUID ? window.crypto.randomUUID() : String(Date.now()));
         saveNotification({
           notificationId,
-          title: payload?.data?.title || "Aura Pulse",
+          title: payload?.data?.title || "NizKarya",
           body: payload?.data?.body || "You have updates waiting.",
           url: payload?.data?.url || "/todos"
         }).catch(() => undefined);
@@ -290,7 +290,7 @@ export default function PwaManager() {
       const title = `Due today: ${dueTodayTodos.length} task${
         dueTodayTodos.length === 1 ? "" : "s"
       }`;
-      const body = detail || "Open Aura Pulse to review today's schedule.";
+      const body = detail || "Open NizKarya to review today's schedule.";
 
       if ("serviceWorker" in navigator) {
         const registration = await navigator.serviceWorker.ready;

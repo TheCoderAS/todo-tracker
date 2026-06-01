@@ -141,17 +141,22 @@ export default function AppHeader({ showSignOut, onSignOut }: AppHeaderProps) {
     <header className="fixed top-0 left-0 right-0 z-20 border-b border-[var(--border)] bg-[var(--surface)] px-4 py-2 pt-[calc(0.5rem+env(safe-area-inset-top))] backdrop-blur-xl sm:px-6">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 sm:gap-4">
         <div className="flex items-center gap-2.5">
-          <div className="gradient-brand flex h-9 w-9 items-center justify-center rounded-2xl shadow-pop no-invert">
+          <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-2xl bg-white shadow-pop no-invert">
             <img
-              src="/aura-pulse.png"
-              alt="Aura Pulse logo"
+              src="/nizkarya.png"
+              alt="NizKarya logo"
               width={40}
               height={40}
               loading="eager"
-              className="h-7 w-7 rounded-xl object-contain no-invert"
+              className="h-9 w-9 object-cover no-invert"
             />
           </div>
-          <span className="text-base font-semibold gradient-text">Aura Pulse</span>
+          <div className="leading-none">
+            <span className="block text-base font-semibold gradient-text">NizKarya</span>
+            <span className="block text-[0.6rem] uppercase tracking-[0.18em] text-faint">
+              Own your day
+            </span>
+          </div>
         </div>
         <div className="flex items-center gap-3">
           {user ? (

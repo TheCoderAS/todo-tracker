@@ -70,7 +70,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <BottomNav />
       <ConfirmDialog
         isOpen={showConfirm}
-        title="Sign out of Aura Pulse?"
+        title="Sign out of NizKarya?"
         description="You will be signed out and need to log in again to access your account."
         confirmLabel="Sign out"
         cancelLabel="Cancel"

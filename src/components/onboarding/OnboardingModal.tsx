@@ -20,9 +20,9 @@ const steps = [
   {
     icon: FiZap,
     iconColor: "text-emerald-300",
-    title: "Welcome to Aura Pulse",
+    title: "Welcome to NizKarya",
     description:
-      "Your personal productivity companion. Manage tasks, build habits, and track your progress — all in one place."
+      "Own your day. Plan tasks, build habits, and track your progress — all in one focused place."
   },
   {
     icon: FiList,
