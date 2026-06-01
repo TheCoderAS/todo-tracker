@@ -138,32 +138,32 @@ export default function AppHeader({ showSignOut, onSignOut }: AppHeaderProps) {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-20 border-b border-slate-900/60 bg-slate-950/90 px-4 py-2 pt-[calc(0.5rem+env(safe-area-inset-top))] backdrop-blur sm:px-6">
+    <header className="fixed top-0 left-0 right-0 z-20 border-b border-[var(--border)] bg-[var(--surface)] px-4 py-2 pt-[calc(0.5rem+env(safe-area-inset-top))] backdrop-blur-xl sm:px-6">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 sm:gap-4">
-        <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-white/10 shadow-xl shadow-slate-900/40 no-invert">
+        <div className="flex items-center gap-2.5">
+          <div className="gradient-brand flex h-9 w-9 items-center justify-center rounded-2xl shadow-pop no-invert">
             <img
               src="/aura-pulse.png"
               alt="Aura Pulse logo"
               width={40}
               height={40}
               loading="eager"
-              className="h-8 w-8 rounded-xl object-contain no-invert"
+              className="h-7 w-7 rounded-xl object-contain no-invert"
             />
           </div>
-          <span className="font-medium text-slate-200">Aura Pulse</span>
+          <span className="text-base font-semibold gradient-text">Aura Pulse</span>
         </div>
         <div className="flex items-center gap-3">
           {user ? (
             <>
               <button
-                className="flex h-10 items-center gap-2 rounded-full border border-slate-700/70 px-3 text-sm text-slate-400 transition-all duration-200 ease-out hover:border-slate-500 hover:text-slate-200"
+                className="flex h-10 items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--surface-soft)] px-3 text-sm text-muted transition-all duration-200 ease-out hover:border-[var(--border-strong)] hover:text-[var(--text)]"
                 onClick={() => setIsSearchOpen(true)}
                 aria-label="Search"
               >
                 <FiSearch className="h-4 w-4" aria-hidden />
                 <span className="hidden sm:inline text-xs">Search</span>
-                <kbd className="hidden sm:inline-flex items-center rounded border border-slate-700/70 bg-slate-900/60 px-1 py-0.5 text-[0.55rem] text-slate-500">
+                <kbd className="hidden sm:inline-flex items-center rounded border border-[var(--border)] bg-[var(--surface-soft)] px-1 py-0.5 text-[0.55rem] text-faint">
                   ⌘K
                 </kbd>
               </button>
@@ -178,7 +178,7 @@ export default function AppHeader({ showSignOut, onSignOut }: AppHeaderProps) {
           {user ? (
             <div className="relative" ref={menuRef}>
               <button
-                className="relative flex h-10 w-10 items-center justify-center rounded-full border border-slate-700/70 text-slate-200 transition-all duration-200 ease-out hover:border-slate-500"
+                className="relative flex h-10 w-10 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--surface-soft)] text-[var(--text)] transition-all duration-200 ease-out hover:border-[var(--border-strong)]"
                 onClick={() => setIsNotificationsOpen((prev) => !prev)}
                 aria-label="Open notifications"
                 aria-haspopup="menu"
@@ -186,7 +186,7 @@ export default function AppHeader({ showSignOut, onSignOut }: AppHeaderProps) {
               >
                 <FiBell aria-hidden />
                 {hasUnread ? (
-                  <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(16,185,129,0.6)]" />
+                  <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-[var(--accent-2)] shadow-[0_0_8px_rgba(255,92,138,0.7)]" />
                 ) : null}
               </button>
               {isNotificationsOpen ? (
@@ -270,7 +270,7 @@ export default function AppHeader({ showSignOut, onSignOut }: AppHeaderProps) {
           ) : null}
           {showSignOut ? (
             <button
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-700/70 text-slate-200 transition-all duration-200 ease-out hover:border-slate-500"
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--surface-soft)] text-[var(--text)] transition-all duration-200 ease-out hover:border-[var(--border-strong)]"
               onClick={onSignOut}
               aria-label="Sign out"
             >
