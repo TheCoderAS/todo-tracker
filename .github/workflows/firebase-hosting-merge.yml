@@ -56,3 +56,18 @@ jobs:
           VITE_NOTIFICATION_SERVICE_URL: ${{secrets.NEXT_PUBLIC_NOTIFICATION_SERVICE_URL}}
           VITE_NOTIFICATION_PING_INTERVAL_MINUTES: ${{secrets.NEXT_PUBLIC_NOTIFICATION_PING_INTERVAL_MINUTES}}
           VITE_NOTIFICATION_SUMMARY_INTERVAL_MINUTES: ${{secrets.NEXT_PUBLIC_NOTIFICATION_SUMMARY_INTERVAL_MINUTES}}
+      # Runs after the Hosting deploy so a rules failure cannot block the app
+      # release. The Hosting action only publishes the static site, so Firestore,
+      # Realtime Database, and Storage rules/indexes must be deployed separately.
+      - name: Deploy Firestore, Realtime Database & Storage rules
+        run: |
+          printf '%s' "$FIREBASE_SERVICE_ACCOUNT_NEXT_GEN_TRACK" > "$RUNNER_TEMP/service-account.json"
+          export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/service-account.json"
+          npx --yes firebase-tools deploy \
+            --only firestore:rules,firestore:indexes,database,storage \
+            --project next-gen-track \
+            --non-interactive \
+            --force
+          rm -f "$RUNNER_TEMP/service-account.json"
+        env:
+          FIREBASE_SERVICE_ACCOUNT_NEXT_GEN_TRACK: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_NEXT_GEN_TRACK }}
