@@ -36,7 +36,18 @@ jobs:
           VITE_NOTIFICATION_SERVICE_URL: ${{secrets.NEXT_PUBLIC_NOTIFICATION_SERVICE_URL}}
           VITE_NOTIFICATION_PING_INTERVAL_MINUTES: ${{secrets.NEXT_PUBLIC_NOTIFICATION_PING_INTERVAL_MINUTES}}
           VITE_NOTIFICATION_SUMMARY_INTERVAL_MINUTES: ${{secrets.NEXT_PUBLIC_NOTIFICATION_SUMMARY_INTERVAL_MINUTES}}
-      - name: Deploy to Firebase Hosting
+      - name: Deploy Firestore & Realtime Database rules
+        run: |
+          printf '%s' "$FIREBASE_SERVICE_ACCOUNT_NEXT_GEN_TRACK" > "$RUNNER_TEMP/service-account.json"
+          export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/service-account.json"
+          npx --yes firebase-tools deploy \
+            --only firestore:rules,firestore:indexes,database \
+            --project next-gen-track \
+            --non-interactive \
+            --force
+          rm -f "$RUNNER_TEMP/service-account.json"
+        env:
+          FIREBASE_SERVICE_ACCOUNT_NEXT_GEN_TRACK: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_NEXT_GEN_TRACK }}
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.TOKEN }}
