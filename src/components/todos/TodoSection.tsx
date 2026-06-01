@@ -2,12 +2,10 @@
 
 import { useMemo, useState } from "react";
 import {
-  FiArrowDown,
-  FiArrowUp,
   FiCheckCircle,
   FiCheckSquare,
-  FiFilter,
   FiPlus,
+  FiSliders,
   FiTrash2,
   FiX,
   FiZap
@@ -80,8 +78,6 @@ export default function TodoSection({
   sortBy,
   sortOrder,
   onQuickFilter,
-  onSortByChange,
-  onSortOrderChange,
   contextTagFilter,
   contextTagOptions,
   onContextTagChange,
@@ -126,24 +122,36 @@ export default function TodoSection({
           ? "all"
           : null;
 
+  // Show a badge on the Filters button when an "advanced" choice is active that
+  // isn't reachable from the quick-filter row (so the user knows extra filtering
+  // or a non-default sort is in effect even though it's hidden in the modal).
+  const advancedDatePresets = ["tomorrow", "week", "spillover", "upcoming", "custom"];
+  const hasAdvancedFilters =
+    (priorityFilter !== "all" && priorityFilter !== "high") ||
+    advancedDatePresets.includes(datePreset) ||
+    !["scheduled", "completed"].includes(sortBy) ||
+    sortOrder === "desc";
+
   return (
     <section className="grid gap-6">
-      <section className="grid gap-2">
+      <section className="grid gap-3">
         <div className="grid gap-4 rounded-3xl border border-slate-900/70 bg-gradient-to-br from-slate-900/80 via-slate-950/90 to-slate-950/80 p-5 shadow-xl shadow-slate-950/40">
-          <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <p className="text-xs font-semibold uppercase text-slate-500">
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
                 Today progress
               </p>
               <p className="text-lg font-semibold text-white">
                 {todayStats.completed}/{todayStats.total} completed
               </p>
             </div>
-            <div className="flex items-center gap-2 text-xs text-slate-300">
-              <span className="rounded-full border border-emerald-400/40 bg-emerald-400/10 px-3 py-1 text-emerald-200">
+            <div className="flex items-center gap-2 text-xs">
+              <span className="inline-flex items-center gap-1 rounded-full border border-amber-400/30 bg-amber-400/10 px-3 py-1 font-semibold text-amber-200">
+                🔥 {streakCount}d
+              </span>
+              <span className="rounded-full border border-emerald-400/40 bg-emerald-400/10 px-3 py-1 font-semibold text-emerald-200">
                 {todayStats.percent}%
               </span>
-              <span className="text-slate-400">on track</span>
             </div>
           </div>
           <div className="h-2 w-full overflow-hidden rounded-full bg-slate-800/60">
@@ -154,48 +162,70 @@ export default function TodoSection({
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3 mt-2">
-          <div className="rounded-full border border-slate-800/70 bg-slate-950/40 px-3 py-2 text-xs text-slate-200">
-            <span className="text-slate-400">Streak</span>
-            <span className="ml-2 text-xs font-semibold text-emerald-200">
-              {streakCount} days
-            </span>
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto rounded-full border border-slate-800/70 bg-slate-950/40 p-1 text-xs font-semibold text-slate-200">
+            {quickFilters.map(({ id, label }) => {
+              const isActive =
+                activeQuickFilter === id || (id === "all" && !activeQuickFilter);
+              return (
+                <button
+                  key={id}
+                  type="button"
+                  className={`whitespace-nowrap rounded-full px-3 py-1.5 transition ${
+                    isActive
+                      ? "bg-sky-400/20 text-sky-100"
+                      : "text-slate-400 hover:text-white"
+                  }`}
+                  onClick={() =>
+                    onQuickFilter(id as "all" | "today" | "completed" | "flagged")
+                  }
+                >
+                  {label}
+                </button>
+              );
+            })}
           </div>
-          <div className="rounded-2xl border border-slate-800/70 bg-slate-950/40 px-2 pr-1 py-1 text-xs text-slate-200">
-            <label className="flex items-center gap-2">
-              <span className="text-slate-400">Context</span>
-              <select
-                value={contextTagFilter}
-                onChange={(event) => onContextTagChange(event.target.value)}
-                className="rounded-full border border-slate-800/70 bg-slate-950/60 px-2 py-1 text-[0.7rem] text-slate-200"
-              >
-                <option value="all">All</option>
-                {contextTagOptions.map((tag) => (
-                  <option key={tag} value={tag}>
-                    {tag}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
+
+          <label className="flex h-10 items-center gap-1.5 rounded-full border border-slate-800/70 bg-slate-950/40 pl-3 pr-1 text-xs text-slate-400">
+            <span className="hidden sm:inline">Context</span>
+            <select
+              value={contextTagFilter}
+              onChange={(event) => onContextTagChange(event.target.value)}
+              aria-label="Filter by context tag"
+              className="h-8 rounded-full border border-slate-800/70 bg-slate-950/60 px-2 text-xs text-slate-200 focus:border-slate-500 focus:outline-none"
+            >
+              <option value="all">All</option>
+              {contextTagOptions.map((tag) => (
+                <option key={tag} value={tag}>
+                  {tag}
+                </option>
+              ))}
+            </select>
+          </label>
+
           <button
             type="button"
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-800/70 bg-slate-950/40 text-sm text-slate-300 transition hover:border-slate-600/70 hover:text-white"
+            className="relative flex h-10 items-center gap-2 rounded-full border border-slate-800/70 bg-slate-950/40 px-3.5 text-xs font-semibold text-slate-300 transition hover:border-slate-600/70 hover:text-white"
             onClick={onOpenFilter}
-            aria-label="Open filters"
+            aria-label="Open filters and sorting"
           >
-            <FiFilter aria-hidden />
+            <FiSliders aria-hidden />
+            <span className="hidden sm:inline">Filters</span>
+            {hasAdvancedFilters ? (
+              <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full border-2 border-slate-950 bg-emerald-400" />
+            ) : null}
           </button>
+
           {onToggleSelectMode && (
             <button
               type="button"
-              className={`flex h-9 w-9 items-center justify-center rounded-full border text-sm transition hover:border-slate-600/70 hover:text-white ${
+              className={`flex h-10 w-10 items-center justify-center rounded-full border text-sm transition hover:border-slate-600/70 hover:text-white ${
                 isSelectMode
                   ? "border-sky-400/60 bg-sky-400/15 text-sky-200"
                   : "border-slate-800/70 bg-slate-950/40 text-slate-300"
               }`}
               onClick={onToggleSelectMode}
-              aria-label={isSelectMode ? "Exit select mode" : "Enter select mode"}
+              aria-label={isSelectMode ? "Exit select mode" : "Select multiple"}
             >
               <FiCheckSquare aria-hidden />
             </button>
@@ -253,7 +283,7 @@ export default function TodoSection({
               )}
               <button
                 type="button"
-                className="flex h-7 w-7 items-center justify-center rounded-full text-slate-400 transition hover:text-white"
+                className="flex h-8 w-8 items-center justify-center rounded-full text-slate-400 transition hover:text-white"
                 onClick={onToggleSelectMode}
                 aria-label="Cancel selection"
               >
@@ -262,73 +292,6 @@ export default function TodoSection({
             </div>
           </div>
         )}
-
-        <div className="grid gap-2 sm:gap-3">
-          <div className="flex flex-wrap items-center gap-2 rounded-full border border-slate-800/70 bg-slate-950/40 p-1 text-xs font-semibold text-slate-200">
-            {quickFilters.map(({ id, label }) => {
-              const isActive =
-                activeQuickFilter === id || (id === "all" && !activeQuickFilter);
-              return (
-                <button
-                  key={id}
-                  type="button"
-                  className={`rounded-full px-3 py-1.5 transition ${
-                    isActive
-                      ? "bg-sky-400/20 text-sky-100"
-                      : "text-slate-400 hover:text-white"
-                  }`}
-                  onClick={() =>
-                    onQuickFilter(id as "all" | "today" | "completed" | "flagged")
-                  }
-                >
-                  {label}
-                </button>
-              );
-            })}
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="flex flex-wrap items-center rounded-full border border-slate-800/70 bg-slate-950/40 p-1 text-xs font-semibold text-slate-200">
-              <button
-                type="button"
-                className={`rounded-full px-2.5 py-1 transition ${
-                  sortBy === "scheduled" || sortBy === "completed"
-                    ? "bg-slate-800/70 text-white"
-                    : "text-slate-400 hover:text-white"
-                }`}
-                onClick={() =>
-                  onSortByChange(
-                    statusFilter === "completed" ? "completed" : "scheduled"
-                  )
-                }
-              >
-                Time
-              </button>
-              <button
-                type="button"
-                className={`rounded-full px-2.5 py-1 transition ${
-                  sortBy === "priority"
-                    ? "bg-slate-800/70 text-white"
-                    : "text-slate-400 hover:text-white"
-                }`}
-                onClick={() => onSortByChange("priority")}
-              >
-                Priority
-              </button>
-            </div>
-            <button
-              type="button"
-              className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-800/70 bg-slate-950/40 text-slate-300 transition hover:border-slate-600/70 hover:text-white sm:h-9 sm:w-9"
-              onClick={() => onSortOrderChange(sortOrder === "asc" ? "desc" : "asc")}
-              aria-label="Toggle sort order"
-            >
-              {sortOrder === "asc" ? (
-                <FiArrowUp aria-hidden />
-              ) : (
-                <FiArrowDown aria-hidden />
-              )}
-            </button>
-          </div>
-        </div>
 
         <TodoList
           groups={groups}
