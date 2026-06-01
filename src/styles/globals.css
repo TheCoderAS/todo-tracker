@@ -38,6 +38,23 @@
 
     --radius: 1.5rem;
     --shadow-pop: 0 18px 50px -12px rgba(124, 92, 255, 0.45);
+
+    /* Theme-aware Tailwind palette channels (space-separated RGB so Tailwind's
+       /opacity modifiers keep working). The whole app uses `slate` for surfaces
+       and `white` for headings; defining them here lets light mode re-skin every
+       hardcoded utility without per-component edits. Dark ramp: 50 = lightest. */
+    --s-50: 244 243 255;
+    --s-100: 236 234 255;
+    --s-200: 214 210 245;
+    --s-300: 179 174 224;
+    --s-400: 141 136 191;
+    --s-500: 111 106 156;
+    --s-600: 79 74 120;
+    --s-700: 54 49 88;
+    --s-800: 36 31 68;
+    --s-900: 22 19 46;
+    --s-950: 10 10 26;
+    --w: 255 255 255;
   }
 
   html.theme-light {
@@ -54,6 +71,21 @@
     --text-faint: #8a87a8;
     --accent-ink: #ffffff;
     color-scheme: light;
+
+    /* Light ramp: invert the slate lightness so dark surfaces become light and
+       light text becomes dark. `white` flips to dark ink for headings. */
+    --s-50: 26 20 56;
+    --s-100: 38 33 72;
+    --s-200: 64 58 104;
+    --s-300: 91 87 127;
+    --s-400: 113 108 150;
+    --s-500: 138 135 168;
+    --s-600: 168 164 196;
+    --s-700: 200 197 224;
+    --s-800: 218 214 240;
+    --s-900: 235 233 250;
+    --s-950: 246 245 255;
+    --w: 26 20 56;
   }
 
   :root {
