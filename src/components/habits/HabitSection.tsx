@@ -231,7 +231,7 @@ export default function HabitSection({
               </p>
             </div>
             <div className="flex items-center gap-2 text-xs text-slate-300">
-              <span className="rounded-full border border-sky-400/40 bg-sky-400/10 px-3 py-1 text-sky-200">
+              <span className="rounded-full border border-brand-400/40 bg-brand-400/10 px-3 py-1 text-brand-200">
                 {todayStats.total
                   ? Math.round((todayStats.completed / todayStats.total) * 100)
                   : 0}
@@ -242,7 +242,7 @@ export default function HabitSection({
           </div>
           <div className="h-2 w-full overflow-hidden rounded-full bg-slate-800/60">
             <div
-              className="h-full rounded-full bg-gradient-to-r from-sky-400 via-cyan-300 to-emerald-300 transition-all"
+              className="h-full rounded-full bg-gradient-to-r from-brand-400 via-brand-300 to-emerald-300 transition-all"
               style={{
                 width: `${Math.max(
                   todayStats.total
@@ -268,7 +268,7 @@ export default function HabitSection({
                 type="button"
                 className={`whitespace-nowrap rounded-full px-3 py-1.5 transition ${
                   statusFilter === option.id
-                    ? "bg-sky-400/20 text-sky-100"
+                    ? "bg-brand-400/20 text-brand-100"
                     : "text-slate-400 hover:text-white"
                 }`}
                 onClick={() =>

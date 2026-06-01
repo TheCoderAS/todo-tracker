@@ -156,7 +156,7 @@ export default function TodoSection({
           </div>
           <div className="h-2 w-full overflow-hidden rounded-full bg-slate-800/60">
             <div
-              className="h-full rounded-full bg-gradient-to-r from-emerald-400 via-cyan-300 to-sky-300 transition-all"
+              className="h-full rounded-full bg-gradient-to-r from-emerald-400 via-brand-300 to-brand-300 transition-all"
               style={{ width: `${Math.max(todayStats.percent, 8)}%` }}
             />
           </div>
@@ -173,7 +173,7 @@ export default function TodoSection({
                   type="button"
                   className={`whitespace-nowrap rounded-full px-3 py-1.5 transition ${
                     isActive
-                      ? "bg-sky-400/20 text-sky-100"
+                      ? "bg-brand-400/20 text-brand-100"
                       : "text-slate-400 hover:text-white"
                   }`}
                   onClick={() =>
@@ -221,7 +221,7 @@ export default function TodoSection({
               type="button"
               className={`flex h-10 w-10 items-center justify-center rounded-full border text-sm transition hover:border-slate-600/70 hover:text-white ${
                 isSelectMode
-                  ? "border-sky-400/60 bg-sky-400/15 text-sky-200"
+                  ? "border-brand-400/60 bg-brand-400/15 text-brand-200"
                   : "border-slate-800/70 bg-slate-950/40 text-slate-300"
               }`}
               onClick={onToggleSelectMode}
@@ -241,7 +241,7 @@ export default function TodoSection({
               {onSelectAll && (
                 <button
                   type="button"
-                  className="text-xs font-medium text-sky-300 transition hover:text-sky-200"
+                  className="text-xs font-medium text-brand-300 transition hover:text-brand-200"
                   onClick={() => {
                     const allIds = groups.flatMap((g) =>
                       g.items.filter((t) => t.status === "pending").map((t) => t.id)

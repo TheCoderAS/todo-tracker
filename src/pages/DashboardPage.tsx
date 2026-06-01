@@ -47,6 +47,13 @@ export default function DashboardPage() {
   return (
     <section className="grid gap-6">
       <OnboardingModal isOpen={showOnboarding} onComplete={completeOnboarding} />
+      <header>
+        <p className="text-sm text-muted">Your progress</p>
+        <h1 className="text-3xl font-semibold gradient-text">Insights</h1>
+        <p className="mt-1 text-sm text-faint">
+          Trends, streaks, and how your week is shaping up.
+        </p>
+      </header>
       <div className="grid gap-4 md:grid-cols-2">
         <CompletedTargetCard
           completed={todayCompleted}

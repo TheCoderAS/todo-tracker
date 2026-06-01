@@ -361,7 +361,7 @@ export default function TodoList({
       <div
         className={`flex flex-col gap-4 rounded-3xl border bg-gradient-to-br from-slate-900/80 via-slate-950/90 to-slate-950/80 px-5 py-4 transition hover:border-slate-700/70 ${cardTone} ${
           isCompleted || isSkipped ? "opacity-70" : ""
-        } ${isDueSoon ? "amber-pulse" : ""} ${isSelected ? "border-sky-400/60 ring-1 ring-sky-400/30" : "border-slate-900/60"}`}
+        } ${isDueSoon ? "amber-pulse" : ""} ${isSelected ? "border-brand-400/60 ring-1 ring-brand-400/30" : "border-slate-900/60"}`}
         role="button"
         tabIndex={0}
         onClick={handleCardClick}
@@ -378,7 +378,7 @@ export default function TodoList({
               <div
                 className={`flex h-5 w-5 items-center justify-center rounded border transition ${
                   isSelected
-                    ? "border-sky-400 bg-sky-400 text-slate-950"
+                    ? "border-brand-400 bg-brand-400 text-slate-950"
                     : "border-slate-600 bg-slate-900/60"
                 }`}
               >

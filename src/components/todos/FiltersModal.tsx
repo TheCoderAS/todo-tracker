@@ -185,7 +185,7 @@ export default function FiltersModal({
                   type="button"
                   className={`flex h-9 items-center justify-center rounded-full border px-3 text-xs font-medium transition active:scale-95 ${
                     filterDraft.status === option.value
-                      ? "border-sky-400/60 bg-sky-400/15 text-sky-100"
+                      ? "border-brand-400/60 bg-brand-400/15 text-brand-100"
                       : "border-slate-800/70 bg-slate-950/50 text-slate-300 hover:border-slate-600/70 hover:text-white"
                   }`}
                   onClick={() =>
@@ -300,7 +300,7 @@ export default function FiltersModal({
                       type="button"
                       className={`flex h-9 items-center justify-center rounded-full border px-3 text-xs font-medium transition active:scale-95 ${
                         isSelected
-                          ? "border-cyan-400/60 bg-cyan-400/15 text-cyan-100"
+                          ? "border-brand-400/60 bg-brand-400/15 text-brand-100"
                           : "border-slate-800/70 bg-slate-950/50 text-slate-300 hover:border-slate-600/70 hover:text-white"
                       }`}
                       onClick={() => {
@@ -328,7 +328,7 @@ export default function FiltersModal({
                     type="button"
                     className={`flex h-9 items-center justify-center rounded-full border px-3 text-xs font-medium transition active:scale-95 ${
                       filterDraft.sortBy === option.value
-                        ? "border-sky-400/60 bg-sky-400/15 text-sky-100"
+                        ? "border-brand-400/60 bg-brand-400/15 text-brand-100"
                         : "border-slate-800/70 bg-slate-950/50 text-slate-300 hover:border-slate-600/70 hover:text-white"
                     }`}
                     onClick={() =>

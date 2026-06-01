@@ -55,11 +55,11 @@ export default function WeeklySummaryCard({
           <p className="text-[0.7rem] uppercase tracking-wide text-slate-500">Spillover</p>
         </div>
         <div className="rounded-2xl border border-slate-800/70 bg-slate-950/60 p-3 text-center">
-          <p className="text-lg font-medium text-sky-300">{avgPerDay}</p>
+          <p className="text-lg font-medium text-brand-300">{avgPerDay}</p>
           <p className="text-[0.7rem] uppercase tracking-wide text-slate-500">Avg/day</p>
         </div>
         <div className="rounded-2xl border border-slate-800/70 bg-slate-950/60 p-3 text-center">
-          <p className="text-sm font-medium text-cyan-300 truncate">{bestDayLabel}</p>
+          <p className="text-sm font-medium text-brand-300 truncate">{bestDayLabel}</p>
           <p className="text-[0.7rem] uppercase tracking-wide text-slate-500">Best day</p>
         </div>
       </div>

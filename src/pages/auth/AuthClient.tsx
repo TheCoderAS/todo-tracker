@@ -249,14 +249,18 @@ export default function AuthClient() {
 
   if (loading || user) {
     return (
-      <main className="relative mx-auto flex min-h-screen max-w-6xl flex-col justify-center px-6 pb-20 pt-24 text-slate-100">
+      <main className="relative mx-auto flex min-h-screen max-w-6xl flex-col justify-center px-6 pb-20 pt-24 text-[var(--text)]">
         <OverlayLoader />
       </main>
     );
   }
 
   return (
-    <main className="relative mx-auto flex min-h-screen max-w-6xl flex-col justify-center px-6 pb-20 pt-24 text-slate-100">
+    <main className="relative mx-auto flex min-h-screen max-w-6xl flex-col justify-center px-6 pb-20 pt-24 text-[var(--text)]">
+      <div
+        aria-hidden
+        className="pointer-events-none fixed -top-32 left-1/2 h-80 w-80 -translate-x-1/2 rounded-full bg-grad-brand opacity-25 blur-3xl"
+      />
       <AuthSection
         mode={authMode}
         form={authForm}

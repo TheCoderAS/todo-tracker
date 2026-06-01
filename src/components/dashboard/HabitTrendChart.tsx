@@ -101,7 +101,7 @@ export default function HabitTrendChart({
                   <div className="flex h-32 w-full items-end justify-center">
                     <div className="flex h-full w-6 items-end rounded-full bg-slate-900/60">
                       <div
-                        className={`w-full rounded-full bg-gradient-to-t from-sky-400 to-emerald-300 transition-all duration-700 ${
+                        className={`w-full rounded-full bg-gradient-to-t from-brand-400 to-emerald-300 transition-all duration-700 ${
                           isEmpty ? "opacity-30" : ""
                         }`}
                         style={{ height: `${height}%` }}

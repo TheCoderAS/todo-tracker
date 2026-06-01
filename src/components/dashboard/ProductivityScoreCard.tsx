@@ -35,7 +35,7 @@ export default function ProductivityScoreCard({
           {completionByDayOfWeek.map((d) => (
             <div key={d.day} className="flex flex-1 flex-col items-center gap-1">
               <div
-                className="w-full rounded-t bg-gradient-to-t from-sky-500 to-cyan-400 transition-all"
+                className="w-full rounded-t bg-gradient-to-t from-brand-500 to-brand-400 transition-all"
                 style={{ height: `${Math.max((d.count / maxDayCount) * 100, 4)}%` }}
               />
               <span className="text-[0.5rem] text-slate-500">{d.day}</span>
@@ -59,7 +59,7 @@ export default function ProductivityScoreCard({
                 <span className="w-14 text-xs text-slate-400">{p.priority}</span>
                 <div className="flex-1 h-2 rounded-full bg-slate-800/60 overflow-hidden">
                   <div
-                    className={`h-full rounded-full ${colorMap[p.priority] ?? "bg-sky-400"}`}
+                    className={`h-full rounded-full ${colorMap[p.priority] ?? "bg-brand-400"}`}
                     style={{ width: `${Math.max(rate, 2)}%` }}
                   />
                 </div>

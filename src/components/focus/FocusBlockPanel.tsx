@@ -325,7 +325,7 @@ export default function FocusBlockPanel({
                   <ul className="mt-2 space-y-1 text-sm text-slate-100">
                     {activeBlockHabits.map((habit) => (
                       <li key={habit.id} className="flex items-center gap-2">
-                        <span className="h-2 w-2 rounded-full bg-sky-400" />
+                        <span className="h-2 w-2 rounded-full bg-brand-400" />
                         <span>{habit.title}</span>
                       </li>
                     ))}
@@ -442,7 +442,7 @@ export default function FocusBlockPanel({
                       type="checkbox"
                       checked={selectedHabitIds.includes(habit.id)}
                       onChange={() => handleHabitToggle(habit.id)}
-                      className="h-4 w-4 rounded border-slate-600 bg-slate-950 text-sky-400 focus:ring-sky-300/30"
+                      className="h-4 w-4 rounded border-slate-600 bg-slate-950 text-brand-400 focus:ring-brand-300/30"
                     />
                     <span>{habit.title}</span>
                   </label>

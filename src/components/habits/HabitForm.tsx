@@ -272,7 +272,7 @@ export default function HabitForm({
                   aria-pressed={isActive}
                   className={`rounded-full border px-3 py-2 text-xs font-medium transition ${
                     isActive
-                      ? "border-sky-400/70 bg-sky-400/20 text-sky-100"
+                      ? "border-brand-400/70 bg-brand-400/20 text-brand-100"
                       : "border-slate-800/70 text-slate-400 hover:border-slate-600/70 hover:text-slate-200"
                   }`}
                 >
