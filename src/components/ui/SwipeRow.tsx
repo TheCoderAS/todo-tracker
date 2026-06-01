@@ -74,7 +74,7 @@ export default function SwipeRow({ children, left, right, disabled }: SwipeRowPr
       {/* Left action background (revealed swiping right) */}
       {left && dx > 0 && (
         <div
-          className={`absolute inset-y-0 left-0 flex items-center gap-2 pl-5 text-sm font-medium text-white ${left.className}`}
+          className={`absolute inset-y-0 left-0 flex items-center gap-2 pl-5 text-sm font-medium text-[#fff] ${left.className}`}
           style={{ width: Math.abs(dx) }}
         >
           {dx >= THRESHOLD && (
@@ -88,7 +88,7 @@ export default function SwipeRow({ children, left, right, disabled }: SwipeRowPr
       {/* Right action background (revealed swiping left) */}
       {right && dx < 0 && (
         <div
-          className={`absolute inset-y-0 right-0 flex items-center justify-end gap-2 pr-5 text-sm font-medium text-white ${right.className}`}
+          className={`absolute inset-y-0 right-0 flex items-center justify-end gap-2 pr-5 text-sm font-medium text-[#fff] ${right.className}`}
           style={{ width: Math.abs(dx) }}
         >
           {dx <= -THRESHOLD && (

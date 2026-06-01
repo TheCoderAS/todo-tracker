@@ -202,7 +202,7 @@ export default function TodosPage() {
             type="button"
             className={`flex-1 rounded-full px-4 py-2 text-center transition ${
               activeTab === t.id
-                ? "gradient-brand text-white shadow-pop"
+                ? "gradient-brand text-[#fff] shadow-pop"
                 : "text-muted hover:text-[var(--text)]"
             }`}
             onClick={() => setTab(t.id)}

@@ -141,7 +141,7 @@ export default function AppHeader({ showSignOut, onSignOut }: AppHeaderProps) {
     <header className="fixed top-0 left-0 right-0 z-20 border-b border-[var(--border)] bg-[var(--surface)] px-4 py-2 pt-[calc(0.5rem+env(safe-area-inset-top))] backdrop-blur-xl sm:px-6">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 sm:gap-4">
         <div className="flex items-center gap-2.5">
-          <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-2xl bg-white shadow-pop no-invert">
+          <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-2xl bg-[#fff] shadow-pop no-invert">
             <img
               src="/nizkarya.png"
               alt="NizKarya logo"

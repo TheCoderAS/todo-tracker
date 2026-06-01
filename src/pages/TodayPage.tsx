@@ -282,7 +282,7 @@ export default function TodayPage() {
                   <span
                     className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 transition ${
                       done
-                        ? "gradient-success border-transparent text-white"
+                        ? "gradient-success border-transparent text-[#fff]"
                         : "border-[var(--border-strong)] text-transparent"
                     }`}
                   >
@@ -309,7 +309,7 @@ export default function TodayPage() {
         to="/insights"
         className="surface-card flex items-center gap-3 p-4 transition active:scale-[0.99]"
       >
-        <span className="gradient-brand flex h-10 w-10 items-center justify-center rounded-2xl text-white">
+        <span className="gradient-brand flex h-10 w-10 items-center justify-center rounded-2xl text-[#fff]">
           <FiBarChart2 aria-hidden />
         </span>
         <div className="flex-1">

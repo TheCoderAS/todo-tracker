@@ -8,18 +8,21 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        // Theme-aware via CSS-variable channels (see globals.css). These flip
+        // between dark/light so every hardcoded slate/white utility re-skins.
+        white: "rgb(var(--w) / <alpha-value>)",
         slate: {
-          50: "#f4f3ff",
-          100: "#eceaff",
-          200: "#d6d2f5",
-          300: "#b3aee0",
-          400: "#8d88bf",
-          500: "#6f6a9c",
-          600: "#4f4a78",
-          700: "#363158",
-          800: "#241f44",
-          900: "#16132e",
-          950: "#0a0a1a"
+          50: "rgb(var(--s-50) / <alpha-value>)",
+          100: "rgb(var(--s-100) / <alpha-value>)",
+          200: "rgb(var(--s-200) / <alpha-value>)",
+          300: "rgb(var(--s-300) / <alpha-value>)",
+          400: "rgb(var(--s-400) / <alpha-value>)",
+          500: "rgb(var(--s-500) / <alpha-value>)",
+          600: "rgb(var(--s-600) / <alpha-value>)",
+          700: "rgb(var(--s-700) / <alpha-value>)",
+          800: "rgb(var(--s-800) / <alpha-value>)",
+          900: "rgb(var(--s-900) / <alpha-value>)",
+          950: "rgb(var(--s-950) / <alpha-value>)"
         },
         brand: {
           DEFAULT: "#7c5cff",

@@ -29,7 +29,7 @@ export default function BottomNav() {
               <span
                 className={`flex h-11 w-11 items-center justify-center rounded-2xl text-lg transition-all duration-200 ease-out ${
                   isActive
-                    ? "nav-icon-pop gradient-brand text-white shadow-pop"
+                    ? "nav-icon-pop gradient-brand text-[#fff] shadow-pop"
                     : "text-muted group-hover:text-[var(--text)]"
                 }`}
               >
