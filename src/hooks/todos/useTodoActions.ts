@@ -11,10 +11,8 @@ import {
 } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
-import {
-  formatDateInput,
-  formatTimeInput
-} from "@/lib/todoFormatters";
+import { formatDateInput, formatTimeInput } from "@/lib/todoFormatters";
+import { parseQuickAdd } from "@/lib/quickAddParser";
 import type { Todo, TodoInput, TodoRecurrence } from "@/lib/types";
 import type { SnackbarVariant } from "@/components/ui/Snackbar";
 import { normalizeTitle } from "@/hooks/todos/useTodoFormState";
@@ -94,12 +92,9 @@ export function useTodoActions({
     });
   }, []);
 
-  const selectAll = useCallback(
-    (ids: string[]) => {
-      setSelectedIds(new Set(ids));
-    },
-    []
-  );
+  const selectAll = useCallback((ids: string[]) => {
+    setSelectedIds(new Set(ids));
+  }, []);
 
   const clearSelection = useCallback(() => {
     setSelectedIds(new Set());
@@ -510,6 +505,56 @@ export function useTodoActions({
     }
   }, [user, selectedIds, setSnackbar]);
 
+  const handleQuickAddTodo = useCallback(
+    async (rawInput: string) => {
+      if (!user) {
+        setSnackbar({ message: "Sign in to manage todos.", variant: "error" });
+        return;
+      }
+      const parsed = parseQuickAdd(rawInput);
+      const normalizedTitle = normalizeTitle(parsed.title);
+      if (!normalizedTitle) {
+        setSnackbar({ message: "Enter a task description.", variant: "error" });
+        return;
+      }
+
+      setActionLoading(true);
+      try {
+        const scheduledDate =
+          parsed.scheduledDate && parsed.scheduledTime
+            ? Timestamp.fromDate(
+                new Date(`${parsed.scheduledDate}T${parsed.scheduledTime}`)
+              )
+            : parsed.scheduledDate
+              ? Timestamp.fromDate(new Date(`${parsed.scheduledDate}T09:00`))
+              : null;
+
+        await addDoc(collection(db, "users", user.uid, "todos"), {
+          title: normalizedTitle,
+          scheduledDate,
+          createdAt: serverTimestamp(),
+          priority: parsed.priority,
+          status: "pending",
+          completedDate: null,
+          skippedAt: null,
+          recurrence: null,
+          subtasks: [],
+          author_uid: user.uid,
+          tags: parsed.tags,
+          contextTags: [],
+          description: ""
+        });
+        setSnackbar({ message: "Todo added to your list.", variant: "success" });
+      } catch (error) {
+        console.error(error);
+        setSnackbar({ message: "Unable to save todo.", variant: "error" });
+      } finally {
+        setActionLoading(false);
+      }
+    },
+    [user, setSnackbar]
+  );
+
   return {
     actionLoading,
     lastCompletedId,
@@ -532,6 +577,7 @@ export function useTodoActions({
     handleSkipTodo,
     handleArchiveTodo,
     handleSubmitTodo,
+    handleQuickAddTodo,
     handleReorder
   };
 }

@@ -13,7 +13,11 @@ import {
 } from "react-icons/fi";
 
 import type { Habit, HabitFrequency } from "@/lib/types";
-import { getDateKey, getHabitMilestoneProgress, isHabitScheduledForDate } from "@/lib/habitUtils";
+import {
+  getDateKey,
+  getHabitMilestoneProgress,
+  isHabitScheduledForDate
+} from "@/lib/habitUtils";
 
 const dayLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
@@ -177,7 +181,10 @@ export default function HabitSection({
         if (isArchived) return false;
         if (statusFilter === "completed" && !isCompletedToday) return false;
         if (statusFilter === "pending" && isCompletedToday) return false;
-        if ((statusFilter === "completed" || statusFilter === "pending") && !isScheduledToday) {
+        if (
+          (statusFilter === "completed" || statusFilter === "pending") &&
+          !isScheduledToday
+        ) {
           return false;
         }
       }
@@ -339,8 +346,12 @@ export default function HabitSection({
                 ? habitLookup.get(habit.triggerAfterHabitId)
                 : null;
               const triggerIncoming = triggerSources.get(habit.id) ?? [];
-              const visibleTriggerTarget = triggerTarget?.archivedAt ? null : triggerTarget;
-              const visibleTriggerIncoming = triggerIncoming.filter((source) => !source.archivedAt);
+              const visibleTriggerTarget = triggerTarget?.archivedAt
+                ? null
+                : triggerTarget;
+              const visibleTriggerIncoming = triggerIncoming.filter(
+                (source) => !source.archivedAt
+              );
               return (
                 <div
                   key={habit.id}
@@ -359,7 +370,8 @@ export default function HabitSection({
                         ) : null}
                       </div>
                       <p className="text-xs text-slate-400">
-                        {formatHabitTypeLabel(habit)} • {formatFrequencyLabel(habit.frequency)} •{" "}
+                        {formatHabitTypeLabel(habit)} •{" "}
+                        {formatFrequencyLabel(habit.frequency)} •{" "}
                         {formatScheduleSummary(habit)} •{" "}
                         {habit.reminderTime
                           ? `Reminds at ${habit.reminderTime}`
@@ -419,7 +431,11 @@ export default function HabitSection({
                         onClick={() => onDelete(habit)}
                         aria-label={isArchived ? "Delete habit" : "Archive habit"}
                       >
-                        {isArchived ? <FiTrash2 aria-hidden /> : <FiArchive aria-hidden />}
+                        {isArchived ? (
+                          <FiTrash2 aria-hidden />
+                        ) : (
+                          <FiArchive aria-hidden />
+                        )}
                       </button>
                     </div>
                   </div>
@@ -428,8 +444,8 @@ export default function HabitSection({
                       {isCompleted
                         ? completionLabels.status
                         : isScheduledToday
-                        ? completionLabels.status
-                        : "Not scheduled today"}
+                          ? completionLabels.status
+                          : "Not scheduled today"}
                     </p>
                     {isScheduledToday ? (
                       <button

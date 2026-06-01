@@ -154,7 +154,8 @@ export default function PwaManager() {
 
       const idToken = await user.getIdToken();
       const endpoint =
-        import.meta.env.VITE_NOTIFICATION_SERVICE_URL || "https://next-gen-track.web.app";
+        import.meta.env.VITE_NOTIFICATION_SERVICE_URL ||
+        "https://next-gen-track.web.app";
       await fetch(`${endpoint}/register`, {
         method: "POST",
         headers: {
@@ -189,7 +190,10 @@ export default function PwaManager() {
 
     return () => {
       if ("serviceWorker" in navigator) {
-        navigator.serviceWorker.removeEventListener("message", handleServiceWorkerMessage);
+        navigator.serviceWorker.removeEventListener(
+          "message",
+          handleServiceWorkerMessage
+        );
       }
       Promise.resolve(unsubscribeForeground).then((unsubscribe) => unsubscribe?.());
     };
@@ -229,10 +233,13 @@ export default function PwaManager() {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    const interval = window.setInterval(() => {
-      const nextKey = new Date().toDateString();
-      setDayKey((prev) => (prev === nextKey ? prev : nextKey));
-    }, 60 * 60 * 1000);
+    const interval = window.setInterval(
+      () => {
+        const nextKey = new Date().toDateString();
+        setDayKey((prev) => (prev === nextKey ? prev : nextKey));
+      },
+      60 * 60 * 1000
+    );
 
     return () => window.clearInterval(interval);
   }, []);
@@ -307,12 +314,15 @@ export default function PwaManager() {
       (now.getMinutes() * 60 + now.getSeconds()) * 1000 + now.getMilliseconds();
     const msUntilNextInterval = intervalMs - (elapsedMs % intervalMs);
 
-    const timeoutId = window.setTimeout(() => {
-      sendSummary().catch(() => undefined);
-      notificationIntervalRef.current = window.setInterval(() => {
+    const timeoutId = window.setTimeout(
+      () => {
         sendSummary().catch(() => undefined);
-      }, intervalMs);
-    }, Math.max(msUntilNextInterval, 0));
+        notificationIntervalRef.current = window.setInterval(() => {
+          sendSummary().catch(() => undefined);
+        }, intervalMs);
+      },
+      Math.max(msUntilNextInterval, 0)
+    );
 
     return () => {
       window.clearTimeout(timeoutId);

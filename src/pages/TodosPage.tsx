@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 
 import FiltersModal from "@/components/todos/FiltersModal";
+import QuickAddBar from "@/components/todos/QuickAddBar";
 import TodoForm from "@/components/todos/TodoForm";
 import TodoSection from "@/components/todos/TodoSection";
 import HabitForm from "@/components/habits/HabitForm";
@@ -14,10 +15,7 @@ import OverlayLoader from "@/components/ui/OverlayLoader";
 import Snackbar, { type SnackbarVariant } from "@/components/ui/Snackbar";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { formatDateDisplay } from "@/lib/todoFormatters";
-import {
-  getDateKey,
-  isHabitScheduledForDate
-} from "@/lib/habitUtils";
+import { getDateKey, isHabitScheduledForDate } from "@/lib/habitUtils";
 import { useHabitsData } from "@/hooks/todos/useHabitsData";
 import { useTabState } from "@/hooks/todos/useTabState";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
@@ -42,9 +40,9 @@ export default function TodosPage() {
   } | null>(null);
 
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [selectedTodo, setSelectedTodo] = useState<
-    import("@/lib/types").Todo | null
-  >(null);
+  const [selectedTodo, setSelectedTodo] = useState<import("@/lib/types").Todo | null>(
+    null
+  );
 
   const todoForm = useTodoFormState();
 
@@ -111,7 +109,11 @@ export default function TodosPage() {
 
   const missedHabits = useMemo<MissedHabitEntry[]>(() => {
     const today = new Date();
-    const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const startOfToday = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate()
+    );
     const dates = Array.from({ length: reviewWindowDays }).map((_, index) => {
       const date = new Date(startOfToday);
       date.setDate(startOfToday.getDate() - (index + 1));
@@ -181,7 +183,8 @@ export default function TodosPage() {
   const isLoading = loading || isInitialLoad;
   const isHabitLoading = loading || isHabitInitialLoad;
   const isFocusLoading = loading || isFocusInitialLoad;
-  const isAnyActionLoading = todoActions.actionLoading || habitActions.habitActionLoading;
+  const isAnyActionLoading =
+    todoActions.actionLoading || habitActions.habitActionLoading;
 
   return (
     <section className="flex flex-col gap-6">
@@ -225,7 +228,11 @@ export default function TodosPage() {
       </div>
 
       {activeTab === "todos" ? (
-        <div key="todos" className="tab-transition">
+        <div key="todos" className="tab-transition space-y-4">
+          <QuickAddBar
+            onQuickAdd={todoActions.handleQuickAddTodo}
+            disabled={todoActions.actionLoading}
+          />
           <TodoSection
             groups={groupedTodos}
             formatDate={formatDateDisplay}
@@ -328,7 +335,9 @@ export default function TodosPage() {
             <HabitForm
               form={habitActions.habitForm}
               graceMissesInput={habitActions.graceMissesInput}
-              habits={habits.filter((habit) => habit.id !== habitActions.editingHabitId)}
+              habits={habits.filter(
+                (habit) => habit.id !== habitActions.editingHabitId
+              )}
               isEditing={Boolean(habitActions.editingHabitId)}
               onChange={habitActions.handleHabitFormChange}
               onGraceMissesChange={habitActions.handleGraceMissesChange}

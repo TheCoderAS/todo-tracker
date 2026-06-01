@@ -25,7 +25,12 @@ export const useKeyboardShortcuts = (shortcuts: ShortcutHandler[]) => {
         const metaMatch = shortcut.meta ? event.metaKey : true;
         const shiftMatch = shortcut.shift ? event.shiftKey : !event.shiftKey;
 
-        if (event.key.toLowerCase() === shortcut.key.toLowerCase() && ctrlMatch && metaMatch && shiftMatch) {
+        if (
+          event.key.toLowerCase() === shortcut.key.toLowerCase() &&
+          ctrlMatch &&
+          metaMatch &&
+          shiftMatch
+        ) {
           event.preventDefault();
           shortcut.handler();
           return;

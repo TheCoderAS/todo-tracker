@@ -1,46 +1,126 @@
 # Aura Pulse
 
-Next-gen daily productivity app built with Next.js.
+A next-gen daily productivity PWA for tasks, habits, routines, focus sessions,
+and analytics. Built with **React 18 + TypeScript + Vite**, styled with
+**Tailwind CSS**, and backed by **Firebase** (Auth, Cloud Firestore, and Cloud
+Messaging). A standalone Node/Express cron service sends scheduled push
+reminders (see `cron-service/`).
+
+## Features
+
+- **Todos** — priorities, tags, context tags, descriptions, subtasks,
+  recurrence (daily/weekly/monthly), skip/complete/archive, drag-and-drop order,
+  and bulk select/complete/delete.
+- **Natural-language quick add** — type `Gym tomorrow at 6pm #health !high` and
+  the task is parsed into a scheduled, tagged, prioritized todo.
+- **Habits** — daily through yearly frequencies, reminders, streaks and
+  milestones, grace misses, and habit chaining.
+- **Routines** — reusable task templates you can launch into today's list.
+- **Focus blocks** — timed sessions over selected todos/habits with a live
+  countdown, progress bar, and completion metrics.
+- **Dashboard analytics** — completion trends, productivity score, habit
+  consistency, weekly summaries.
+- **Data export** — download todos/habits as JSON or CSV, or export scheduled
+  tasks as an `.ics` calendar file for Google/Apple/Outlook Calendar.
+- **Search**, **onboarding**, **PWA install + offline (IndexedDB) cache**, and
+  **push notifications** via Firebase Cloud Messaging.
+
+## Security notes
+
+- Rich-text descriptions are sanitized against an allow-list of formatting tags
+  (`src/lib/sanitizeHtml.ts`) before being stored or rendered, preventing stored
+  XSS through the contentEditable editors.
+- Firestore and Realtime Database rules scope every document to its authenticated
+  owner (`users/{uid}/**`); see `firestore.rules` and `database.rules.json`.
+
+## Tech stack
+
+| Area      | Choice                              |
+| --------- | ----------------------------------- |
+| Framework | React 18 + React Router 6           |
+| Build     | Vite 5                              |
+| Language  | TypeScript 5 (strict)               |
+| Styling   | Tailwind CSS 3                       |
+| Backend   | Firebase Auth + Cloud Firestore     |
+| Push      | Firebase Cloud Messaging + cron svc |
+| DnD       | @dnd-kit                            |
+| Testing   | Vitest + Testing Library            |
 
 ## Firebase setup
 
-Create a Firebase project, enable **Authentication** (Email/Password + Google), and create a **Cloud Firestore** database.
+Create a Firebase project, enable **Authentication** (Email/Password + Google),
+and create a **Cloud Firestore** database. For push notifications, enable
+**Cloud Messaging** and generate a web push (VAPID) key pair.
 
-Copy your web app configuration into environment variables:
+Copy `.env.example` to `.env.local` and fill in your values. Vite only exposes
+variables prefixed with `VITE_` to the client:
 
 ```
-NEXT_PUBLIC_FIREBASE_API_KEY=
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=
-NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=
-NEXT_PUBLIC_FIREBASE_APP_ID=
+VITE_FIREBASE_API_KEY=
+VITE_FIREBASE_AUTH_DOMAIN=
+VITE_FIREBASE_PROJECT_ID=
+VITE_FIREBASE_STORAGE_BUCKET=
+VITE_FIREBASE_MESSAGING_SENDER_ID=
+VITE_FIREBASE_APP_ID=
+VITE_FIREBASE_VAPID_KEY=
+VITE_NOTIFICATION_SERVICE_URL=
+VITE_NOTIFICATION_PING_INTERVAL_MINUTES=
+VITE_NOTIFICATION_SUMMARY_INTERVAL_MINUTES=
 ```
-
-You can copy `.env.example` to `.env.local` and fill in your values.
 
 ## Firestore schema
 
-Todos are stored per-user at:
+All data is stored per-user and is readable/writable only by its owner (see
+`firestore.rules`):
 
 ```
-users/{userId}/todos/{todoId}
+users/{userId}/
+  todos/{todoId}
+  habits/{habitId}
+  routines/{routineId}
+  focusBlocks/{blockId}
+  notifications/{notificationId}
+  settings/preferences
+  fcmTokens/{token}
 ```
 
-Fields:
+A `todos` document, for example:
 
 - `title` (string)
-- `status` ("pending" | "completed")
-- `scheduledDate` (Timestamp | null)
-- `completedDate` (Timestamp | null)
+- `status` ("pending" | "completed" | "skipped")
 - `priority` ("low" | "medium" | "high")
-- `tags` (string[])
+- `scheduledDate` / `completedDate` / `skippedAt` / `archivedAt` (Timestamp | null)
+- `tags` (string[]), `contextTags` (string[])
+- `description` (string)
+- `recurrence` ("none" | "daily" | "weekly" | "monthly")
+- `subtasks` (Subtask[]), `manualOrder` (number)
 - `createdAt` (server timestamp)
-- `updatedAt` (server timestamp)
+
+The full type definitions live in `src/lib/types.ts`.
 
 ## Development
 
 ```
 npm install
-npm run dev
+npm run dev          # start the dev server
+npm run typecheck    # tsc --noEmit
+npm run lint         # eslint
+npm test             # vitest run
+npm run build        # production build (outputs to dist/)
+npm run preview      # preview the production build
 ```
+
+> `dist/` is a build artifact and is not committed; it is generated by
+> `npm run build` and deployed by CI.
+
+## Deployment
+
+Pushes to `main` build and deploy to Firebase Hosting via
+`.github/workflows/firebase-hosting-merge.yml`. Pull requests run lint,
+type-check, tests, and a build via `.github/workflows/pull-request.yml`.
+
+## Cron service
+
+`cron-service/` is a separate Express + firebase-admin service that periodically
+sends "due today" task summaries and habit reminders via FCM. See
+`cron-service/server.js`.

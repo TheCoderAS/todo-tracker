@@ -8,14 +8,8 @@ type SortableTodoCardProps = {
 };
 
 export default function SortableTodoCard({ id, children }: SortableTodoCardProps) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging
-  } = useSortable({ id });
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
+    useSortable({ id });
 
   const style = {
     transform: CSS.Transform.toString(transform),

@@ -1,10 +1,20 @@
 "use client";
 
 import { useMemo } from "react";
-import { FiCalendar, FiCheckCircle, FiClock, FiTrendingUp, FiZap } from "react-icons/fi";
+import {
+  FiCalendar,
+  FiCheckCircle,
+  FiClock,
+  FiTrendingUp,
+  FiZap
+} from "react-icons/fi";
 
 import Modal from "@/components/ui/Modal";
-import { getDateKey, getHabitMilestoneProgress, isHabitScheduledForDate } from "@/lib/habitUtils";
+import {
+  getDateKey,
+  getHabitMilestoneProgress,
+  isHabitScheduledForDate
+} from "@/lib/habitUtils";
 import type { Habit, HabitFrequency } from "@/lib/types";
 
 type HabitDetailsModalProps = {
@@ -51,7 +61,12 @@ const clampDay = (year: number, monthIndex: number, day: number) => {
   return Math.min(day, lastDay);
 };
 
-const buildMonthlyOccurrences = (start: Date, step: number, count: number, day: number) => {
+const buildMonthlyOccurrences = (
+  start: Date,
+  step: number,
+  count: number,
+  day: number
+) => {
   const occurrences: Date[] = [];
   const base = new Date(start.getFullYear(), start.getMonth(), 1);
   for (let index = 0; index < count; index += 1) {
@@ -72,7 +87,12 @@ const buildDailyOccurrences = (start: Date, count: number) => {
   });
 };
 
-const buildYearlyOccurrences = (start: Date, count: number, month: number, day: number) => {
+const buildYearlyOccurrences = (
+  start: Date,
+  count: number,
+  month: number,
+  day: number
+) => {
   const occurrences: Date[] = [];
   for (let index = 0; index < count; index += 1) {
     const year = start.getFullYear() - index;
@@ -101,12 +121,10 @@ const buildTrendEntries = (habit: Habit): TrendEntry[] => {
   const today = new Date();
   const dayOfMonth = habit.reminderDays?.[0] ?? today.getDate();
   const hasYearlyMonth = habit.reminderDays && habit.reminderDays.length >= 2;
-  const yearlyMonth = hasYearlyMonth
-    ? habit.reminderDays?.[0]
-    : today.getMonth() + 1;
+  const yearlyMonth = hasYearlyMonth ? habit.reminderDays?.[0] : today.getMonth() + 1;
   const yearlyDay = hasYearlyMonth
     ? habit.reminderDays?.[1]
-    : habit.reminderDays?.[0] ?? today.getDate();
+    : (habit.reminderDays?.[0] ?? today.getDate());
   let occurrences: Date[] = [];
   if (habit.frequency === "daily") {
     occurrences = buildDailyOccurrences(today, 7);
@@ -218,7 +236,11 @@ const buildHeatmapData = (habit: Habit) => {
 const formatHabitTypeLabel = (habit: Habit) =>
   habit.habitType === "avoid" ? "Avoid habit" : "Build habit";
 
-export default function HabitDetailsModal({ habit, isOpen, onClose }: HabitDetailsModalProps) {
+export default function HabitDetailsModal({
+  habit,
+  isOpen,
+  onClose
+}: HabitDetailsModalProps) {
   const trendEntries = useMemo(() => (habit ? buildTrendEntries(habit) : []), [habit]);
   const totalCompletions = habit?.completionDates?.length ?? 0;
   const lastCompletion = habit?.completionDates?.length
@@ -228,49 +250,56 @@ export default function HabitDetailsModal({ habit, isOpen, onClose }: HabitDetai
     () => getHabitMilestoneProgress(totalCompletions),
     [totalCompletions]
   );
-  const { rollingCompletionRate, rollingCompleted, rollingScheduled, rollingWindowDays } =
-    useMemo(() => {
-      const windowDays = 30;
-      if (!habit) {
-        return {
-          rollingCompletionRate: 0,
-          rollingCompleted: 0,
-          rollingScheduled: 0,
-          rollingWindowDays: windowDays
-        };
-      }
-
-      const today = new Date();
-      const dates = Array.from({ length: windowDays }).map((_, index) => {
-        const date = new Date(today);
-        date.setDate(today.getDate() - index);
-        return date;
-      });
-      let scheduled = 0;
-      let completed = 0;
-
-      dates.forEach((date) => {
-        if (!isHabitScheduledForDate(habit, date)) return;
-        const dateKey = getDateKey(date, habit.timezone);
-        if (habit.skippedDates?.includes(dateKey)) return;
-        scheduled += 1;
-        if (habit.completionDates?.includes(dateKey)) {
-          completed += 1;
-        }
-      });
-
+  const {
+    rollingCompletionRate,
+    rollingCompleted,
+    rollingScheduled,
+    rollingWindowDays
+  } = useMemo(() => {
+    const windowDays = 30;
+    if (!habit) {
       return {
-        rollingCompletionRate: scheduled ? Math.round((completed / scheduled) * 100) : 0,
-        rollingCompleted: completed,
-        rollingScheduled: scheduled,
+        rollingCompletionRate: 0,
+        rollingCompleted: 0,
+        rollingScheduled: 0,
         rollingWindowDays: windowDays
       };
-    }, [habit]);
+    }
+
+    const today = new Date();
+    const dates = Array.from({ length: windowDays }).map((_, index) => {
+      const date = new Date(today);
+      date.setDate(today.getDate() - index);
+      return date;
+    });
+    let scheduled = 0;
+    let completed = 0;
+
+    dates.forEach((date) => {
+      if (!isHabitScheduledForDate(habit, date)) return;
+      const dateKey = getDateKey(date, habit.timezone);
+      if (habit.skippedDates?.includes(dateKey)) return;
+      scheduled += 1;
+      if (habit.completionDates?.includes(dateKey)) {
+        completed += 1;
+      }
+    });
+
+    return {
+      rollingCompletionRate: scheduled ? Math.round((completed / scheduled) * 100) : 0,
+      rollingCompleted: completed,
+      rollingScheduled: scheduled,
+      rollingWindowDays: windowDays
+    };
+  }, [habit]);
   const trendStatusLabel = habit
     ? (completed: boolean) => getTrendStatusLabel(habit, completed)
     : () => "";
 
-  const streaks = useMemo(() => (habit ? computeStreak(habit) : { current: 0, longest: 0 }), [habit]);
+  const streaks = useMemo(
+    () => (habit ? computeStreak(habit) : { current: 0, longest: 0 }),
+    [habit]
+  );
   const heatmapWeeks = useMemo(() => (habit ? buildHeatmapData(habit) : []), [habit]);
 
   const completionRate = useMemo(() => {
@@ -285,7 +314,9 @@ export default function HabitDetailsModal({ habit, isOpen, onClose }: HabitDetai
         <div className="grid gap-6">
           <div className="modal-header flex flex-wrap items-center justify-between gap-3">
             <div>
-              <p className="text-xs font-semibold uppercase text-slate-500">Habit details</p>
+              <p className="text-xs font-semibold uppercase text-slate-500">
+                Habit details
+              </p>
               <h3 className="text-xl font-semibold text-white">{habit.title}</h3>
             </div>
             <span className="rounded-full border border-slate-800/70 bg-slate-950/60 px-3 py-1 text-xs font-semibold text-slate-300">
@@ -383,13 +414,18 @@ export default function HabitDetailsModal({ habit, isOpen, onClose }: HabitDetai
           <div className="grid gap-3">
             <div className="flex items-center gap-2">
               <FiZap aria-hidden className="text-emerald-300 h-4 w-4" />
-              <h4 className="text-sm font-semibold text-white">Activity (last 90 days)</h4>
+              <h4 className="text-sm font-semibold text-white">
+                Activity (last 90 days)
+              </h4>
             </div>
             <div className="rounded-2xl border border-slate-800/70 bg-slate-950/60 p-4 overflow-x-auto">
               <div className="flex gap-0.5 min-w-fit">
                 <div className="flex flex-col gap-0.5 mr-1">
                   {dayLabels.map((label, i) => (
-                    <div key={i} className="h-3 w-3 flex items-center justify-center text-[0.45rem] text-slate-500">
+                    <div
+                      key={i}
+                      className="h-3 w-3 flex items-center justify-center text-[0.45rem] text-slate-500"
+                    >
                       {i % 2 === 0 ? label : ""}
                     </div>
                   ))}

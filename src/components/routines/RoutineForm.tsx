@@ -11,12 +11,14 @@ import {
 } from "react-icons/bs";
 import { FiPlus, FiSave, FiTrash2, FiX } from "react-icons/fi";
 
+import { sanitizeHtml } from "@/lib/sanitizeHtml";
 import type { RoutineInput, TodoPriority } from "@/lib/types";
 
 const inputClasses =
   "w-full rounded-2xl border border-slate-800/70 bg-slate-950/55 px-3.5 py-2.5 text-sm text-slate-100 shadow-sm transition-colors duration-200 ease-out focus:border-emerald-300/60 focus:bg-slate-950/70 focus:outline-none focus:ring-2 focus:ring-emerald-300/15";
 
-const labelTextClasses = "text-[0.7rem] font-semibold uppercase tracking-wide text-slate-400";
+const labelTextClasses =
+  "text-[0.7rem] font-semibold uppercase tracking-wide text-slate-400";
 
 type RoutineFormProps = {
   form: RoutineInput;
@@ -57,9 +59,7 @@ function RoutineItemEditor({
 }: RoutineItemEditorProps) {
   const [tagInput, setTagInput] = useState("");
   const [contextTagInput, setContextTagInput] = useState("");
-  const [isDescriptionOpen, setIsDescriptionOpen] = useState(
-    Boolean(item.description)
-  );
+  const [isDescriptionOpen, setIsDescriptionOpen] = useState(Boolean(item.description));
   const descriptionRef = useRef<HTMLDivElement | null>(null);
 
   const tags = useMemo(() => parseTagList(item.tags), [item.tags]);
@@ -114,13 +114,15 @@ function RoutineItemEditor({
     const editor = descriptionRef.current;
     if (!editor) return;
     editor.focus();
-    document.execCommand(type === "ordered" ? "insertOrderedList" : "insertUnorderedList");
+    document.execCommand(
+      type === "ordered" ? "insertOrderedList" : "insertUnorderedList"
+    );
   };
 
   const handleDescriptionInput = () => {
     const editor = descriptionRef.current;
     if (!editor) return;
-    onItemChange(index, "description", editor.innerHTML);
+    onItemChange(index, "description", sanitizeHtml(editor.innerHTML));
   };
 
   useEffect(() => {

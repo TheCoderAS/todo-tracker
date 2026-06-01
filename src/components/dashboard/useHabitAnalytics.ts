@@ -59,10 +59,7 @@ const emptyAnalytics: HabitAnalytics = {
   loading: false
 };
 
-export function useHabitAnalytics(
-  habits: Habit[],
-  isLoading: boolean
-): HabitAnalytics {
+export function useHabitAnalytics(habits: Habit[], isLoading: boolean): HabitAnalytics {
   return useMemo(() => {
     if (isLoading) return { ...emptyAnalytics, loading: true };
     if (habits.length === 0) return emptyAnalytics;
@@ -158,10 +155,7 @@ export function useHabitAnalytics(
       ? Math.round((rollingWindowCompleted / rollingWindowScheduled) * 100)
       : 0;
 
-    const contextTagMap = new Map<
-      string,
-      { completed: number; scheduled: number }
-    >();
+    const contextTagMap = new Map<string, { completed: number; scheduled: number }>();
     scheduledToday.forEach((habit) => {
       const tagList =
         habit.contextTags && habit.contextTags.length > 0

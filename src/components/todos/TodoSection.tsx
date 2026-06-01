@@ -7,10 +7,7 @@ import {
   FiCheckCircle,
   FiCheckSquare,
   FiFilter,
-  FiFlag,
   FiPlus,
-  FiStar,
-  FiTarget,
   FiTrash2,
   FiX,
   FiZap
@@ -32,11 +29,20 @@ type TodoSectionProps = {
   onOpenCreate: () => void;
   statusFilter: "all" | Todo["status"];
   priorityFilter: "all" | Todo["priority"];
-  datePreset: "all" | "today" | "spillover" | "upcoming" | "custom" | "tomorrow" | "week";
+  datePreset:
+    | "all"
+    | "today"
+    | "spillover"
+    | "upcoming"
+    | "custom"
+    | "tomorrow"
+    | "week";
   sortBy: "scheduled" | "completed" | "priority" | "created" | "manual";
   sortOrder: "asc" | "desc";
   onQuickFilter: (value: "all" | "today" | "completed" | "flagged") => void;
-  onSortByChange: (value: "scheduled" | "completed" | "priority" | "created" | "manual") => void;
+  onSortByChange: (
+    value: "scheduled" | "completed" | "priority" | "created" | "manual"
+  ) => void;
   onSortOrderChange: (value: "asc" | "desc") => void;
   contextTagFilter: string;
   contextTagOptions: string[];
@@ -113,12 +119,12 @@ export default function TodoSection({
   const activeQuickFilter = isTodayActive
     ? "today"
     : isCompletedActive
-    ? "completed"
-    : isFlaggedActive
-    ? "flagged"
-    : isAllActive
-    ? "all"
-    : null;
+      ? "completed"
+      : isFlaggedActive
+        ? "flagged"
+        : isAllActive
+          ? "all"
+          : null;
 
   return (
     <section className="grid gap-6">
@@ -260,7 +266,8 @@ export default function TodoSection({
         <div className="grid gap-2 sm:gap-3">
           <div className="flex flex-wrap items-center gap-2 rounded-full border border-slate-800/70 bg-slate-950/40 p-1 text-[0.7rem] font-semibold text-slate-200">
             {quickFilters.map(({ id, label }) => {
-              const isActive = activeQuickFilter === id || (id === "all" && !activeQuickFilter);
+              const isActive =
+                activeQuickFilter === id || (id === "all" && !activeQuickFilter);
               return (
                 <button
                   key={id}
@@ -270,7 +277,9 @@ export default function TodoSection({
                       ? "bg-sky-400/20 text-sky-100"
                       : "text-slate-400 hover:text-white"
                   }`}
-                  onClick={() => onQuickFilter(id as "all" | "today" | "completed" | "flagged")}
+                  onClick={() =>
+                    onQuickFilter(id as "all" | "today" | "completed" | "flagged")
+                  }
                 >
                   {label}
                 </button>
@@ -287,7 +296,9 @@ export default function TodoSection({
                     : "text-slate-400 hover:text-white"
                 }`}
                 onClick={() =>
-                  onSortByChange(statusFilter === "completed" ? "completed" : "scheduled")
+                  onSortByChange(
+                    statusFilter === "completed" ? "completed" : "scheduled"
+                  )
                 }
               >
                 Time
@@ -310,7 +321,11 @@ export default function TodoSection({
               onClick={() => onSortOrderChange(sortOrder === "asc" ? "desc" : "asc")}
               aria-label="Toggle sort order"
             >
-              {sortOrder === "asc" ? <FiArrowUp aria-hidden /> : <FiArrowDown aria-hidden />}
+              {sortOrder === "asc" ? (
+                <FiArrowUp aria-hidden />
+              ) : (
+                <FiArrowDown aria-hidden />
+              )}
             </button>
           </div>
         </div>

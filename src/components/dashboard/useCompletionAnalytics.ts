@@ -88,8 +88,7 @@ export function useCompletionAnalytics(
     const weeklyBreakdown = days.map((date) => {
       const { start, end } = buildDayRange(date);
       const completedTodos = activeTodos.filter(
-        (todo) =>
-          todo.status === "completed" && inRange(todo.completedDate, start, end)
+        (todo) => todo.status === "completed" && inRange(todo.completedDate, start, end)
       );
 
       let onTime = 0;
@@ -109,14 +108,12 @@ export function useCompletionAnalytics(
     const { start: todayStart, end: todayEnd } = buildDayRange(today);
     const todayTarget = activeTodos.filter(
       (todo) =>
-        todo.status !== "skipped" &&
-        inRange(todo.scheduledDate, todayStart, todayEnd)
+        todo.status !== "skipped" && inRange(todo.scheduledDate, todayStart, todayEnd)
     ).length;
 
     const todayCompletedTodos = activeTodos.filter(
       (todo) =>
-        todo.status === "completed" &&
-        inRange(todo.completedDate, todayStart, todayEnd)
+        todo.status === "completed" && inRange(todo.completedDate, todayStart, todayEnd)
     );
 
     let onTime = 0;
@@ -172,11 +169,10 @@ export function useCompletionAnalytics(
         count: entry.onTime + entry.spillover
       })),
       weeklyCompletionBreakdown: weeklyBreakdown,
-      todayCompleted:
-        weeklyBreakdown[weeklyBreakdown.length - 1]
-          ? weeklyBreakdown[weeklyBreakdown.length - 1].onTime +
-            weeklyBreakdown[weeklyBreakdown.length - 1].spillover
-          : 0,
+      todayCompleted: weeklyBreakdown[weeklyBreakdown.length - 1]
+        ? weeklyBreakdown[weeklyBreakdown.length - 1].onTime +
+          weeklyBreakdown[weeklyBreakdown.length - 1].spillover
+        : 0,
       todayTarget,
       onTimeCompletions: onTime,
       spilloverCompletions: spillover,

@@ -13,9 +13,7 @@ type SearchModalProps = {
   onSelectHabit?: (habit: Habit) => void;
 };
 
-type SearchResult =
-  | { type: "todo"; item: Todo }
-  | { type: "habit"; item: Habit };
+type SearchResult = { type: "todo"; item: Todo } | { type: "habit"; item: Habit };
 
 const highlightMatch = (text: string, query: string) => {
   if (!query.trim()) return text;
@@ -130,15 +128,20 @@ export default function SearchModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center pt-[15vh]">
-      <div
-        className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm"
+    <div
+      className="fixed inset-0 z-50 flex items-start justify-center pt-[15vh]"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Search todos and habits"
+    >
+      <button
+        type="button"
+        aria-label="Close search"
+        tabIndex={-1}
+        className="fixed inset-0 cursor-default bg-slate-950/80 backdrop-blur-sm"
         onClick={onClose}
       />
-      <div
-        className="relative w-full max-w-lg mx-4 overflow-hidden rounded-2xl border border-slate-800/80 bg-slate-950/95 shadow-2xl shadow-slate-950/80"
-        onKeyDown={handleKeyDown}
-      >
+      <div className="relative w-full max-w-lg mx-4 overflow-hidden rounded-2xl border border-slate-800/80 bg-slate-950/95 shadow-2xl shadow-slate-950/80">
         <div className="flex items-center gap-3 border-b border-slate-800/60 px-4 py-3">
           <FiSearch className="flex-shrink-0 text-slate-400" />
           <input
@@ -146,6 +149,7 @@ export default function SearchModal({
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyDown={handleKeyDown}
             placeholder="Search todos and habits..."
             className="flex-1 bg-transparent text-sm text-slate-100 placeholder-slate-500 outline-none"
           />
@@ -206,18 +210,20 @@ export default function SearchModal({
                       <span className="text-[0.65rem] uppercase text-slate-500">
                         {result.type === "todo" ? "Task" : "Habit"}
                       </span>
-                      {result.type === "todo" && (result.item as Todo).scheduledDate && (
-                        <span className="flex items-center gap-1 text-[0.65rem] text-slate-500">
-                          <FiClock className="h-2.5 w-2.5" />
-                          {formatDate((result.item as Todo).scheduledDate)}
-                        </span>
-                      )}
-                      {result.type === "todo" && (result.item as Todo).priority === "high" && (
-                        <span className="flex items-center gap-1 text-[0.65rem] text-amber-400">
-                          <FiFlag className="h-2.5 w-2.5" />
-                          High
-                        </span>
-                      )}
+                      {result.type === "todo" &&
+                        (result.item as Todo).scheduledDate && (
+                          <span className="flex items-center gap-1 text-[0.65rem] text-slate-500">
+                            <FiClock className="h-2.5 w-2.5" />
+                            {formatDate((result.item as Todo).scheduledDate)}
+                          </span>
+                        )}
+                      {result.type === "todo" &&
+                        (result.item as Todo).priority === "high" && (
+                          <span className="flex items-center gap-1 text-[0.65rem] text-amber-400">
+                            <FiFlag className="h-2.5 w-2.5" />
+                            High
+                          </span>
+                        )}
                       {result.type === "todo" &&
                         (result.item as Todo).tags.length > 0 && (
                           <span className="flex items-center gap-1 text-[0.65rem] text-slate-500">
@@ -227,11 +233,12 @@ export default function SearchModal({
                         )}
                     </div>
                   </div>
-                  {result.type === "todo" && (result.item as Todo).status === "completed" && (
-                    <span className="flex-shrink-0 rounded-full border border-emerald-400/40 bg-emerald-400/10 px-2 py-0.5 text-[0.6rem] text-emerald-300">
-                      Done
-                    </span>
-                  )}
+                  {result.type === "todo" &&
+                    (result.item as Todo).status === "completed" && (
+                      <span className="flex-shrink-0 rounded-full border border-emerald-400/40 bg-emerald-400/10 px-2 py-0.5 text-[0.6rem] text-emerald-300">
+                        Done
+                      </span>
+                    )}
                 </button>
               ))}
             </div>
@@ -245,11 +252,17 @@ export default function SearchModal({
         {results.length > 0 && (
           <div className="border-t border-slate-800/60 px-4 py-2 text-[0.65rem] text-slate-500">
             <span className="hidden sm:inline">
-              <kbd className="rounded border border-slate-700/70 bg-slate-900/60 px-1 py-0.5 mr-0.5">↑</kbd>
-              <kbd className="rounded border border-slate-700/70 bg-slate-900/60 px-1 py-0.5 mr-1">↓</kbd>
+              <kbd className="rounded border border-slate-700/70 bg-slate-900/60 px-1 py-0.5 mr-0.5">
+                ↑
+              </kbd>
+              <kbd className="rounded border border-slate-700/70 bg-slate-900/60 px-1 py-0.5 mr-1">
+                ↓
+              </kbd>
               navigate
               <span className="mx-2">·</span>
-              <kbd className="rounded border border-slate-700/70 bg-slate-900/60 px-1 py-0.5 mr-1">↵</kbd>
+              <kbd className="rounded border border-slate-700/70 bg-slate-900/60 px-1 py-0.5 mr-1">
+                ↵
+              </kbd>
               select
             </span>
             <span className="sm:hidden">Tap a result to open</span>

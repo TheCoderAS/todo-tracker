@@ -16,7 +16,9 @@ export default function BottomNav() {
       <div className="mx-auto flex w-full max-w-6xl items-center justify-around gap-4">
         {navItems.map(({ href, label, icon: Icon }) => {
           const isActive =
-            href === "/" ? pathname === "/" : pathname === href || pathname?.startsWith(`${href}/`);
+            href === "/"
+              ? pathname === "/"
+              : pathname === href || pathname?.startsWith(`${href}/`);
           return (
             <Link
               key={href}

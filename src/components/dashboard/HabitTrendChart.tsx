@@ -35,8 +35,15 @@ export default function HabitTrendChart({
 }: HabitTrendChartProps) {
   const [period, setPeriod] = useState<TrendPeriod>("weekly");
   const data =
-    period === "weekly" ? weeklyTrend : period === "monthly" ? monthlyTrend : yearlyTrend;
-  const maxCount = useMemo(() => Math.max(1, ...data.map((entry) => entry.count)), [data]);
+    period === "weekly"
+      ? weeklyTrend
+      : period === "monthly"
+        ? monthlyTrend
+        : yearlyTrend;
+  const maxCount = useMemo(
+    () => Math.max(1, ...data.map((entry) => entry.count)),
+    [data]
+  );
 
   return (
     <div className="group rounded-3xl border border-white/10 bg-slate-950/70 p-6 transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_0_45px_rgba(56,189,248,0.15)]">
@@ -87,7 +94,10 @@ export default function HabitTrendChart({
               const height = Math.max((entry.count / maxCount) * 100, 4);
               const isEmpty = entry.count === 0;
               return (
-                <div key={entry.date.toISOString()} className="flex flex-col items-center gap-2">
+                <div
+                  key={entry.date.toISOString()}
+                  className="flex flex-col items-center gap-2"
+                >
                   <div className="flex h-32 w-full items-end justify-center">
                     <div className="flex h-full w-6 items-end rounded-full bg-slate-900/60">
                       <div
