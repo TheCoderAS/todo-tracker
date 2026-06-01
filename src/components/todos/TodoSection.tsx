@@ -163,7 +163,7 @@ export default function TodoSection({
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <div className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto rounded-full border border-slate-800/70 bg-slate-950/40 p-1 text-xs font-medium text-slate-200">
+          <div className="flex h-10 min-w-0 flex-1 items-center gap-1 overflow-x-auto rounded-full border border-slate-800/70 bg-slate-950/40 p-1 text-xs font-medium text-slate-200">
             {quickFilters.map(({ id, label }) => {
               const isActive =
                 activeQuickFilter === id || (id === "all" && !activeQuickFilter);
@@ -171,7 +171,7 @@ export default function TodoSection({
                 <button
                   key={id}
                   type="button"
-                  className={`whitespace-nowrap rounded-full px-3 py-1.5 transition ${
+                  className={`flex h-full items-center whitespace-nowrap rounded-full px-3 transition ${
                     isActive
                       ? "bg-brand-400/20 text-brand-100"
                       : "text-slate-400 hover:text-white"
