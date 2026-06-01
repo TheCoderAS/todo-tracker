@@ -61,7 +61,7 @@ export default function AuthForm({
           <button
             type="button"
             className={`flex-1 rounded-full px-4 py-2 text-center transition sm:flex-none ${
-              mode === "signin" ? "bg-sky-500/20 text-sky-200" : "text-slate-400"
+              mode === "signin" ? "bg-brand-500/20 text-brand-200" : "text-slate-400"
             }`}
             onClick={() => onModeChange("signin")}
           >
@@ -70,7 +70,7 @@ export default function AuthForm({
           <button
             type="button"
             className={`flex-1 rounded-full px-4 py-2 text-center transition sm:flex-none ${
-              mode === "signup" ? "bg-sky-500/20 text-sky-200" : "text-slate-400"
+              mode === "signup" ? "bg-brand-500/20 text-brand-200" : "text-slate-400"
             }`}
             onClick={() => onModeChange("signup")}
           >
@@ -172,7 +172,7 @@ export default function AuthForm({
           <div className="flex justify-end sm:col-span-2">
             <button
               type="button"
-              className="text-xs font-medium text-sky-200 transition hover:text-sky-100"
+              className="text-xs font-medium text-brand-200 transition hover:text-brand-100"
               onClick={onForgotPassword}
               disabled={isLoading}
             >
@@ -193,7 +193,7 @@ export default function AuthForm({
           <button
             onClick={onEmailSignIn}
             disabled={isLoading}
-            className="w-full rounded-2xl bg-sky-500 px-6 py-3 text-sm font-medium text-slate-950 transition hover:bg-sky-400"
+            className="w-full rounded-2xl bg-brand-500 px-6 py-3 text-sm font-medium text-slate-950 transition hover:bg-brand-400"
           >
             Sign in with email
           </button>
@@ -201,7 +201,7 @@ export default function AuthForm({
           <button
             onClick={onEmailSignUp}
             disabled={isLoading}
-            className="w-full rounded-2xl bg-sky-500 px-6 py-3 text-sm font-medium text-slate-950 transition hover:bg-sky-400"
+            className="w-full rounded-2xl bg-brand-500 px-6 py-3 text-sm font-medium text-slate-950 transition hover:bg-brand-400"
           >
             Create my account
           </button>

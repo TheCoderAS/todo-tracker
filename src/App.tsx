@@ -11,6 +11,7 @@ import AppLayout from "@/layouts/AppLayout";
 // Route-level code splitting: each page ships in its own chunk and is only
 // downloaded when the user navigates to it.
 const AuthPage = lazy(() => import("@/pages/auth/AuthPage"));
+const TodayPage = lazy(() => import("@/pages/TodayPage"));
 const DashboardPage = lazy(() => import("@/pages/DashboardPage"));
 const RoutinesPage = lazy(() => import("@/pages/RoutinesPage"));
 const SettingsPage = lazy(() => import("@/pages/SettingsPage"));
@@ -28,12 +29,13 @@ export default function App() {
   return (
     <ErrorBoundary>
       <AuthProvider>
-        <div className="min-h-screen bg-slate-950 text-slate-100">
+        <div className="min-h-screen text-[var(--text)]">
           <Suspense fallback={<OverlayLoader />}>
             <Routes>
               <Route path="/auth" element={<AuthPage />} />
               <Route element={<ProtectedLayout />}>
-                <Route path="/" element={<DashboardPage />} />
+                <Route path="/" element={<TodayPage />} />
+                <Route path="/insights" element={<DashboardPage />} />
                 <Route path="/todos" element={<TodosPage />} />
                 <Route path="/routines" element={<RoutinesPage />} />
                 <Route path="/settings" element={<SettingsPage />} />

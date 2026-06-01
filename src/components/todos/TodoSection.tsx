@@ -156,7 +156,7 @@ export default function TodoSection({
           </div>
           <div className="h-2 w-full overflow-hidden rounded-full bg-slate-800/60">
             <div
-              className="h-full rounded-full bg-gradient-to-r from-emerald-400 via-cyan-300 to-sky-300 transition-all"
+              className="h-full rounded-full bg-gradient-to-r from-emerald-400 via-brand-300 to-brand-300 transition-all"
               style={{ width: `${Math.max(todayStats.percent, 8)}%` }}
             />
           </div>
@@ -173,7 +173,7 @@ export default function TodoSection({
                   type="button"
                   className={`whitespace-nowrap rounded-full px-3 py-1.5 transition ${
                     isActive
-                      ? "bg-sky-400/20 text-sky-100"
+                      ? "bg-brand-400/20 text-brand-100"
                       : "text-slate-400 hover:text-white"
                   }`}
                   onClick={() =>
@@ -221,7 +221,7 @@ export default function TodoSection({
               type="button"
               className={`flex h-10 w-10 items-center justify-center rounded-full border text-sm transition hover:border-slate-600/70 hover:text-white ${
                 isSelectMode
-                  ? "border-sky-400/60 bg-sky-400/15 text-sky-200"
+                  ? "border-brand-400/60 bg-brand-400/15 text-brand-200"
                   : "border-slate-800/70 bg-slate-950/40 text-slate-300"
               }`}
               onClick={onToggleSelectMode}
@@ -241,7 +241,7 @@ export default function TodoSection({
               {onSelectAll && (
                 <button
                   type="button"
-                  className="text-xs font-medium text-sky-300 transition hover:text-sky-200"
+                  className="text-xs font-medium text-brand-300 transition hover:text-brand-200"
                   onClick={() => {
                     const allIds = groups.flatMap((g) =>
                       g.items.filter((t) => t.status === "pending").map((t) => t.id)
@@ -313,34 +313,34 @@ export default function TodoSection({
         />
       </section>
 
-      <div className="fixed bottom-[calc(6.5rem+env(safe-area-inset-bottom))] right-6 z-30 flex flex-col items-end gap-3 sm:bottom-8 sm:right-10 xl:right-[calc((100vw-72rem)/2+1.5rem)]">
+      <div className="fixed bottom-[calc(7.5rem+env(safe-area-inset-bottom))] right-5 z-30 flex flex-col items-end gap-3 sm:bottom-10 sm:right-10 xl:right-[calc((100vw-72rem)/2+1.5rem)]">
         {isFabOpen ? (
-          <div className="floating-menu grid gap-2 rounded-3xl border border-slate-800/70 bg-slate-950/90 p-3 shadow-2xl shadow-slate-950/50">
+          <div className="floating-menu surface-card-strong grid gap-2 p-3 shadow-pop">
             <button
               type="button"
-              className="flex w-full items-center gap-3 rounded-2xl px-3 py-2 text-sm font-medium text-slate-100 transition hover:bg-slate-900/70"
+              className="flex w-full items-center gap-3 rounded-2xl px-3 py-2 text-sm font-medium text-[var(--text)] transition hover:bg-[var(--surface-soft)]"
               onClick={() => {
                 onOpenCreate();
                 setIsFabOpen(false);
               }}
             >
-              <FiPlus aria-hidden className="text-emerald-300" />
+              <FiPlus aria-hidden className="text-[var(--accent)]" />
               Task
             </button>
             <button
               type="button"
-              className="flex w-full items-center gap-3 rounded-2xl px-3 py-2 text-sm font-medium text-slate-400"
+              className="flex w-full items-center gap-3 rounded-2xl px-3 py-2 text-sm font-medium text-faint"
               aria-disabled="true"
               disabled
             >
-              <FiZap aria-hidden className="text-amber-300" />
+              <FiZap aria-hidden className="text-[var(--warning)]" />
               Reminder
             </button>
           </div>
         ) : null}
         <button
           type="button"
-          className="glow-emerald flex h-14 w-14 items-center justify-center rounded-full bg-emerald-400 text-3xl font-medium text-slate-950 shadow-xl shadow-slate-950/40 transition hover:scale-[1.02] hover:bg-emerald-300"
+          className="btn-pop flex h-14 w-14 items-center justify-center rounded-full text-3xl"
           onClick={() => setIsFabOpen((prev) => !prev)}
           aria-label="Quick add menu"
           aria-expanded={isFabOpen}

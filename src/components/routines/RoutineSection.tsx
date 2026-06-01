@@ -69,7 +69,7 @@ export default function RoutineSection({
                   <button
                     type="button"
                     onClick={() => onRun(routine)}
-                    className="flex items-center gap-2 rounded-full border border-sky-400/40 bg-sky-400/10 px-4 py-2 text-xs font-medium uppercase text-sky-200 transition hover:border-sky-300/80 hover:bg-sky-400/20"
+                    className="flex items-center gap-2 rounded-full border border-brand-400/40 bg-brand-400/10 px-4 py-2 text-xs font-medium uppercase text-brand-200 transition hover:border-brand-300/80 hover:bg-brand-400/20"
                   >
                     <FiPlay />
                     Run routine

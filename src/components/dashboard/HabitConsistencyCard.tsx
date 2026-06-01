@@ -26,13 +26,13 @@ export default function HabitConsistencyCard({
   }, [completionRate, scheduled]);
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-slate-950/80 via-slate-950/70 to-sky-950/30 p-6 shadow-[0_0_30px_rgba(56,189,248,0.12)]">
-      <div className="absolute -left-10 -top-10 h-32 w-32 rounded-full bg-sky-400/20 blur-3xl" />
-      <p className="text-xs uppercase text-sky-200/80">Consistency score</p>
+    <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-slate-950/80 via-slate-950/70 to-brand-950/30 p-6 shadow-[0_0_30px_rgba(56,189,248,0.12)]">
+      <div className="absolute -left-10 -top-10 h-32 w-32 rounded-full bg-brand-400/20 blur-3xl" />
+      <p className="text-xs uppercase text-brand-200/80">Consistency score</p>
       <div className="mt-4 flex flex-wrap items-center justify-between gap-4">
         <div>
           <p className="text-4xl font-medium text-white">{completionRate}%</p>
-          <p className="mt-2 text-sm font-medium text-sky-100/80">{statusMessage}</p>
+          <p className="mt-2 text-sm font-medium text-brand-100/80">{statusMessage}</p>
           <p className="mt-3 text-xs text-slate-400">
             Based on scheduled sessions over the last {days} days.
           </p>

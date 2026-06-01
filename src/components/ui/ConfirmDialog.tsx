@@ -27,13 +27,13 @@ export default function ConfirmDialog({
     <Modal isOpen={isOpen} onClose={onCancel} ariaLabel={title}>
       <div className="grid gap-6">
         <div className="modal-header grid gap-2">
-          <h2 className="text-xl font-semibold text-white">{title}</h2>
-          <p className="text-sm text-slate-300">{description}</p>
+          <h2 className="text-xl font-semibold text-[var(--text)]">{title}</h2>
+          <p className="text-sm text-muted">{description}</p>
         </div>
         <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
           <button
             type="button"
-            className="rounded-full border border-slate-700/70 px-5 py-2 text-sm font-medium text-slate-200 transition hover:border-slate-500"
+            className="rounded-full border border-[var(--border-strong)] px-5 py-2 text-sm font-medium text-[var(--text)] transition hover:border-[var(--accent)]"
             onClick={onCancel}
             disabled={isLoading}
           >

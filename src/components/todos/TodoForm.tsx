@@ -256,7 +256,7 @@ export default function TodoForm({
                     aria-pressed={isActive}
                     className={`rounded-full border px-4 py-2 text-xs font-medium transition ${
                       isActive
-                        ? "border-sky-400/60 bg-sky-400/15 text-sky-100"
+                        ? "border-brand-400/60 bg-brand-400/15 text-brand-100"
                         : "border-slate-800/80 text-slate-400 hover:border-slate-600/70 hover:text-slate-200"
                     }`}
                   >

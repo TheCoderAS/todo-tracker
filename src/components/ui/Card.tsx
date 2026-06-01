@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 
-const baseClasses =
-  "rounded-3xl border border-slate-800/60 bg-slate-900/50 p-8 shadow-2xl shadow-slate-950/40";
+const baseClasses = "surface-card p-8 shadow-pop";
 
 type CardProps = {
   children: ReactNode;

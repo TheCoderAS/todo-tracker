@@ -231,7 +231,7 @@ export default function HabitSection({
               </p>
             </div>
             <div className="flex items-center gap-2 text-xs text-slate-300">
-              <span className="rounded-full border border-sky-400/40 bg-sky-400/10 px-3 py-1 text-sky-200">
+              <span className="rounded-full border border-brand-400/40 bg-brand-400/10 px-3 py-1 text-brand-200">
                 {todayStats.total
                   ? Math.round((todayStats.completed / todayStats.total) * 100)
                   : 0}
@@ -242,7 +242,7 @@ export default function HabitSection({
           </div>
           <div className="h-2 w-full overflow-hidden rounded-full bg-slate-800/60">
             <div
-              className="h-full rounded-full bg-gradient-to-r from-sky-400 via-cyan-300 to-emerald-300 transition-all"
+              className="h-full rounded-full bg-gradient-to-r from-brand-400 via-brand-300 to-emerald-300 transition-all"
               style={{
                 width: `${Math.max(
                   todayStats.total
@@ -268,7 +268,7 @@ export default function HabitSection({
                 type="button"
                 className={`whitespace-nowrap rounded-full px-3 py-1.5 transition ${
                   statusFilter === option.id
-                    ? "bg-sky-400/20 text-sky-100"
+                    ? "bg-brand-400/20 text-brand-100"
                     : "text-slate-400 hover:text-white"
                 }`}
                 onClick={() =>
@@ -472,10 +472,10 @@ export default function HabitSection({
         </div>
       </section>
 
-      <div className="fixed bottom-[calc(6.5rem+env(safe-area-inset-bottom))] right-6 z-30 flex flex-col items-end gap-3 sm:bottom-8 sm:right-10 xl:right-[calc((100vw-72rem)/2+1.5rem)]">
+      <div className="fixed bottom-[calc(7.5rem+env(safe-area-inset-bottom))] right-5 z-30 flex flex-col items-end gap-3 sm:bottom-10 sm:right-10 xl:right-[calc((100vw-72rem)/2+1.5rem)]">
         <button
           type="button"
-          className="glow-emerald flex h-14 w-14 items-center justify-center rounded-full bg-sky-400 text-3xl font-medium text-slate-950 shadow-xl shadow-slate-950/40 transition hover:scale-[1.02] hover:bg-sky-300"
+          className="btn-pop flex h-14 w-14 items-center justify-center rounded-full text-3xl"
           onClick={onOpenCreate}
           aria-label="Add habit"
         >

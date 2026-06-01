@@ -2,26 +2,77 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ============================================================
+   Aura Pulse — design tokens (bold & playful)
+   Themed via CSS variables so light/dark switch with no filter hack.
+   ============================================================ */
 @layer base {
-  body {
-    @apply bg-slate-950 text-slate-100;
-    color-scheme: dark;
-    position: relative;
-    background-image: radial-gradient(circle at top, #1e293b 0%, #0b1120 55%);
-    overflow-x: hidden;
+  :root {
+    /* Surfaces */
+    --bg: #0a0a1a;
+    --bg-grad-1: #1b1147;
+    --bg-grad-2: #0a0a1a;
+    --surface: rgba(22, 22, 42, 0.72);
+    --surface-strong: rgba(28, 28, 52, 0.92);
+    --surface-soft: rgba(255, 255, 255, 0.04);
+    --border: rgba(255, 255, 255, 0.08);
+    --border-strong: rgba(255, 255, 255, 0.16);
+
+    /* Text */
+    --text: #f4f3ff;
+    --text-muted: #a5a3c7;
+    --text-faint: #6f6d96;
+
+    /* Brand / accents (vivid) */
+    --accent: #7c5cff; /* violet */
+    --accent-2: #ff5c8a; /* pink */
+    --accent-3: #2dd4bf; /* teal */
+    --accent-ink: #0a0a1a;
+    --success: #34d399;
+    --warning: #fbbf24;
+    --danger: #fb7185;
+
+    --grad-brand: linear-gradient(135deg, #7c5cff 0%, #ff5c8a 100%);
+    --grad-success: linear-gradient(135deg, #2dd4bf 0%, #34d399 100%);
+    --grad-warm: linear-gradient(135deg, #fbbf24 0%, #ff5c8a 100%);
+
+    --radius: 1.5rem;
+    --shadow-pop: 0 18px 50px -12px rgba(124, 92, 255, 0.45);
   }
 
   html.theme-light {
+    --bg: #f6f5ff;
+    --bg-grad-1: #efe9ff;
+    --bg-grad-2: #f6f5ff;
+    --surface: rgba(255, 255, 255, 0.85);
+    --surface-strong: rgba(255, 255, 255, 0.97);
+    --surface-soft: rgba(17, 12, 46, 0.04);
+    --border: rgba(17, 12, 46, 0.1);
+    --border-strong: rgba(17, 12, 46, 0.18);
+    --text: #1a1438;
+    --text-muted: #5b577f;
+    --text-faint: #8a87a8;
+    --accent-ink: #ffffff;
     color-scheme: light;
-    filter: invert(1) hue-rotate(180deg);
   }
 
-  html.theme-light body {
-    background-image: radial-gradient(circle at top, #e2e8f0 0%, #f8fafc 55%);
+  :root {
+    color-scheme: dark;
   }
 
-  html.theme-light .no-invert {
-    filter: invert(1) hue-rotate(180deg);
+  body {
+    color: var(--text);
+    background-color: var(--bg);
+    position: relative;
+    min-height: 100vh;
+    background-image: radial-gradient(
+        120% 80% at 50% -10%,
+        var(--bg-grad-1) 0%,
+        var(--bg-grad-2) 60%
+      );
+    background-attachment: fixed;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
   }
 
   html {
@@ -48,67 +99,107 @@
   }
 }
 
+/* ============================================================
+   Reusable component classes (token-driven, theme-aware)
+   ============================================================ */
+@layer components {
+  .surface-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    backdrop-filter: blur(16px);
+  }
+
+  .surface-card-strong {
+    background: var(--surface-strong);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    backdrop-filter: blur(20px);
+  }
+
+  .text-muted {
+    color: var(--text-muted);
+  }
+  .text-faint {
+    color: var(--text-faint);
+  }
+
+  .gradient-brand {
+    background-image: var(--grad-brand);
+  }
+  .gradient-success {
+    background-image: var(--grad-success);
+  }
+  .gradient-text {
+    background-image: var(--grad-brand);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* Primary pill button */
+  .btn-pop {
+    background-image: var(--grad-brand);
+    color: var(--accent-ink);
+    border-radius: 999px;
+    box-shadow: var(--shadow-pop);
+    transition:
+      transform 0.18s ease,
+      box-shadow 0.18s ease,
+      filter 0.18s ease;
+  }
+  .btn-pop:active {
+    transform: scale(0.96);
+  }
+  .btn-pop:hover {
+    filter: brightness(1.05);
+  }
+}
+
+/* ============================================================
+   Motion + decorative
+   ============================================================ */
 .no-invert {
-  filter: none !important;
   forced-color-adjust: none;
 }
 
 .modal-ambient {
   opacity: 0.7;
-  background: radial-gradient(circle at 20% 20%, rgba(56, 189, 248, 0.25), transparent 55%),
-    radial-gradient(circle at 80% 30%, rgba(168, 85, 247, 0.2), transparent 60%),
-    radial-gradient(circle at 50% 80%, rgba(34, 211, 238, 0.18), transparent 55%);
-}
-
-.modal-ambient::before {
-  content: "";
-  position: absolute;
-  inset: -30%;
-  background-image: radial-gradient(
-      circle,
-      rgba(226, 232, 240, 0.4) 1px,
-      transparent 2px
-    ),
-    linear-gradient(
-      130deg,
-      rgba(56, 189, 248, 0.16) 0%,
-      transparent 55%,
-      rgba(14, 116, 144, 0.16) 100%
-    );
-  background-size: 70px 70px, 260px 260px;
-  opacity: 0.5;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(124, 92, 255, 0.3), transparent 55%),
+    radial-gradient(circle at 80% 30%, rgba(255, 92, 138, 0.24), transparent 60%),
+    radial-gradient(circle at 50% 80%, rgba(45, 212, 191, 0.2), transparent 55%);
 }
 
 .amber-pulse {
   animation: amberPulse 2.4s ease-in-out infinite;
 }
-
 .celebrate-pop {
   animation: celebratePop 900ms ease-out;
 }
-
 .nav-icon-pop {
   animation: navIconPop 450ms ease-out;
 }
-
 .floating-menu {
   animation: floatMenu 320ms ease-out;
+}
+.pop-in {
+  animation: popIn 420ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
 
 .modal-header {
   margin: -1.5rem -1.5rem 0;
   padding: 1.5rem 1.5rem 1rem;
-  border-bottom: 1px solid rgba(30, 41, 59, 0.7);
-  background: rgba(2, 6, 23, 0.95);
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-strong);
   backdrop-filter: blur(12px);
 }
 
 .page-transition {
   position: relative;
-  animation: pageEnter 280ms ease-out both;
-  will-change: opacity;
+  animation: pageEnter 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  will-change: opacity, transform;
 }
-
 
 .tab-transition {
   position: relative;
@@ -116,25 +207,28 @@
 }
 
 .status-ring {
-  box-shadow: 0 0 0 1px rgba(148, 163, 184, 0.25), 0 12px 30px rgba(15, 23, 42, 0.4);
+  box-shadow:
+    0 0 0 1px var(--border-strong),
+    0 12px 30px rgba(10, 10, 26, 0.4);
 }
 
 .glow-emerald {
-  box-shadow: 0 0 18px rgba(52, 211, 153, 0.35);
+  box-shadow: 0 0 26px rgba(52, 211, 153, 0.4);
 }
-
 .glow-amber {
-  box-shadow: 0 0 16px rgba(251, 191, 36, 0.35);
+  box-shadow: 0 0 22px rgba(251, 191, 36, 0.4);
 }
-
 .glow-rose {
-  box-shadow: 0 0 16px rgba(251, 113, 133, 0.3);
+  box-shadow: 0 0 22px rgba(251, 113, 133, 0.35);
+}
+.glow-brand {
+  box-shadow: var(--shadow-pop);
 }
 
 @keyframes amberPulse {
   0%,
   100% {
-    box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.1);
+    box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.12);
   }
   50% {
     box-shadow: 0 0 0 8px rgba(251, 191, 36, 0.08);
@@ -177,15 +271,27 @@
   }
 }
 
-@keyframes pageEnter {
+@keyframes popIn {
   0% {
     opacity: 0;
+    transform: translateY(12px) scale(0.96);
   }
   100% {
     opacity: 1;
+    transform: translateY(0) scale(1);
   }
 }
 
+@keyframes pageEnter {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 
 @keyframes tabFade {
   0% {
@@ -197,7 +303,9 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .page-transition {
+  .page-transition,
+  .pop-in,
+  .tab-transition {
     animation: none;
   }
 }
@@ -207,7 +315,7 @@
   input:-webkit-autofill:hover,
   input:-webkit-autofill:focus,
   select:-webkit-autofill {
-    box-shadow: 0 0 0px 1000px rgba(15, 23, 42, 0.9) inset;
-    -webkit-text-fill-color: #f8fafc;
+    box-shadow: 0 0 0px 1000px var(--surface-strong) inset;
+    -webkit-text-fill-color: var(--text);
   }
 }

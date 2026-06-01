@@ -26,7 +26,7 @@ const steps = [
   },
   {
     icon: FiList,
-    iconColor: "text-sky-300",
+    iconColor: "text-brand-300",
     title: "Smart task management",
     description:
       "Create todos with priorities, tags, subtasks, and scheduled dates. Filter and sort to focus on what matters most."
@@ -40,7 +40,7 @@ const steps = [
   },
   {
     icon: FiGrid,
-    iconColor: "text-cyan-300",
+    iconColor: "text-brand-300",
     title: "Dashboard analytics",
     description:
       "See your productivity score, weekly trends, habit streaks, and completion heatmaps at a glance."

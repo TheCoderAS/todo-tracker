@@ -330,7 +330,7 @@ export default function HabitDetailsModal({
               <p className="text-[0.65rem] text-slate-500 uppercase">Current streak</p>
             </div>
             <div className="rounded-2xl border border-slate-800/70 bg-slate-950/60 p-3 text-center">
-              <p className="text-lg font-medium text-sky-300">{streaks.longest}</p>
+              <p className="text-lg font-medium text-brand-300">{streaks.longest}</p>
               <p className="text-[0.65rem] text-slate-500 uppercase">Best streak</p>
             </div>
             <div className="rounded-2xl border border-slate-800/70 bg-slate-950/60 p-3 text-center">
@@ -338,7 +338,7 @@ export default function HabitDetailsModal({
               <p className="text-[0.65rem] text-slate-500 uppercase">Total</p>
             </div>
             <div className="rounded-2xl border border-slate-800/70 bg-slate-950/60 p-3 text-center">
-              <p className="text-lg font-medium text-cyan-300">{completionRate}%</p>
+              <p className="text-lg font-medium text-brand-300">{completionRate}%</p>
               <p className="text-[0.65rem] text-slate-500 uppercase">Rate</p>
             </div>
           </div>
@@ -354,7 +354,7 @@ export default function HabitDetailsModal({
               </span>
             </div>
             <div className="flex items-center gap-2">
-              <FiCalendar aria-hidden className="text-sky-300" />
+              <FiCalendar aria-hidden className="text-brand-300" />
               <span>
                 Habit type{" "}
                 <span className="font-medium text-slate-100">
@@ -388,7 +388,7 @@ export default function HabitDetailsModal({
               </span>
             </div>
             <div className="flex items-center gap-2">
-              <FiCalendar aria-hidden className="text-sky-300" />
+              <FiCalendar aria-hidden className="text-brand-300" />
               <span>
                 Grace misses per week{" "}
                 <span className="font-medium text-slate-100">
@@ -398,7 +398,7 @@ export default function HabitDetailsModal({
             </div>
             {lastCompletion ? (
               <div className="flex items-center gap-2">
-                <FiCalendar aria-hidden className="text-sky-300" />
+                <FiCalendar aria-hidden className="text-brand-300" />
                 <span>
                   Last completed{" "}
                   <span className="font-medium text-slate-100">{lastCompletion}</span>
@@ -458,7 +458,7 @@ export default function HabitDetailsModal({
           <div className="grid gap-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <FiTrendingUp aria-hidden className="text-sky-300 h-4 w-4" />
+                <FiTrendingUp aria-hidden className="text-brand-300 h-4 w-4" />
                 <h4 className="text-sm font-medium text-white">Recent trend</h4>
               </div>
               <p className="text-xs text-slate-500">Last scheduled sessions</p>
