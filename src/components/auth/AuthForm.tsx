@@ -57,7 +57,7 @@ export default function AuthForm({
               : "Tell us a little about you to personalize the workspace."}
           </p>
         </div>
-        <div className="flex w-full rounded-full border border-slate-800/70 bg-slate-900/60 p-1 text-xs font-semibold sm:w-auto">
+        <div className="flex w-full rounded-full border border-slate-800/70 bg-slate-900/60 p-1 text-xs font-medium sm:w-auto">
           <button
             type="button"
             className={`flex-1 rounded-full px-4 py-2 text-center transition sm:flex-none ${
@@ -172,7 +172,7 @@ export default function AuthForm({
           <div className="flex justify-end sm:col-span-2">
             <button
               type="button"
-              className="text-xs font-semibold text-sky-200 transition hover:text-sky-100"
+              className="text-xs font-medium text-sky-200 transition hover:text-sky-100"
               onClick={onForgotPassword}
               disabled={isLoading}
             >
@@ -193,7 +193,7 @@ export default function AuthForm({
           <button
             onClick={onEmailSignIn}
             disabled={isLoading}
-            className="w-full rounded-2xl bg-sky-500 px-6 py-3 text-sm font-semibold text-slate-950 transition hover:bg-sky-400"
+            className="w-full rounded-2xl bg-sky-500 px-6 py-3 text-sm font-medium text-slate-950 transition hover:bg-sky-400"
           >
             Sign in with email
           </button>
@@ -201,13 +201,13 @@ export default function AuthForm({
           <button
             onClick={onEmailSignUp}
             disabled={isLoading}
-            className="w-full rounded-2xl bg-sky-500 px-6 py-3 text-sm font-semibold text-slate-950 transition hover:bg-sky-400"
+            className="w-full rounded-2xl bg-sky-500 px-6 py-3 text-sm font-medium text-slate-950 transition hover:bg-sky-400"
           >
             Create my account
           </button>
         )}
         <button
-          className="flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-800/70 bg-slate-900/60 px-6 py-3 text-sm font-semibold text-slate-200 transition hover:border-slate-600"
+          className="flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-800/70 bg-slate-900/60 px-6 py-3 text-sm font-medium text-slate-200 transition hover:border-slate-600"
           onClick={onGoogleSignIn}
         >
           <FaGoogle className="h-4 w-4" />

@@ -49,7 +49,7 @@ export default function Snackbar({
             onUndo();
             onDismiss();
           }}
-          className="flex items-center gap-1 rounded-full border border-white/20 px-2 py-1 text-xs font-semibold text-current transition hover:bg-white/10"
+          className="flex items-center gap-1 rounded-full border border-white/20 px-2 py-1 text-xs font-medium text-current transition hover:bg-white/10"
         >
           <FiRotateCcw className="h-3 w-3" />
           Undo

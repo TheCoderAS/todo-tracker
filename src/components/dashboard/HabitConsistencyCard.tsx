@@ -31,7 +31,7 @@ export default function HabitConsistencyCard({
       <p className="text-xs uppercase text-sky-200/80">Consistency score</p>
       <div className="mt-4 flex flex-wrap items-center justify-between gap-4">
         <div>
-          <p className="text-4xl font-semibold text-white">{completionRate}%</p>
+          <p className="text-4xl font-medium text-white">{completionRate}%</p>
           <p className="mt-2 text-sm font-medium text-sky-100/80">{statusMessage}</p>
           <p className="mt-3 text-xs text-slate-400">
             Based on scheduled sessions over the last {days} days.
@@ -39,7 +39,7 @@ export default function HabitConsistencyCard({
         </div>
         <div className="rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-sm text-slate-200">
           <p className="text-xs uppercase text-slate-400">Completed</p>
-          <p className="mt-1 text-lg font-semibold text-white">
+          <p className="mt-1 text-lg font-medium text-white">
             {completed}
             <span className="text-sm text-slate-400"> / {scheduled}</span>
           </p>

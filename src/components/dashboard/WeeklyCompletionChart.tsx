@@ -32,7 +32,7 @@ export default function WeeklyCompletionChart({
           style={donutStyle}
         >
           <div className="flex h-[72%] w-[72%] flex-col items-center justify-center rounded-full bg-slate-950 text-center">
-            <span className="text-2xl font-semibold text-white">
+            <span className="text-2xl font-medium text-white">
               {onTime + spillover}
             </span>
             <span className="text-[0.65rem] uppercase text-slate-400">Total</span>
@@ -50,7 +50,7 @@ export default function WeeklyCompletionChart({
                 style={{ width: `${onTimePercent}%` }}
               />
             </div>
-            <p className="mt-2 text-sm font-semibold text-white">{onTime}</p>
+            <p className="mt-2 text-sm font-medium text-white">{onTime}</p>
           </div>
           <div>
             <div className="flex items-center justify-between text-xs uppercase text-slate-400">
@@ -63,7 +63,7 @@ export default function WeeklyCompletionChart({
                 style={{ width: `${spilloverPercent}%` }}
               />
             </div>
-            <p className="mt-2 text-sm font-semibold text-white">{spillover}</p>
+            <p className="mt-2 text-sm font-medium text-white">{spillover}</p>
           </div>
         </div>
       </div>

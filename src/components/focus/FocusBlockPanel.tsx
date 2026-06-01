@@ -248,7 +248,7 @@ export default function FocusBlockPanel({
           <p className="text-xs uppercase tracking-[0.2em] text-emerald-200/70">
             Focus block
           </p>
-          <h2 className="mt-2 text-2xl font-semibold text-white">
+          <h2 className="mt-2 text-2xl font-medium text-white">
             {activeBlock ? "Active focus" : "Plan a focused sprint"}
           </h2>
           <p className="mt-2 text-sm text-slate-300">
@@ -263,7 +263,7 @@ export default function FocusBlockPanel({
         {activeBlock ? (
           <div className="rounded-2xl border border-emerald-400/30 bg-emerald-500/10 px-4 py-3 text-center">
             <p className="text-xs uppercase text-emerald-200/70">Time left</p>
-            <p className="mt-1 text-3xl font-semibold text-emerald-100">
+            <p className="mt-1 text-3xl font-medium text-emerald-100">
               {formatDuration(remainingSeconds)}
             </p>
             <div
@@ -298,7 +298,7 @@ export default function FocusBlockPanel({
             <div className="mt-4 space-y-3">
               {activeBlockTodos.length ? (
                 <div>
-                  <p className="text-xs font-semibold uppercase text-slate-400">
+                  <p className="text-xs font-medium uppercase text-slate-400">
                     Todos
                   </p>
                   <ul className="mt-2 space-y-1 text-sm text-slate-100">
@@ -319,7 +319,7 @@ export default function FocusBlockPanel({
               ) : null}
               {activeBlockHabits.length ? (
                 <div>
-                  <p className="text-xs font-semibold uppercase text-slate-400">
+                  <p className="text-xs font-medium uppercase text-slate-400">
                     Habits
                   </p>
                   <ul className="mt-2 space-y-1 text-sm text-slate-100">
@@ -342,7 +342,7 @@ export default function FocusBlockPanel({
             <div className="mt-4 space-y-3 text-sm text-slate-200">
               <div className="flex items-center justify-between">
                 <span>Todos completed</span>
-                <span className="font-semibold text-white">
+                <span className="font-medium text-white">
                   {
                     activeBlockTodos.filter((todo) => todo.status === "completed")
                       .length
@@ -352,7 +352,7 @@ export default function FocusBlockPanel({
               </div>
               <div className="flex items-center justify-between">
                 <span>Habits checked today</span>
-                <span className="font-semibold text-white">
+                <span className="font-medium text-white">
                   {
                     activeBlockHabits.filter((habit) =>
                       getHabitCompletionStatus(habit, new Date())
@@ -363,13 +363,13 @@ export default function FocusBlockPanel({
               </div>
               <div className="flex items-center justify-between">
                 <span>Duration</span>
-                <span className="font-semibold text-white">
+                <span className="font-medium text-white">
                   {activeBlock.durationMinutes} min
                 </span>
               </div>
               <div className="flex items-center justify-between">
                 <span>Completion rate</span>
-                <span className="font-semibold text-white">
+                <span className="font-medium text-white">
                   {Math.round(
                     (activeBlockTodos.length + activeBlockHabits.length > 0
                       ? (activeBlockTodos.filter((todo) => todo.status === "completed")
@@ -387,7 +387,7 @@ export default function FocusBlockPanel({
             <div className="mt-5 flex flex-col gap-3">
               <button
                 type="button"
-                className="w-full rounded-2xl border border-emerald-400/40 bg-emerald-500/20 px-4 py-3 text-sm font-semibold text-emerald-100 transition hover:border-emerald-300/60 hover:bg-emerald-400/30 disabled:cursor-not-allowed disabled:opacity-60"
+                className="w-full rounded-2xl border border-emerald-400/40 bg-emerald-500/20 px-4 py-3 text-sm font-medium text-emerald-100 transition hover:border-emerald-300/60 hover:bg-emerald-400/30 disabled:cursor-not-allowed disabled:opacity-60"
                 onClick={handleCompleteBlock}
                 disabled={actionLoading}
               >
@@ -395,7 +395,7 @@ export default function FocusBlockPanel({
               </button>
               <button
                 type="button"
-                className="w-full rounded-2xl border border-slate-700/60 bg-slate-900/60 px-4 py-2 text-xs font-semibold text-slate-300 transition hover:border-slate-600/70 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+                className="w-full rounded-2xl border border-slate-700/60 bg-slate-900/60 px-4 py-2 text-xs font-medium text-slate-300 transition hover:border-slate-600/70 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
                 onClick={handleCancelBlock}
                 disabled={actionLoading}
               >
@@ -482,7 +482,7 @@ export default function FocusBlockPanel({
             </div>
             <button
               type="button"
-              className="mt-5 w-full rounded-2xl border border-emerald-400/40 bg-emerald-500/20 px-4 py-3 text-sm font-semibold text-emerald-100 transition hover:border-emerald-300/60 hover:bg-emerald-400/30 disabled:cursor-not-allowed disabled:opacity-60"
+              className="mt-5 w-full rounded-2xl border border-emerald-400/40 bg-emerald-500/20 px-4 py-3 text-sm font-medium text-emerald-100 transition hover:border-emerald-300/60 hover:bg-emerald-400/30 disabled:cursor-not-allowed disabled:opacity-60"
               onClick={handleStartBlock}
               disabled={actionLoading || loading}
             >

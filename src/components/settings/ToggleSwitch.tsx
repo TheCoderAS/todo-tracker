@@ -30,7 +30,7 @@ export default function ToggleSwitch({
       }`}
     >
       <span
-        className={`absolute left-1 flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold transition-all ${
+        className={`absolute left-1 flex h-6 w-6 items-center justify-center rounded-full text-xs font-medium transition-all ${
           checked
             ? "translate-x-8 bg-emerald-400 text-slate-950"
             : "translate-x-0 bg-slate-700 text-slate-200"

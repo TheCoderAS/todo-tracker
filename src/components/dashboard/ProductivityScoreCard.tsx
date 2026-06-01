@@ -18,19 +18,19 @@ export default function ProductivityScoreCard({
     <div className="grid gap-4 rounded-3xl border border-slate-900/60 bg-slate-950/70 p-5 shadow-lg shadow-slate-950/40">
       <div className="flex items-center justify-between gap-4">
         <div>
-          <p className="text-xs font-semibold uppercase text-slate-500">
+          <p className="text-xs font-medium uppercase text-slate-500">
             Productivity score
           </p>
-          <p className="text-3xl font-bold text-white">{score}%</p>
+          <p className="text-3xl font-medium text-white">{score}%</p>
         </div>
         <div className="text-right">
           <p className="text-xs text-slate-500">Best day</p>
-          <p className="text-sm font-semibold text-emerald-300">{bestDay.day}</p>
+          <p className="text-sm font-medium text-emerald-300">{bestDay.day}</p>
         </div>
       </div>
 
       <div>
-        <p className="mb-2 text-xs font-semibold text-slate-400">By day of week</p>
+        <p className="mb-2 text-xs font-medium text-slate-400">By day of week</p>
         <div className="flex items-end gap-1.5 h-16">
           {completionByDayOfWeek.map((d) => (
             <div key={d.day} className="flex flex-1 flex-col items-center gap-1">
@@ -45,7 +45,7 @@ export default function ProductivityScoreCard({
       </div>
 
       <div>
-        <p className="mb-2 text-xs font-semibold text-slate-400">By priority</p>
+        <p className="mb-2 text-xs font-medium text-slate-400">By priority</p>
         <div className="grid gap-2">
           {completionByPriority.map((p) => {
             const rate = p.total > 0 ? Math.round((p.count / p.total) * 100) : 0;

@@ -138,18 +138,18 @@ export default function TodoSection({
         <div className="grid gap-4 rounded-3xl border border-slate-900/70 bg-gradient-to-br from-slate-900/80 via-slate-950/90 to-slate-950/80 p-5 shadow-xl shadow-slate-950/40">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
                 Today progress
               </p>
-              <p className="text-lg font-semibold text-white">
+              <p className="text-lg font-medium text-white">
                 {todayStats.completed}/{todayStats.total} completed
               </p>
             </div>
             <div className="flex items-center gap-2 text-xs">
-              <span className="inline-flex items-center gap-1 rounded-full border border-amber-400/30 bg-amber-400/10 px-3 py-1 font-semibold text-amber-200">
+              <span className="inline-flex items-center gap-1 rounded-full border border-amber-400/30 bg-amber-400/10 px-3 py-1 font-medium text-amber-200">
                 🔥 {streakCount}d
               </span>
-              <span className="rounded-full border border-emerald-400/40 bg-emerald-400/10 px-3 py-1 font-semibold text-emerald-200">
+              <span className="rounded-full border border-emerald-400/40 bg-emerald-400/10 px-3 py-1 font-medium text-emerald-200">
                 {todayStats.percent}%
               </span>
             </div>
@@ -163,7 +163,7 @@ export default function TodoSection({
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <div className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto rounded-full border border-slate-800/70 bg-slate-950/40 p-1 text-xs font-semibold text-slate-200">
+          <div className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto rounded-full border border-slate-800/70 bg-slate-950/40 p-1 text-xs font-medium text-slate-200">
             {quickFilters.map(({ id, label }) => {
               const isActive =
                 activeQuickFilter === id || (id === "all" && !activeQuickFilter);
@@ -205,7 +205,7 @@ export default function TodoSection({
 
           <button
             type="button"
-            className="relative flex h-10 items-center gap-2 rounded-full border border-slate-800/70 bg-slate-950/40 px-3.5 text-xs font-semibold text-slate-300 transition hover:border-slate-600/70 hover:text-white"
+            className="relative flex h-10 items-center gap-2 rounded-full border border-slate-800/70 bg-slate-950/40 px-3.5 text-xs font-medium text-slate-300 transition hover:border-slate-600/70 hover:text-white"
             onClick={onOpenFilter}
             aria-label="Open filters and sorting"
           >
@@ -234,14 +234,14 @@ export default function TodoSection({
 
         {isSelectMode && selectedIds && (
           <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-slate-800/70 bg-slate-950/60 px-4 py-2">
-            <span className="text-xs font-semibold text-slate-300">
+            <span className="text-xs font-medium text-slate-300">
               {selectedIds.size} selected
             </span>
             <div className="ml-auto flex items-center gap-2">
               {onSelectAll && (
                 <button
                   type="button"
-                  className="text-xs font-semibold text-sky-300 transition hover:text-sky-200"
+                  className="text-xs font-medium text-sky-300 transition hover:text-sky-200"
                   onClick={() => {
                     const allIds = groups.flatMap((g) =>
                       g.items.filter((t) => t.status === "pending").map((t) => t.id)
@@ -255,7 +255,7 @@ export default function TodoSection({
               {onClearSelection && selectedIds.size > 0 && (
                 <button
                   type="button"
-                  className="text-xs font-semibold text-slate-400 transition hover:text-slate-200"
+                  className="text-xs font-medium text-slate-400 transition hover:text-slate-200"
                   onClick={onClearSelection}
                 >
                   Clear
@@ -264,7 +264,7 @@ export default function TodoSection({
               {onBulkComplete && selectedIds.size > 0 && (
                 <button
                   type="button"
-                  className="flex items-center gap-1 rounded-full bg-emerald-400/15 border border-emerald-400/40 px-3 py-1 text-xs font-semibold text-emerald-200 transition hover:bg-emerald-400/25"
+                  className="flex items-center gap-1 rounded-full bg-emerald-400/15 border border-emerald-400/40 px-3 py-1 text-xs font-medium text-emerald-200 transition hover:bg-emerald-400/25"
                   onClick={onBulkComplete}
                 >
                   <FiCheckCircle aria-hidden />
@@ -274,7 +274,7 @@ export default function TodoSection({
               {onBulkDelete && selectedIds.size > 0 && (
                 <button
                   type="button"
-                  className="flex items-center gap-1 rounded-full bg-rose-400/15 border border-rose-400/40 px-3 py-1 text-xs font-semibold text-rose-200 transition hover:bg-rose-400/25"
+                  className="flex items-center gap-1 rounded-full bg-rose-400/15 border border-rose-400/40 px-3 py-1 text-xs font-medium text-rose-200 transition hover:bg-rose-400/25"
                   onClick={onBulkDelete}
                 >
                   <FiTrash2 aria-hidden />
@@ -318,7 +318,7 @@ export default function TodoSection({
           <div className="floating-menu grid gap-2 rounded-3xl border border-slate-800/70 bg-slate-950/90 p-3 shadow-2xl shadow-slate-950/50">
             <button
               type="button"
-              className="flex w-full items-center gap-3 rounded-2xl px-3 py-2 text-sm font-semibold text-slate-100 transition hover:bg-slate-900/70"
+              className="flex w-full items-center gap-3 rounded-2xl px-3 py-2 text-sm font-medium text-slate-100 transition hover:bg-slate-900/70"
               onClick={() => {
                 onOpenCreate();
                 setIsFabOpen(false);
@@ -329,7 +329,7 @@ export default function TodoSection({
             </button>
             <button
               type="button"
-              className="flex w-full items-center gap-3 rounded-2xl px-3 py-2 text-sm font-semibold text-slate-400"
+              className="flex w-full items-center gap-3 rounded-2xl px-3 py-2 text-sm font-medium text-slate-400"
               aria-disabled="true"
               disabled
             >
@@ -340,7 +340,7 @@ export default function TodoSection({
         ) : null}
         <button
           type="button"
-          className="glow-emerald flex h-14 w-14 items-center justify-center rounded-full bg-emerald-400 text-3xl font-semibold text-slate-950 shadow-xl shadow-slate-950/40 transition hover:scale-[1.02] hover:bg-emerald-300"
+          className="glow-emerald flex h-14 w-14 items-center justify-center rounded-full bg-emerald-400 text-3xl font-medium text-slate-950 shadow-xl shadow-slate-950/40 transition hover:scale-[1.02] hover:bg-emerald-300"
           onClick={() => setIsFabOpen((prev) => !prev)}
           aria-label="Quick add menu"
           aria-expanded={isFabOpen}

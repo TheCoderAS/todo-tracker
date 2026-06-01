@@ -314,31 +314,31 @@ export default function HabitDetailsModal({
         <div className="grid gap-6">
           <div className="modal-header flex flex-wrap items-center justify-between gap-3">
             <div>
-              <p className="text-xs font-semibold uppercase text-slate-500">
+              <p className="text-xs font-medium uppercase text-slate-500">
                 Habit details
               </p>
               <h3 className="text-xl font-semibold text-white">{habit.title}</h3>
             </div>
-            <span className="rounded-full border border-slate-800/70 bg-slate-950/60 px-3 py-1 text-xs font-semibold text-slate-300">
+            <span className="rounded-full border border-slate-800/70 bg-slate-950/60 px-3 py-1 text-xs font-medium text-slate-300">
               {formatFrequencyLabel(habit.frequency)}
             </span>
           </div>
 
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             <div className="rounded-2xl border border-slate-800/70 bg-slate-950/60 p-3 text-center">
-              <p className="text-lg font-bold text-emerald-300">{streaks.current}</p>
+              <p className="text-lg font-medium text-emerald-300">{streaks.current}</p>
               <p className="text-[0.65rem] text-slate-500 uppercase">Current streak</p>
             </div>
             <div className="rounded-2xl border border-slate-800/70 bg-slate-950/60 p-3 text-center">
-              <p className="text-lg font-bold text-sky-300">{streaks.longest}</p>
+              <p className="text-lg font-medium text-sky-300">{streaks.longest}</p>
               <p className="text-[0.65rem] text-slate-500 uppercase">Best streak</p>
             </div>
             <div className="rounded-2xl border border-slate-800/70 bg-slate-950/60 p-3 text-center">
-              <p className="text-lg font-bold text-amber-300">{totalCompletions}</p>
+              <p className="text-lg font-medium text-amber-300">{totalCompletions}</p>
               <p className="text-[0.65rem] text-slate-500 uppercase">Total</p>
             </div>
             <div className="rounded-2xl border border-slate-800/70 bg-slate-950/60 p-3 text-center">
-              <p className="text-lg font-bold text-cyan-300">{completionRate}%</p>
+              <p className="text-lg font-medium text-cyan-300">{completionRate}%</p>
               <p className="text-[0.65rem] text-slate-500 uppercase">Rate</p>
             </div>
           </div>
@@ -348,7 +348,7 @@ export default function HabitDetailsModal({
               <FiClock aria-hidden className="text-emerald-300" />
               <span>
                 Reminder at{" "}
-                <span className="font-semibold text-slate-100">
+                <span className="font-medium text-slate-100">
                   {habit.reminderTime || "No time set"}
                 </span>
               </span>
@@ -357,7 +357,7 @@ export default function HabitDetailsModal({
               <FiCalendar aria-hidden className="text-sky-300" />
               <span>
                 Habit type{" "}
-                <span className="font-semibold text-slate-100">
+                <span className="font-medium text-slate-100">
                   {formatHabitTypeLabel(habit)}
                 </span>
               </span>
@@ -366,7 +366,7 @@ export default function HabitDetailsModal({
               <FiCheckCircle aria-hidden className="text-emerald-300" />
               <span>
                 Level{" "}
-                <span className="font-semibold text-slate-100">
+                <span className="font-medium text-slate-100">
                   {milestoneProgress.level}
                 </span>{" "}
                 {milestoneProgress.nextMilestone ? (
@@ -382,7 +382,7 @@ export default function HabitDetailsModal({
               <FiCheckCircle aria-hidden className="text-emerald-300" />
               <span>
                 Consistency (last {rollingWindowDays} days){" "}
-                <span className="font-semibold text-slate-100">
+                <span className="font-medium text-slate-100">
                   {rollingCompletionRate}% ({rollingCompleted}/{rollingScheduled})
                 </span>
               </span>
@@ -391,7 +391,7 @@ export default function HabitDetailsModal({
               <FiCalendar aria-hidden className="text-sky-300" />
               <span>
                 Grace misses per week{" "}
-                <span className="font-semibold text-slate-100">
+                <span className="font-medium text-slate-100">
                   {habit.graceMisses ?? 0}
                 </span>
               </span>
@@ -401,7 +401,7 @@ export default function HabitDetailsModal({
                 <FiCalendar aria-hidden className="text-sky-300" />
                 <span>
                   Last completed{" "}
-                  <span className="font-semibold text-slate-100">{lastCompletion}</span>
+                  <span className="font-medium text-slate-100">{lastCompletion}</span>
                 </span>
               </div>
             ) : null}
@@ -414,7 +414,7 @@ export default function HabitDetailsModal({
           <div className="grid gap-3">
             <div className="flex items-center gap-2">
               <FiZap aria-hidden className="text-emerald-300 h-4 w-4" />
-              <h4 className="text-sm font-semibold text-white">
+              <h4 className="text-sm font-medium text-white">
                 Activity (last 90 days)
               </h4>
             </div>
@@ -459,7 +459,7 @@ export default function HabitDetailsModal({
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <FiTrendingUp aria-hidden className="text-sky-300 h-4 w-4" />
-                <h4 className="text-sm font-semibold text-white">Recent trend</h4>
+                <h4 className="text-sm font-medium text-white">Recent trend</h4>
               </div>
               <p className="text-xs text-slate-500">Last scheduled sessions</p>
             </div>
@@ -471,7 +471,7 @@ export default function HabitDetailsModal({
                 >
                   <span className="text-xs text-slate-300">{entry.label}</span>
                   <span
-                    className={`flex items-center gap-1 rounded-full border px-2 py-1 text-[0.65rem] font-semibold ${
+                    className={`flex items-center gap-1 rounded-full border px-2 py-1 text-[0.65rem] font-medium ${
                       entry.completed
                         ? "border-emerald-400/60 bg-emerald-400/10 text-emerald-200"
                         : "border-slate-700/70 text-slate-400"

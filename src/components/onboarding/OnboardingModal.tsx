@@ -77,7 +77,7 @@ export default function OnboardingModal({ isOpen, onComplete }: OnboardingModalP
         </div>
 
         <div className="grid gap-2">
-          <h2 className="text-xl font-bold text-white">{current.title}</h2>
+          <h2 className="text-xl font-semibold text-white">{current.title}</h2>
           <p className="mx-auto max-w-sm text-sm text-slate-400">
             {current.description}
           </p>
@@ -101,14 +101,14 @@ export default function OnboardingModal({ isOpen, onComplete }: OnboardingModalP
         <div className="flex items-center justify-between gap-3">
           <button
             type="button"
-            className="text-xs font-semibold text-slate-500 transition hover:text-slate-300"
+            className="text-xs font-medium text-slate-500 transition hover:text-slate-300"
             onClick={onComplete}
           >
             Skip
           </button>
           <button
             type="button"
-            className="flex items-center gap-2 rounded-full bg-emerald-400 px-6 py-2.5 text-sm font-semibold text-slate-950 shadow-lg shadow-emerald-500/30 transition hover:bg-emerald-300 active:scale-95"
+            className="flex items-center gap-2 rounded-full bg-emerald-400 px-6 py-2.5 text-sm font-medium text-slate-950 shadow-lg shadow-emerald-500/30 transition hover:bg-emerald-300 active:scale-95"
             onClick={handleNext}
           >
             {isLast ? (

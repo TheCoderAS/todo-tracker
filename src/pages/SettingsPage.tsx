@@ -234,7 +234,7 @@ export default function SettingsPage() {
       <div className="rounded-3xl border border-slate-900/60 bg-slate-950/70 p-5 shadow-2xl shadow-slate-950/60">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-4">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-slate-800/80 bg-slate-900/60 text-lg font-semibold text-slate-100">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-slate-800/80 bg-slate-900/60 text-lg font-medium text-slate-100">
               {initials || "AP"}
             </div>
             <div>
@@ -245,7 +245,7 @@ export default function SettingsPage() {
           </div>
           <button
             type="button"
-            className="flex items-center gap-2 rounded-full border border-slate-700/70 px-4 py-2 text-xs font-semibold uppercase text-slate-300 transition hover:border-slate-500/80 hover:text-white"
+            className="flex items-center gap-2 rounded-full border border-slate-700/70 px-4 py-2 text-xs font-medium uppercase text-slate-300 transition hover:border-slate-500/80 hover:text-white"
             onClick={() => setIsProfileModalOpen(true)}
           >
             <FiEdit2 className="h-4 w-4" />
@@ -263,7 +263,7 @@ export default function SettingsPage() {
             <button
               type="button"
               onClick={handleResetPassword}
-              className="rounded-full border border-slate-700/70 px-4 py-2 text-xs font-semibold uppercase text-slate-300 transition hover:border-slate-500/80 hover:text-white"
+              className="rounded-full border border-slate-700/70 px-4 py-2 text-xs font-medium uppercase text-slate-300 transition hover:border-slate-500/80 hover:text-white"
               disabled={isSaving}
             >
               Send link
@@ -308,7 +308,7 @@ export default function SettingsPage() {
             <button
               type="button"
               onClick={handleExportJSON}
-              className="flex items-center gap-2 rounded-full border border-slate-700/70 px-4 py-2 text-xs font-semibold uppercase text-slate-300 transition hover:border-slate-500/80 hover:text-white"
+              className="flex items-center gap-2 rounded-full border border-slate-700/70 px-4 py-2 text-xs font-medium uppercase text-slate-300 transition hover:border-slate-500/80 hover:text-white"
             >
               <FiDownload aria-hidden />
               Export JSON
@@ -316,7 +316,7 @@ export default function SettingsPage() {
             <button
               type="button"
               onClick={handleExportCSV}
-              className="flex items-center gap-2 rounded-full border border-slate-700/70 px-4 py-2 text-xs font-semibold uppercase text-slate-300 transition hover:border-slate-500/80 hover:text-white"
+              className="flex items-center gap-2 rounded-full border border-slate-700/70 px-4 py-2 text-xs font-medium uppercase text-slate-300 transition hover:border-slate-500/80 hover:text-white"
             >
               <FiDownload aria-hidden />
               Export CSV
@@ -324,7 +324,7 @@ export default function SettingsPage() {
             <button
               type="button"
               onClick={handleExportICS}
-              className="flex items-center gap-2 rounded-full border border-slate-700/70 px-4 py-2 text-xs font-semibold uppercase text-slate-300 transition hover:border-slate-500/80 hover:text-white"
+              className="flex items-center gap-2 rounded-full border border-slate-700/70 px-4 py-2 text-xs font-medium uppercase text-slate-300 transition hover:border-slate-500/80 hover:text-white"
             >
               <FiCalendar aria-hidden />
               Calendar (.ics)
@@ -341,7 +341,7 @@ export default function SettingsPage() {
               <button
                 type="button"
                 onClick={() => setIsAboutOpen(true)}
-                className="rounded-full border border-slate-700/70 px-4 py-2 text-xs font-semibold uppercase text-slate-300 transition hover:border-slate-500/80 hover:text-white"
+                className="rounded-full border border-slate-700/70 px-4 py-2 text-xs font-medium uppercase text-slate-300 transition hover:border-slate-500/80 hover:text-white"
               >
                 View
               </button>
@@ -355,7 +355,7 @@ export default function SettingsPage() {
               <button
                 type="button"
                 onClick={() => setIsFaqOpen(true)}
-                className="rounded-full border border-slate-700/70 px-4 py-2 text-xs font-semibold uppercase text-slate-300 transition hover:border-slate-500/80 hover:text-white"
+                className="rounded-full border border-slate-700/70 px-4 py-2 text-xs font-medium uppercase text-slate-300 transition hover:border-slate-500/80 hover:text-white"
               >
                 Explore
               </button>

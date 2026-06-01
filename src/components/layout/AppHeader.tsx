@@ -151,7 +151,7 @@ export default function AppHeader({ showSignOut, onSignOut }: AppHeaderProps) {
               className="h-8 w-8 rounded-xl object-contain no-invert"
             />
           </div>
-          <span className="font-bold text-slate-200">Aura Pulse</span>
+          <span className="font-medium text-slate-200">Aura Pulse</span>
         </div>
         <div className="flex items-center gap-3">
           {user ? (
@@ -195,12 +195,12 @@ export default function AppHeader({ showSignOut, onSignOut }: AppHeaderProps) {
                   role="menu"
                 >
                   <div className="mb-2 flex items-center justify-between gap-2">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                    <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
                       Notifications
                     </p>
                     <button
                       type="button"
-                      className={`text-[0.65rem] font-semibold uppercase transition-colors duration-200 ease-out ${
+                      className={`text-[0.65rem] font-medium uppercase transition-colors duration-200 ease-out ${
                         hasUnread
                           ? "text-emerald-200/80 hover:text-emerald-100"
                           : "text-slate-500"
@@ -220,7 +220,7 @@ export default function AppHeader({ showSignOut, onSignOut }: AppHeaderProps) {
                         >
                           <div className="flex items-start justify-between gap-2">
                             <div>
-                              <p className="text-sm font-semibold text-slate-100">
+                              <p className="text-sm font-medium text-slate-100">
                                 {notification.title}
                               </p>
                               {notification.body ? (

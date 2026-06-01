@@ -88,7 +88,7 @@ export default function FaqModal({ isOpen, onClose }: FaqModalProps) {
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="rounded-full border border-slate-700/70 px-3 py-2 text-xs font-semibold uppercase text-slate-300 transition hover:border-slate-500/80 hover:text-white"
+            className="rounded-full border border-slate-700/70 px-3 py-2 text-xs font-medium uppercase text-slate-300 transition hover:border-slate-500/80 hover:text-white"
           >
             <FiX />
           </button>
@@ -100,7 +100,7 @@ export default function FaqModal({ isOpen, onClose }: FaqModalProps) {
               key={section.title}
               className="rounded-2xl border border-slate-800/70 bg-slate-950/70 p-4"
             >
-              <h4 className="text-sm font-semibold text-white">{section.title}</h4>
+              <h4 className="text-sm font-medium text-white">{section.title}</h4>
               <p className="mt-2 text-xs text-slate-400">{section.intro}</p>
               <ol className="mt-3 list-decimal space-y-2 pl-4 text-sm text-slate-200">
                 {section.steps.map((step) => (

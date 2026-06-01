@@ -33,7 +33,7 @@ export default function ConfirmDialog({
         <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
           <button
             type="button"
-            className="rounded-full border border-slate-700/70 px-5 py-2 text-sm font-semibold text-slate-200 transition hover:border-slate-500"
+            className="rounded-full border border-slate-700/70 px-5 py-2 text-sm font-medium text-slate-200 transition hover:border-slate-500"
             onClick={onCancel}
             disabled={isLoading}
           >
@@ -41,7 +41,7 @@ export default function ConfirmDialog({
           </button>
           <button
             type="button"
-            className="rounded-full bg-rose-400 px-5 py-2 text-sm font-semibold text-slate-950 shadow-lg shadow-rose-500/30 transition hover:bg-rose-300 disabled:cursor-not-allowed disabled:opacity-70"
+            className="rounded-full bg-rose-400 px-5 py-2 text-sm font-medium text-slate-950 shadow-lg shadow-rose-500/30 transition hover:bg-rose-300 disabled:cursor-not-allowed disabled:opacity-70"
             onClick={onConfirm}
             disabled={isLoading}
           >

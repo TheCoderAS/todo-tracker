@@ -14,7 +14,7 @@ const inputClasses =
   "w-full rounded-2xl border border-slate-800/70 bg-slate-950/55 px-3.5 py-2.5 text-sm text-slate-100 shadow-sm transition-colors duration-200 ease-out focus:border-emerald-300/60 focus:bg-slate-950/70 focus:outline-none focus:ring-2 focus:ring-emerald-300/15";
 const labelClasses = "flex flex-col gap-1.5";
 const labelTextClasses =
-  "text-[0.7rem] font-semibold uppercase tracking-wide text-slate-400";
+  "text-[0.7rem] font-medium uppercase tracking-wide text-slate-400";
 
 type ProfileModalProps = {
   isOpen: boolean;
@@ -42,7 +42,7 @@ export default function ProfileModal({
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="rounded-full border border-slate-700/70 px-3 py-2 text-xs font-semibold uppercase text-slate-300 transition hover:border-slate-500/80 hover:text-white"
+            className="rounded-full border border-slate-700/70 px-3 py-2 text-xs font-medium uppercase text-slate-300 transition hover:border-slate-500/80 hover:text-white"
           >
             <FiX />
           </button>
@@ -100,7 +100,7 @@ export default function ProfileModal({
         <div className="grid gap-2 sm:grid-cols-2">
           <button
             type="submit"
-            className="flex w-full items-center justify-center gap-2 rounded-full bg-emerald-400 px-5 py-3 text-sm font-semibold text-slate-950 shadow-[0_0_25px_rgba(16,185,129,0.45)] transition hover:bg-emerald-300 active:scale-[0.98]"
+            className="flex w-full items-center justify-center gap-2 rounded-full bg-emerald-400 px-5 py-3 text-sm font-medium text-slate-950 shadow-[0_0_25px_rgba(16,185,129,0.45)] transition hover:bg-emerald-300 active:scale-[0.98]"
             disabled={isSaving}
           >
             <FiSave aria-hidden />
@@ -108,7 +108,7 @@ export default function ProfileModal({
           </button>
           <button
             type="button"
-            className="flex w-full items-center justify-center gap-2 rounded-full border border-slate-700/70 px-5 py-3 text-sm font-semibold text-slate-200 transition hover:border-slate-500/80 hover:text-white active:scale-[0.98]"
+            className="flex w-full items-center justify-center gap-2 rounded-full border border-slate-700/70 px-5 py-3 text-sm font-medium text-slate-200 transition hover:border-slate-500/80 hover:text-white active:scale-[0.98]"
             onClick={onClose}
             disabled={isSaving}
           >
