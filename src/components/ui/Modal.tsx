@@ -64,16 +64,16 @@ export default function Modal({
 
   const layoutClass =
     variant === "bottom-sheet"
-      ? "items-end justify-center pb-8"
+      ? "items-end justify-center pb-[max(1rem,env(safe-area-inset-bottom))]"
       : "items-center justify-center";
   const panelClass =
     variant === "bottom-sheet"
       ? "max-h-[85vh] w-full max-w-xl rounded-t-3xl rounded-b-2xl"
-      : "max-h-full w-full max-w-2xl rounded-3xl";
+      : "max-h-[92vh] w-full max-w-2xl rounded-3xl sm:max-h-[88vh]";
 
   return createPortal(
     <div
-      className={`fixed inset-0 z-[1000] flex px-4 py-10 backdrop-blur-sm backdrop-saturate-150 transition-opacity duration-300 ease-out ${layoutClass} ${
+      className={`fixed inset-0 z-[1000] flex px-3 py-4 backdrop-blur-sm backdrop-saturate-150 transition-opacity duration-300 ease-out sm:px-4 sm:py-10 ${layoutClass} ${
         isClosing ? "opacity-0" : "opacity-100"
       }`}
       role="dialog"

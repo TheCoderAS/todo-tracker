@@ -420,11 +420,11 @@ export default function HabitDetailsModal({
             </div>
             <div className="rounded-2xl border border-slate-800/70 bg-slate-950/60 p-4 overflow-x-auto">
               <div className="flex gap-0.5 min-w-fit">
-                <div className="flex flex-col gap-0.5 mr-1">
+                <div className="mr-1 hidden flex-col gap-0.5 sm:flex">
                   {dayLabels.map((label, i) => (
                     <div
                       key={i}
-                      className="h-3 w-3 flex items-center justify-center text-[0.45rem] text-slate-500"
+                      className="flex h-3.5 w-5 items-center justify-center text-[0.6rem] text-slate-500"
                     >
                       {i % 2 === 0 ? label : ""}
                     </div>
@@ -435,7 +435,7 @@ export default function HabitDetailsModal({
                     {week.map((day) => (
                       <div
                         key={day.dateKey}
-                        className={`h-3 w-3 rounded-sm transition ${
+                        className={`h-3.5 w-3.5 rounded-sm transition ${
                           day.completed
                             ? "bg-emerald-400 shadow-[0_0_4px_rgba(16,185,129,0.4)]"
                             : "bg-slate-800/60"
@@ -446,10 +446,10 @@ export default function HabitDetailsModal({
                   </div>
                 ))}
               </div>
-              <div className="flex items-center justify-end gap-2 mt-2 text-[0.55rem] text-slate-500">
+              <div className="mt-2 flex items-center justify-end gap-2 text-xs text-slate-500">
                 <span>Less</span>
-                <div className="h-3 w-3 rounded-sm bg-slate-800/60" />
-                <div className="h-3 w-3 rounded-sm bg-emerald-400" />
+                <div className="h-3.5 w-3.5 rounded-sm bg-slate-800/60" />
+                <div className="h-3.5 w-3.5 rounded-sm bg-emerald-400" />
                 <span>More</span>
               </div>
             </div>

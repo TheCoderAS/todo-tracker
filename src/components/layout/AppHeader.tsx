@@ -138,8 +138,8 @@ export default function AppHeader({ showSignOut, onSignOut }: AppHeaderProps) {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-20 border-b border-slate-900/60 bg-slate-950/90 px-6 py-2 backdrop-blur">
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4">
+    <header className="fixed top-0 left-0 right-0 z-20 border-b border-slate-900/60 bg-slate-950/90 px-4 py-2 pt-[calc(0.5rem+env(safe-area-inset-top))] backdrop-blur sm:px-6">
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 sm:gap-4">
         <div className="flex items-center gap-3">
           <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-white/10 shadow-xl shadow-slate-900/40 no-invert">
             <img
@@ -157,7 +157,7 @@ export default function AppHeader({ showSignOut, onSignOut }: AppHeaderProps) {
           {user ? (
             <>
               <button
-                className="flex h-9 items-center gap-2 rounded-full border border-slate-700/70 px-3 text-sm text-slate-400 transition-all duration-200 ease-out hover:border-slate-500 hover:text-slate-200"
+                className="flex h-10 items-center gap-2 rounded-full border border-slate-700/70 px-3 text-sm text-slate-400 transition-all duration-200 ease-out hover:border-slate-500 hover:text-slate-200"
                 onClick={() => setIsSearchOpen(true)}
                 aria-label="Search"
               >
@@ -178,7 +178,7 @@ export default function AppHeader({ showSignOut, onSignOut }: AppHeaderProps) {
           {user ? (
             <div className="relative" ref={menuRef}>
               <button
-                className="relative flex h-9 w-9 items-center justify-center rounded-full border border-slate-700/70 text-slate-200 transition-all duration-200 ease-out hover:border-slate-500"
+                className="relative flex h-10 w-10 items-center justify-center rounded-full border border-slate-700/70 text-slate-200 transition-all duration-200 ease-out hover:border-slate-500"
                 onClick={() => setIsNotificationsOpen((prev) => !prev)}
                 aria-label="Open notifications"
                 aria-haspopup="menu"
@@ -191,7 +191,7 @@ export default function AppHeader({ showSignOut, onSignOut }: AppHeaderProps) {
               </button>
               {isNotificationsOpen ? (
                 <div
-                  className="floating-menu absolute right-0 mt-3 w-72 origin-top-right rounded-2xl border border-slate-800/80 bg-slate-950/95 p-3 shadow-2xl shadow-slate-950/70 backdrop-blur"
+                  className="floating-menu absolute right-0 mt-3 w-[min(20rem,calc(100vw-2rem))] origin-top-right rounded-2xl border border-slate-800/80 bg-slate-950/95 p-3 shadow-2xl shadow-slate-950/70 backdrop-blur"
                   role="menu"
                 >
                   <div className="mb-2 flex items-center justify-between gap-2">
@@ -235,7 +235,7 @@ export default function AppHeader({ showSignOut, onSignOut }: AppHeaderProps) {
                               ) : null}
                               <button
                                 type="button"
-                                className={`flex h-7 w-7 items-center justify-center rounded-full border text-xs transition-all duration-200 ease-out ${
+                                className={`flex h-8 w-8 items-center justify-center rounded-full border text-xs transition-all duration-200 ease-out ${
                                   notification.read
                                     ? "border-slate-800/70 text-slate-500"
                                     : "border-emerald-400/40 text-emerald-200 hover:border-emerald-300/70 hover:text-emerald-100"
@@ -252,7 +252,7 @@ export default function AppHeader({ showSignOut, onSignOut }: AppHeaderProps) {
                             </div>
                           </div>
                           {notification.createdAt ? (
-                            <p className="mt-2 text-[11px] text-slate-500">
+                            <p className="mt-2 text-xs text-slate-500">
                               {notification.createdAt.toLocaleString()}
                             </p>
                           ) : null}
@@ -270,7 +270,7 @@ export default function AppHeader({ showSignOut, onSignOut }: AppHeaderProps) {
           ) : null}
           {showSignOut ? (
             <button
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-700/70 text-slate-200 transition-all duration-200 ease-out hover:border-slate-500"
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-700/70 text-slate-200 transition-all duration-200 ease-out hover:border-slate-500"
               onClick={onSignOut}
               aria-label="Sign out"
             >

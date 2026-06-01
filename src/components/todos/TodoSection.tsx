@@ -264,7 +264,7 @@ export default function TodoSection({
         )}
 
         <div className="grid gap-2 sm:gap-3">
-          <div className="flex flex-wrap items-center gap-2 rounded-full border border-slate-800/70 bg-slate-950/40 p-1 text-[0.7rem] font-semibold text-slate-200">
+          <div className="flex flex-wrap items-center gap-2 rounded-full border border-slate-800/70 bg-slate-950/40 p-1 text-xs font-semibold text-slate-200">
             {quickFilters.map(({ id, label }) => {
               const isActive =
                 activeQuickFilter === id || (id === "all" && !activeQuickFilter);
@@ -272,7 +272,7 @@ export default function TodoSection({
                 <button
                   key={id}
                   type="button"
-                  className={`rounded-full px-3 py-1 transition ${
+                  className={`rounded-full px-3 py-1.5 transition ${
                     isActive
                       ? "bg-sky-400/20 text-sky-100"
                       : "text-slate-400 hover:text-white"
@@ -287,7 +287,7 @@ export default function TodoSection({
             })}
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <div className="flex flex-wrap items-center rounded-full border border-slate-800/70 bg-slate-950/40 p-1 text-[0.65rem] font-semibold text-slate-200 sm:text-[0.7rem]">
+            <div className="flex flex-wrap items-center rounded-full border border-slate-800/70 bg-slate-950/40 p-1 text-xs font-semibold text-slate-200">
               <button
                 type="button"
                 className={`rounded-full px-2.5 py-1 transition ${
