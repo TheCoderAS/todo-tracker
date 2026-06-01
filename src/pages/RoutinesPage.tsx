@@ -279,7 +279,7 @@ export default function RoutinesPage() {
   };
 
   return (
-    <section className="flex flex-col gap-6">
+    <section className="flex flex-col gap-4">
       <RoutineSection
         routines={routines}
         onOpenCreate={openRoutineModal}

@@ -133,7 +133,7 @@ export default function TodoSection({
     sortOrder === "desc";
 
   return (
-    <section className="grid gap-6">
+    <section className="grid gap-4">
       <section className="grid gap-3">
         <div className="grid gap-4 rounded-3xl border border-slate-900/70 bg-gradient-to-br from-slate-900/80 via-slate-950/90 to-slate-950/80 p-5 shadow-xl shadow-slate-950/40">
           <div className="flex flex-wrap items-center justify-between gap-3">

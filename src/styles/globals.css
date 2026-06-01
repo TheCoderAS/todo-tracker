@@ -77,6 +77,14 @@
 
   html {
     scroll-behavior: smooth;
+    /* Compact density: Tailwind sizing is rem-based, so shrinking the root font
+       scales text, padding, margins, and gaps together for a tighter, cleaner
+       layout without editing every utility class. */
+    font-size: 14.5px;
+  }
+
+  body {
+    line-height: 1.45;
   }
 
   select {

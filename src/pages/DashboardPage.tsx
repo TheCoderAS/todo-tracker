@@ -45,7 +45,7 @@ export default function DashboardPage() {
   } = useHabitAnalytics(habits, habitsLoading);
 
   return (
-    <section className="grid gap-6">
+    <section className="grid gap-4">
       <OnboardingModal isOpen={showOnboarding} onComplete={completeOnboarding} />
       <header>
         <p className="text-sm text-muted">Your progress</p>
