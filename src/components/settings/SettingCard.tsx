@@ -27,7 +27,7 @@ export default function SettingCard({
             {icon}
           </div>
           <div>
-            <p className="text-sm font-semibold text-white">{title}</p>
+            <p className="text-sm font-medium text-white">{title}</p>
             <p className="text-xs text-slate-400">{description}</p>
           </div>
         </div>

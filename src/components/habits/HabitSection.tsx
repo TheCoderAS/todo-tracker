@@ -223,10 +223,10 @@ export default function HabitSection({
         <div className="grid gap-4 rounded-3xl border border-slate-900/70 bg-gradient-to-br from-slate-900/80 via-slate-950/90 to-slate-950/80 p-5 shadow-xl shadow-slate-950/40">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
-              <p className="text-xs font-semibold uppercase text-slate-500">
+              <p className="text-xs font-medium uppercase text-slate-500">
                 Today progress
               </p>
-              <p className="text-lg font-semibold text-white">
+              <p className="text-lg font-medium text-white">
                 {todayStats.completed}/{todayStats.total} habits completed
               </p>
             </div>
@@ -256,7 +256,7 @@ export default function HabitSection({
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <div className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto rounded-full border border-slate-800/70 bg-slate-950/40 p-1 text-xs font-semibold text-slate-200">
+          <div className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto rounded-full border border-slate-800/70 bg-slate-950/40 p-1 text-xs font-medium text-slate-200">
             {[
               { id: "all", label: "Active" },
               { id: "completed", label: "Done" },
@@ -358,11 +358,11 @@ export default function HabitSection({
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                     <div className="grid min-w-0 gap-1">
                       <div className="flex flex-wrap items-center gap-2">
-                        <h3 className="text-base font-semibold text-white">
+                        <h3 className="text-base font-medium text-white">
                           {habit.title}
                         </h3>
                         {isArchived ? (
-                          <span className="rounded-full border border-slate-700/70 px-2 py-0.5 text-[0.6rem] font-semibold uppercase text-slate-400">
+                          <span className="rounded-full border border-slate-700/70 px-2 py-0.5 text-[0.6rem] font-medium uppercase text-slate-400">
                             Archived
                           </span>
                         ) : null}
@@ -449,7 +449,7 @@ export default function HabitSection({
                       <button
                         type="button"
                         onClick={() => onToggleComplete(habit)}
-                        className={`flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-semibold transition ${
+                        className={`flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-medium transition ${
                           isCompleted
                             ? "border-emerald-400/70 bg-emerald-400/15 text-emerald-200"
                             : "border-slate-800/70 text-slate-300 hover:border-slate-600/70 hover:text-white"
@@ -475,7 +475,7 @@ export default function HabitSection({
       <div className="fixed bottom-[calc(6.5rem+env(safe-area-inset-bottom))] right-6 z-30 flex flex-col items-end gap-3 sm:bottom-8 sm:right-10 xl:right-[calc((100vw-72rem)/2+1.5rem)]">
         <button
           type="button"
-          className="glow-emerald flex h-14 w-14 items-center justify-center rounded-full bg-sky-400 text-3xl font-semibold text-slate-950 shadow-xl shadow-slate-950/40 transition hover:scale-[1.02] hover:bg-sky-300"
+          className="glow-emerald flex h-14 w-14 items-center justify-center rounded-full bg-sky-400 text-3xl font-medium text-slate-950 shadow-xl shadow-slate-950/40 transition hover:scale-[1.02] hover:bg-sky-300"
           onClick={onOpenCreate}
           aria-label="Add habit"
         >

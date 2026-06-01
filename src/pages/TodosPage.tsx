@@ -188,7 +188,7 @@ export default function TodosPage() {
 
   return (
     <section className="flex flex-col gap-6">
-      <div className="flex w-full rounded-full border border-slate-800/70 bg-slate-900/60 p-1 text-xs font-semibold">
+      <div className="flex w-full rounded-full border border-slate-800/70 bg-slate-900/60 p-1 text-xs font-medium">
         <button
           type="button"
           className={`flex-1 rounded-full px-4 py-2 text-center transition sm:flex-none ${

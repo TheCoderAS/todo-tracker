@@ -11,7 +11,7 @@ const inputClasses =
 
 const labelClasses = "flex flex-col gap-1.5";
 const labelTextClasses =
-  "text-[0.7rem] font-semibold uppercase tracking-wide text-slate-400";
+  "text-[0.7rem] font-medium uppercase tracking-wide text-slate-400";
 
 const days = [
   { id: 0, label: "Sun" },
@@ -270,7 +270,7 @@ export default function HabitForm({
                   type="button"
                   onClick={() => onToggleDay(day.id)}
                   aria-pressed={isActive}
-                  className={`rounded-full border px-3 py-2 text-xs font-semibold transition ${
+                  className={`rounded-full border px-3 py-2 text-xs font-medium transition ${
                     isActive
                       ? "border-sky-400/70 bg-sky-400/20 text-sky-100"
                       : "border-slate-800/70 text-slate-400 hover:border-slate-600/70 hover:text-slate-200"
@@ -350,14 +350,14 @@ export default function HabitForm({
       <div className="sticky bottom-0 -mx-5 mt-6 grid grid-cols-2 gap-2 border-t border-slate-900/60 bg-slate-950/80 px-5 backdrop-blur">
         <button
           type="submit"
-          className="flex w-full items-center justify-center gap-1 rounded-full bg-emerald-400 px-5 py-3 text-sm font-semibold text-slate-950 shadow-[0_0_25px_rgba(16,185,129,0.45)] transition hover:bg-emerald-300 active:scale-[0.98]"
+          className="flex w-full items-center justify-center gap-1 rounded-full bg-emerald-400 px-5 py-3 text-sm font-medium text-slate-950 shadow-[0_0_25px_rgba(16,185,129,0.45)] transition hover:bg-emerald-300 active:scale-[0.98]"
         >
           <FiPlus aria-hidden />
           <span>{isEditing ? "Update" : "Save"}</span>
         </button>
         <button
           type="button"
-          className="flex w-full items-center justify-center gap-1 rounded-full border border-slate-700/70 px-5 py-3 text-sm font-semibold text-slate-200 transition hover:border-slate-500/80 hover:text-white active:scale-[0.98]"
+          className="flex w-full items-center justify-center gap-1 rounded-full border border-slate-700/70 px-5 py-3 text-sm font-medium text-slate-200 transition hover:border-slate-500/80 hover:text-white active:scale-[0.98]"
           onClick={onCancel}
         >
           <FiX aria-hidden />

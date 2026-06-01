@@ -24,7 +24,7 @@ export default function AboutModal({
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="rounded-full border border-slate-700/70 px-3 py-2 text-xs font-semibold uppercase text-slate-300 transition hover:border-slate-500/80 hover:text-white"
+            className="rounded-full border border-slate-700/70 px-3 py-2 text-xs font-medium uppercase text-slate-300 transition hover:border-slate-500/80 hover:text-white"
           >
             <FiX />
           </button>

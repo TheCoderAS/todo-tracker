@@ -140,7 +140,7 @@ export default function FiltersModal({
       <div className="grid gap-6">
         <div className="modal-header flex items-center justify-between gap-4">
           <div>
-            <p className="text-xs font-semibold uppercase text-slate-500">
+            <p className="text-xs font-medium uppercase text-slate-500">
               Filter & sorting
             </p>
             <h3 className="text-xl font-semibold text-white">Refine your focus</h3>
@@ -156,7 +156,7 @@ export default function FiltersModal({
         </div>
 
         <div className="grid gap-3 rounded-2xl border border-slate-800/60 bg-slate-950/70 p-4">
-          <div className="flex items-center gap-2 text-xs font-semibold text-slate-300">
+          <div className="flex items-center gap-2 text-xs font-medium text-slate-300">
             <FiZap aria-hidden className="text-emerald-300" />
             Smart filters
           </div>
@@ -165,7 +165,7 @@ export default function FiltersModal({
               <button
                 key={preset.id}
                 type="button"
-                className="flex items-center gap-2 rounded-full border border-slate-800/70 bg-slate-950/60 px-3 py-2 text-xs font-semibold text-slate-200 transition hover:border-slate-600/70 hover:text-white active:scale-95"
+                className="flex items-center gap-2 rounded-full border border-slate-800/70 bg-slate-950/60 px-3 py-2 text-xs font-medium text-slate-200 transition hover:border-slate-600/70 hover:text-white active:scale-95"
                 onClick={preset.apply}
               >
                 <FiFilter aria-hidden className="text-xs text-slate-400" />
@@ -177,13 +177,13 @@ export default function FiltersModal({
 
         <div className="grid gap-5">
           <div className="grid gap-3">
-            <h4 className="text-xs font-semibold text-white">Status</h4>
+            <h4 className="text-xs font-medium text-white">Status</h4>
             <div className="flex flex-wrap gap-2">
               {statusOptions.map((option) => (
                 <button
                   key={option.value}
                   type="button"
-                  className={`flex h-9 items-center justify-center rounded-full border px-3 text-xs font-semibold transition active:scale-95 ${
+                  className={`flex h-9 items-center justify-center rounded-full border px-3 text-xs font-medium transition active:scale-95 ${
                     filterDraft.status === option.value
                       ? "border-sky-400/60 bg-sky-400/15 text-sky-100"
                       : "border-slate-800/70 bg-slate-950/50 text-slate-300 hover:border-slate-600/70 hover:text-white"
@@ -210,13 +210,13 @@ export default function FiltersModal({
           </div>
 
           <div className="grid gap-3">
-            <h4 className="text-xs font-semibold text-white">Priority</h4>
+            <h4 className="text-xs font-medium text-white">Priority</h4>
             <div className="flex flex-wrap gap-2">
               {priorityOptions.map((option) => (
                 <button
                   key={option.value}
                   type="button"
-                  className={`flex h-9 items-center justify-center rounded-full border px-3 text-xs font-semibold transition active:scale-95 ${
+                  className={`flex h-9 items-center justify-center rounded-full border px-3 text-xs font-medium transition active:scale-95 ${
                     filterDraft.priority === option.value
                       ? "border-amber-400/60 bg-amber-400/15 text-amber-100"
                       : "border-slate-800/70 bg-slate-950/50 text-slate-300 hover:border-slate-600/70 hover:text-white"
@@ -235,7 +235,7 @@ export default function FiltersModal({
           </div>
 
           <div className="grid gap-3">
-            <h4 className="text-xs font-semibold text-white">Date filter</h4>
+            <h4 className="text-xs font-medium text-white">Date filter</h4>
             <div className="flex flex-wrap gap-2">
               {(
                 [
@@ -251,7 +251,7 @@ export default function FiltersModal({
                 <button
                   key={option.value}
                   type="button"
-                  className={`flex h-9 items-center justify-center rounded-full border px-3 text-xs font-semibold transition active:scale-95 ${
+                  className={`flex h-9 items-center justify-center rounded-full border px-3 text-xs font-medium transition active:scale-95 ${
                     filterDraft.datePreset === option.value
                       ? "border-emerald-400/60 bg-emerald-400/15 text-emerald-100"
                       : "border-slate-800/70 bg-slate-950/50 text-slate-300 hover:border-slate-600/70 hover:text-white"
@@ -270,7 +270,7 @@ export default function FiltersModal({
               ))}
             </div>
             {showDatePicker ? (
-              <label className="grid gap-1.5 text-[0.7rem] font-semibold uppercase tracking-wide text-slate-400">
+              <label className="grid gap-1.5 text-[0.7rem] font-medium uppercase tracking-wide text-slate-400">
                 Choose date
                 <input
                   type="date"
@@ -290,7 +290,7 @@ export default function FiltersModal({
 
           {availableTags.length > 0 && (
             <div className="grid gap-3">
-              <h4 className="text-xs font-semibold text-white">Tags</h4>
+              <h4 className="text-xs font-medium text-white">Tags</h4>
               <div className="flex flex-wrap gap-2">
                 {availableTags.map((tag) => {
                   const isSelected = filterDraft.tags.includes(tag);
@@ -298,7 +298,7 @@ export default function FiltersModal({
                     <button
                       key={tag}
                       type="button"
-                      className={`flex h-9 items-center justify-center rounded-full border px-3 text-xs font-semibold transition active:scale-95 ${
+                      className={`flex h-9 items-center justify-center rounded-full border px-3 text-xs font-medium transition active:scale-95 ${
                         isSelected
                           ? "border-cyan-400/60 bg-cyan-400/15 text-cyan-100"
                           : "border-slate-800/70 bg-slate-950/50 text-slate-300 hover:border-slate-600/70 hover:text-white"
@@ -319,14 +319,14 @@ export default function FiltersModal({
           )}
 
           <div className="grid gap-3">
-            <h4 className="text-xs font-semibold text-white">Sort by</h4>
+            <h4 className="text-xs font-medium text-white">Sort by</h4>
             <div className="grid gap-3 rounded-2xl border border-slate-800/60 bg-slate-950/60 p-3">
               <div className="flex flex-wrap gap-2">
                 {sortByOptions.map((option) => (
                   <button
                     key={option.value}
                     type="button"
-                    className={`flex h-9 items-center justify-center rounded-full border px-3 text-xs font-semibold transition active:scale-95 ${
+                    className={`flex h-9 items-center justify-center rounded-full border px-3 text-xs font-medium transition active:scale-95 ${
                       filterDraft.sortBy === option.value
                         ? "border-sky-400/60 bg-sky-400/15 text-sky-100"
                         : "border-slate-800/70 bg-slate-950/50 text-slate-300 hover:border-slate-600/70 hover:text-white"
@@ -342,11 +342,11 @@ export default function FiltersModal({
                   </button>
                 ))}
               </div>
-              <div className="flex items-center justify-between rounded-2xl border border-slate-800/70 bg-slate-950/70 px-3 py-2 text-[0.7rem] font-semibold text-slate-300">
+              <div className="flex items-center justify-between rounded-2xl border border-slate-800/70 bg-slate-950/70 px-3 py-2 text-[0.7rem] font-medium text-slate-300">
                 <span>Sort order</span>
                 <button
                   type="button"
-                  className="flex items-center gap-2 rounded-full border border-slate-700/70 bg-slate-950/60 px-3 py-1 text-[0.7rem] font-semibold text-slate-100 transition hover:border-slate-500 active:scale-95"
+                  className="flex items-center gap-2 rounded-full border border-slate-700/70 bg-slate-950/60 px-3 py-1 text-[0.7rem] font-medium text-slate-100 transition hover:border-slate-500 active:scale-95"
                   onClick={() =>
                     onDraftChange({
                       ...filterDraft,
@@ -369,7 +369,7 @@ export default function FiltersModal({
         <div className="sticky bottom-0 -mx-6 flex flex-wrap items-center justify-between gap-3 border-t border-slate-900/80 bg-slate-950/95 px-6 py-4">
           <button
             type="button"
-            className="inline-flex h-9 items-center gap-2 rounded-full border border-slate-700/70 px-4 text-xs font-semibold text-slate-300 transition hover:border-slate-500 hover:text-white active:scale-95"
+            className="inline-flex h-9 items-center gap-2 rounded-full border border-slate-700/70 px-4 text-xs font-medium text-slate-300 transition hover:border-slate-500 hover:text-white active:scale-95"
             onClick={onReset}
           >
             <FiRotateCcw aria-hidden />
@@ -377,7 +377,7 @@ export default function FiltersModal({
           </button>
           <button
             type="button"
-            className={`flex h-9 min-w-[10rem] items-center justify-center gap-2 rounded-full bg-emerald-400 text-xs font-semibold text-slate-950 shadow-lg shadow-emerald-500/30 transition hover:bg-emerald-300 active:scale-95 ${
+            className={`flex h-9 min-w-[10rem] items-center justify-center gap-2 rounded-full bg-emerald-400 text-xs font-medium text-slate-950 shadow-lg shadow-emerald-500/30 transition hover:bg-emerald-300 active:scale-95 ${
               applyBounce ? "animate-[bounce_0.5s_ease-out]" : ""
             }`}
             onClick={handleApply}

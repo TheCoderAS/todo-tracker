@@ -28,15 +28,15 @@ export default function RoutineSection({
     <section className="grid gap-5">
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-3xl border border-slate-900/70 bg-gradient-to-br from-slate-900/80 via-slate-950/90 to-slate-950/80 p-5 shadow-xl shadow-slate-950/40">
         <div>
-          <p className="text-xs font-semibold uppercase text-slate-500">Routines</p>
-          <p className="text-lg font-semibold text-white">
+          <p className="text-xs font-medium uppercase text-slate-500">Routines</p>
+          <p className="text-lg font-medium text-white">
             {routines.length} saved routine{routines.length === 1 ? "" : "s"}
           </p>
         </div>
         <button
           type="button"
           onClick={onOpenCreate}
-          className="flex items-center gap-2 rounded-full border border-emerald-400/40 bg-emerald-400/10 px-4 py-2 text-xs font-semibold uppercase text-emerald-200 transition hover:border-emerald-300/80 hover:bg-emerald-400/20"
+          className="flex items-center gap-2 rounded-full border border-emerald-400/40 bg-emerald-400/10 px-4 py-2 text-xs font-medium uppercase text-emerald-200 transition hover:border-emerald-300/80 hover:bg-emerald-400/20"
         >
           <FiPlus />
           Add routine
@@ -59,7 +59,7 @@ export default function RoutineSection({
             >
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
-                  <h3 className="text-lg font-semibold text-white">{routine.title}</h3>
+                  <h3 className="text-lg font-medium text-white">{routine.title}</h3>
                   <p className="text-xs text-slate-400">
                     {routine.items.length} template item
                     {routine.items.length === 1 ? "" : "s"}
@@ -69,7 +69,7 @@ export default function RoutineSection({
                   <button
                     type="button"
                     onClick={() => onRun(routine)}
-                    className="flex items-center gap-2 rounded-full border border-sky-400/40 bg-sky-400/10 px-4 py-2 text-xs font-semibold uppercase text-sky-200 transition hover:border-sky-300/80 hover:bg-sky-400/20"
+                    className="flex items-center gap-2 rounded-full border border-sky-400/40 bg-sky-400/10 px-4 py-2 text-xs font-medium uppercase text-sky-200 transition hover:border-sky-300/80 hover:bg-sky-400/20"
                   >
                     <FiPlay />
                     Run routine
@@ -77,7 +77,7 @@ export default function RoutineSection({
                   <button
                     type="button"
                     onClick={() => onEdit(routine)}
-                    className="rounded-full border border-slate-700/70 px-3 py-2 text-xs font-semibold uppercase text-slate-300 transition hover:border-slate-500/80 hover:text-white"
+                    className="rounded-full border border-slate-700/70 px-3 py-2 text-xs font-medium uppercase text-slate-300 transition hover:border-slate-500/80 hover:text-white"
                     aria-label={`Edit ${routine.title}`}
                   >
                     <FiEdit2 />
@@ -85,7 +85,7 @@ export default function RoutineSection({
                   <button
                     type="button"
                     onClick={() => onDelete(routine)}
-                    className="rounded-full border border-rose-500/40 px-3 py-2 text-xs font-semibold uppercase text-rose-300 transition hover:border-rose-400/80 hover:text-rose-100"
+                    className="rounded-full border border-rose-500/40 px-3 py-2 text-xs font-medium uppercase text-rose-300 transition hover:border-rose-400/80 hover:text-rose-100"
                     aria-label={`Delete ${routine.title}`}
                   >
                     <FiTrash2 />
@@ -102,7 +102,7 @@ export default function RoutineSection({
                       className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-slate-900/80 bg-slate-950/80 px-4 py-3"
                     >
                       <div>
-                        <p className="text-sm font-semibold text-slate-100">
+                        <p className="text-sm font-medium text-slate-100">
                           {item.title}
                         </p>
                         <p className="text-xs text-slate-500">

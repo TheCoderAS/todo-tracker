@@ -37,13 +37,13 @@ export default function WeeklyCompletionSpilloverChart({
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <p className="text-xs uppercase text-slate-400">Task flow</p>
-          <p className="text-lg font-semibold text-white">On-time vs spillover</p>
+          <p className="text-lg font-medium text-white">On-time vs spillover</p>
           <p className="mt-1 text-sm text-slate-300/80">
             Trend confidence grows as you keep closing tasks.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          <label className="text-xs font-semibold uppercase text-slate-400">
+          <label className="text-xs font-medium uppercase text-slate-400">
             <span className="sr-only">Select completion period</span>
             <select
               value={period}

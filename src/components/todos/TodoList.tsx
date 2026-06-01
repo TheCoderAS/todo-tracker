@@ -397,7 +397,7 @@ export default function TodoList({
           )}
           <div className="min-w-0 flex-1">
             <strong
-              className={`block truncate text-base font-semibold text-white ${
+              className={`block truncate text-base font-medium text-white ${
                 isCompleted
                   ? "line-through decoration-emerald-400/70"
                   : isSkipped
@@ -501,7 +501,7 @@ export default function TodoList({
     const itemIds = group.items.map((todo) => todo.id);
     return (
       <div key={group.title} className="grid gap-3">
-        <h3 className="flex items-center gap-2 text-sm font-semibold capitalize text-slate-300">
+        <h3 className="flex items-center gap-2 text-sm font-medium capitalize text-slate-300">
           <FiCalendar aria-hidden className="text-slate-400" />
           <span>{group.title}</span>
         </h3>
@@ -532,7 +532,7 @@ export default function TodoList({
       {hasMore && (
         <button
           type="button"
-          className="flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-800/70 bg-slate-950/60 px-4 py-3 text-xs font-semibold text-slate-300 transition hover:border-slate-600/70 hover:text-white"
+          className="flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-800/70 bg-slate-950/60 px-4 py-3 text-xs font-medium text-slate-300 transition hover:border-slate-600/70 hover:text-white"
           onClick={loadMore}
         >
           Load more ({totalItems - visibleCount} remaining)
@@ -542,7 +542,7 @@ export default function TodoList({
         <div className="grid gap-3">
           <button
             type="button"
-            className="flex items-center justify-between rounded-2xl border border-slate-800/70 bg-slate-950/60 px-4 py-3 text-xs font-semibold text-slate-200 transition hover:border-slate-600/70"
+            className="flex items-center justify-between rounded-2xl border border-slate-800/70 bg-slate-950/60 px-4 py-3 text-xs font-medium text-slate-200 transition hover:border-slate-600/70"
             onClick={() => setShowCompleted((prev) => !prev)}
             aria-expanded={showCompleted}
           >
@@ -565,7 +565,7 @@ export default function TodoList({
           <div className="grid gap-6">
             <div className="modal-header flex items-start justify-between gap-4">
               <div className="grid gap-2">
-                <h3 className="text-lg font-semibold text-white">
+                <h3 className="text-lg font-medium text-white">
                   {selectedTodo.title}
                 </h3>
                 <div className="flex flex-wrap items-center gap-2 text-xs text-slate-400">
@@ -619,7 +619,7 @@ export default function TodoList({
                   </div>
                 </div>
                 <div className="grid gap-2 text-sm text-slate-200">
-                  <p className="text-xs font-semibold capitalize text-slate-300">
+                  <p className="text-xs font-medium capitalize text-slate-300">
                     Description
                   </p>
                   {selectedTodo.description?.trim() ? (

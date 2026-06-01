@@ -27,7 +27,7 @@ const inputClasses =
 
 const labelClasses = "flex flex-col gap-1.5";
 const labelTextClasses =
-  "text-[0.7rem] font-semibold uppercase tracking-wide text-slate-400";
+  "text-[0.7rem] font-medium uppercase tracking-wide text-slate-400";
 
 type TodoFormProps = {
   form: TodoInput;
@@ -254,7 +254,7 @@ export default function TodoForm({
                       } as React.ChangeEvent<HTMLSelectElement>)
                     }
                     aria-pressed={isActive}
-                    className={`rounded-full border px-4 py-2 text-xs font-semibold transition ${
+                    className={`rounded-full border px-4 py-2 text-xs font-medium transition ${
                       isActive
                         ? "border-sky-400/60 bg-sky-400/15 text-sky-100"
                         : "border-slate-800/80 text-slate-400 hover:border-slate-600/70 hover:text-slate-200"
@@ -288,7 +288,7 @@ export default function TodoForm({
                         } as React.ChangeEvent<HTMLSelectElement>)
                       }
                       aria-pressed={isActive}
-                      className={`rounded-full border px-4 py-2 text-xs font-semibold uppercase transition ${
+                      className={`rounded-full border px-4 py-2 text-xs font-medium uppercase transition ${
                         isActive
                           ? `${colorClasses} bg-white/5`
                           : "border-slate-800/80 text-slate-400 hover:border-slate-600/70 hover:text-slate-200"
@@ -379,7 +379,7 @@ export default function TodoForm({
               <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-slate-800/70 bg-slate-950/55 px-3 py-2 shadow-sm transition-colors duration-200 ease-out focus-within:border-emerald-300/50 focus-within:bg-slate-950/70 focus-within:ring-2 focus-within:ring-emerald-300/10">
                 <button
                   type="button"
-                  className="flex items-center gap-2 rounded-full border border-slate-700/70 px-3 py-1 text-xs font-semibold text-slate-200 transition hover:border-emerald-400/70 hover:text-emerald-100"
+                  className="flex items-center gap-2 rounded-full border border-slate-700/70 px-3 py-1 text-xs font-medium text-slate-200 transition hover:border-emerald-400/70 hover:text-emerald-100"
                   onClick={() => applyInlineFormat("bold")}
                   aria-label="Bold"
                 >
@@ -387,7 +387,7 @@ export default function TodoForm({
                 </button>
                 <button
                   type="button"
-                  className="flex items-center gap-2 rounded-full border border-slate-700/70 px-3 py-1 text-xs font-semibold text-slate-200 transition hover:border-emerald-400/70 hover:text-emerald-100"
+                  className="flex items-center gap-2 rounded-full border border-slate-700/70 px-3 py-1 text-xs font-medium text-slate-200 transition hover:border-emerald-400/70 hover:text-emerald-100"
                   onClick={() => applyInlineFormat("italic")}
                   aria-label="Italic"
                 >
@@ -395,7 +395,7 @@ export default function TodoForm({
                 </button>
                 <button
                   type="button"
-                  className="flex items-center gap-2 rounded-full border border-slate-700/70 px-3 py-1 text-xs font-semibold text-slate-200 transition hover:border-emerald-400/70 hover:text-emerald-100"
+                  className="flex items-center gap-2 rounded-full border border-slate-700/70 px-3 py-1 text-xs font-medium text-slate-200 transition hover:border-emerald-400/70 hover:text-emerald-100"
                   onClick={() => applyInlineFormat("strikeThrough")}
                   aria-label="Strikethrough"
                 >
@@ -403,7 +403,7 @@ export default function TodoForm({
                 </button>
                 <button
                   type="button"
-                  className="flex items-center gap-2 rounded-full border border-slate-700/70 px-3 py-1 text-xs font-semibold text-slate-200 transition hover:border-emerald-400/70 hover:text-emerald-100"
+                  className="flex items-center gap-2 rounded-full border border-slate-700/70 px-3 py-1 text-xs font-medium text-slate-200 transition hover:border-emerald-400/70 hover:text-emerald-100"
                   onClick={() => applyListFormat("unordered")}
                   aria-label="Bulleted list"
                 >
@@ -411,7 +411,7 @@ export default function TodoForm({
                 </button>
                 <button
                   type="button"
-                  className="flex items-center gap-2 rounded-full border border-slate-700/70 px-3 py-1 text-xs font-semibold text-slate-200 transition hover:border-emerald-400/70 hover:text-emerald-100"
+                  className="flex items-center gap-2 rounded-full border border-slate-700/70 px-3 py-1 text-xs font-medium text-slate-200 transition hover:border-emerald-400/70 hover:text-emerald-100"
                   onClick={() => applyListFormat("ordered")}
                   aria-label="Numbered list"
                 >
@@ -505,14 +505,14 @@ export default function TodoForm({
       <div className="sticky bottom-0 -mx-5 mt-6 grid grid-cols-2 gap-2 border-t border-slate-900/60 bg-slate-950/80 px-5 pb-[env(safe-area-inset-bottom)] backdrop-blur">
         <button
           type="submit"
-          className="flex w-full items-center justify-center gap-1 rounded-full bg-emerald-400 px-5 py-3 text-sm font-semibold text-slate-950 shadow-[0_0_25px_rgba(16,185,129,0.45)] transition hover:bg-emerald-300 active:scale-[0.98]"
+          className="flex w-full items-center justify-center gap-1 rounded-full bg-emerald-400 px-5 py-3 text-sm font-medium text-slate-950 shadow-[0_0_25px_rgba(16,185,129,0.45)] transition hover:bg-emerald-300 active:scale-[0.98]"
         >
           {isEditing ? <FiSave aria-hidden /> : <FiPlus aria-hidden />}
           <span>{isEditing ? "Save" : "Save"}</span>
         </button>
         <button
           type="button"
-          className="flex w-full items-center justify-center gap-1 rounded-full border border-slate-700/70 px-5 py-3 text-sm font-semibold text-slate-200 transition hover:border-slate-500/80 hover:text-white active:scale-[0.98]"
+          className="flex w-full items-center justify-center gap-1 rounded-full border border-slate-700/70 px-5 py-3 text-sm font-medium text-slate-200 transition hover:border-slate-500/80 hover:text-white active:scale-[0.98]"
           onClick={onCancelEdit}
         >
           <FiX aria-hidden />

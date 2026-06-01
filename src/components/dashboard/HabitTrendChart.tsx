@@ -50,12 +50,12 @@ export default function HabitTrendChart({
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <p className="text-xs uppercase text-slate-400">Habit trend</p>
-          <p className="text-lg font-semibold text-white">Scheduled completions</p>
+          <p className="text-lg font-medium text-white">Scheduled completions</p>
           <p className="mt-1 text-sm text-slate-300/80">
             Review how consistently you&apos;re closing habits.
           </p>
         </div>
-        <label className="text-xs font-semibold uppercase text-slate-400">
+        <label className="text-xs font-medium uppercase text-slate-400">
           <span className="sr-only">Select trend period</span>
           <select
             value={period}

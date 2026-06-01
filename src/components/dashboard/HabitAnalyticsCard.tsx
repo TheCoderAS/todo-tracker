@@ -43,7 +43,7 @@ export default function HabitAnalyticsCard({
       <p className="text-xs uppercase text-emerald-200/70">Habit momentum</p>
       <div className="mt-4 flex flex-wrap items-end justify-between gap-6">
         <div>
-          <p className="text-4xl font-semibold text-white sm:text-5xl">
+          <p className="text-4xl font-medium text-white sm:text-5xl">
             {completedToday}
             <span className="text-2xl text-slate-300"> / {activeHabits}</span>
           </p>
@@ -60,7 +60,7 @@ export default function HabitAnalyticsCard({
           className="flex h-24 w-24 items-center justify-center rounded-full border border-white/10 bg-slate-950/70 shadow-[0_0_25px_rgba(16,185,129,0.2)]"
           style={badgeStyle}
         >
-          <div className="flex h-[72%] w-[72%] items-center justify-center rounded-full bg-slate-950 text-lg font-semibold text-white">
+          <div className="flex h-[72%] w-[72%] items-center justify-center rounded-full bg-slate-950 text-lg font-medium text-white">
             {activeHabits > 0 ? Math.round(progress) : 0}%
           </div>
         </div>

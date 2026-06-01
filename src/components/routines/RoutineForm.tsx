@@ -18,7 +18,7 @@ const inputClasses =
   "w-full rounded-2xl border border-slate-800/70 bg-slate-950/55 px-3.5 py-2.5 text-sm text-slate-100 shadow-sm transition-colors duration-200 ease-out focus:border-emerald-300/60 focus:bg-slate-950/70 focus:outline-none focus:ring-2 focus:ring-emerald-300/15";
 
 const labelTextClasses =
-  "text-[0.7rem] font-semibold uppercase tracking-wide text-slate-400";
+  "text-[0.7rem] font-medium uppercase tracking-wide text-slate-400";
 
 type RoutineFormProps = {
   form: RoutineInput;
@@ -136,11 +136,11 @@ function RoutineItemEditor({
   return (
     <div className="grid gap-3 rounded-3xl border border-slate-900/70 bg-slate-950/70 p-4">
       <div className="flex items-center justify-between">
-        <p className="text-sm font-semibold text-white">Item {index + 1}</p>
+        <p className="text-sm font-medium text-white">Item {index + 1}</p>
         <button
           type="button"
           onClick={() => onRemoveItem(index)}
-          className="rounded-full border border-rose-500/40 px-3 py-2 text-xs font-semibold uppercase text-rose-300 transition hover:border-rose-400/80 hover:text-rose-100"
+          className="rounded-full border border-rose-500/40 px-3 py-2 text-xs font-medium uppercase text-rose-300 transition hover:border-rose-400/80 hover:text-rose-100"
           aria-label={`Remove item ${index + 1}`}
         >
           <FiTrash2 />
@@ -247,7 +247,7 @@ function RoutineItemEditor({
           <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-slate-800/70 bg-slate-950/60 px-3 py-2">
             <button
               type="button"
-              className="flex items-center gap-2 rounded-full border border-slate-700/70 px-3 py-1 text-xs font-semibold text-slate-200 transition hover:border-emerald-400/70 hover:text-emerald-100"
+              className="flex items-center gap-2 rounded-full border border-slate-700/70 px-3 py-1 text-xs font-medium text-slate-200 transition hover:border-emerald-400/70 hover:text-emerald-100"
               onClick={() => applyInlineFormat("bold")}
               aria-label="Bold"
             >
@@ -255,7 +255,7 @@ function RoutineItemEditor({
             </button>
             <button
               type="button"
-              className="flex items-center gap-2 rounded-full border border-slate-700/70 px-3 py-1 text-xs font-semibold text-slate-200 transition hover:border-emerald-400/70 hover:text-emerald-100"
+              className="flex items-center gap-2 rounded-full border border-slate-700/70 px-3 py-1 text-xs font-medium text-slate-200 transition hover:border-emerald-400/70 hover:text-emerald-100"
               onClick={() => applyInlineFormat("italic")}
               aria-label="Italic"
             >
@@ -263,7 +263,7 @@ function RoutineItemEditor({
             </button>
             <button
               type="button"
-              className="flex items-center gap-2 rounded-full border border-slate-700/70 px-3 py-1 text-xs font-semibold text-slate-200 transition hover:border-emerald-400/70 hover:text-emerald-100"
+              className="flex items-center gap-2 rounded-full border border-slate-700/70 px-3 py-1 text-xs font-medium text-slate-200 transition hover:border-emerald-400/70 hover:text-emerald-100"
               onClick={() => applyInlineFormat("strikeThrough")}
               aria-label="Strikethrough"
             >
@@ -271,7 +271,7 @@ function RoutineItemEditor({
             </button>
             <button
               type="button"
-              className="flex items-center gap-2 rounded-full border border-slate-700/70 px-3 py-1 text-xs font-semibold text-slate-200 transition hover:border-emerald-400/70 hover:text-emerald-100"
+              className="flex items-center gap-2 rounded-full border border-slate-700/70 px-3 py-1 text-xs font-medium text-slate-200 transition hover:border-emerald-400/70 hover:text-emerald-100"
               onClick={() => applyListFormat("unordered")}
               aria-label="Bulleted list"
             >
@@ -279,7 +279,7 @@ function RoutineItemEditor({
             </button>
             <button
               type="button"
-              className="flex items-center gap-2 rounded-full border border-slate-700/70 px-3 py-1 text-xs font-semibold text-slate-200 transition hover:border-emerald-400/70 hover:text-emerald-100"
+              className="flex items-center gap-2 rounded-full border border-slate-700/70 px-3 py-1 text-xs font-medium text-slate-200 transition hover:border-emerald-400/70 hover:text-emerald-100"
               onClick={() => applyListFormat("ordered")}
               aria-label="Numbered list"
             >
@@ -329,7 +329,7 @@ export default function RoutineForm({
         <button
           type="button"
           onClick={onCancel}
-          className="flex items-center gap-2 rounded-full border border-slate-700/70 px-4 py-2 text-xs font-semibold uppercase text-slate-300 transition hover:border-slate-500/80 hover:text-white"
+          className="flex items-center gap-2 rounded-full border border-slate-700/70 px-4 py-2 text-xs font-medium uppercase text-slate-300 transition hover:border-slate-500/80 hover:text-white"
         >
           <FiX />
           Close
@@ -352,7 +352,7 @@ export default function RoutineForm({
           <button
             type="button"
             onClick={onAddItem}
-            className="flex items-center gap-2 rounded-full border border-emerald-400/40 bg-emerald-400/10 px-3 py-2 text-xs font-semibold uppercase text-emerald-200 transition hover:border-emerald-300/80 hover:bg-emerald-400/20"
+            className="flex items-center gap-2 rounded-full border border-emerald-400/40 bg-emerald-400/10 px-3 py-2 text-xs font-medium uppercase text-emerald-200 transition hover:border-emerald-300/80 hover:bg-emerald-400/20"
           >
             <FiPlus />
             Add item
@@ -378,7 +378,7 @@ export default function RoutineForm({
       <div className="flex flex-wrap items-center gap-3">
         <button
           type="submit"
-          className="flex items-center gap-2 rounded-full border border-emerald-400/40 bg-emerald-400/10 px-4 py-2 text-xs font-semibold uppercase text-emerald-200 transition hover:border-emerald-300/80 hover:bg-emerald-400/20"
+          className="flex items-center gap-2 rounded-full border border-emerald-400/40 bg-emerald-400/10 px-4 py-2 text-xs font-medium uppercase text-emerald-200 transition hover:border-emerald-300/80 hover:bg-emerald-400/20"
         >
           <FiSave />
           {isEditing ? "Save routine" : "Create routine"}
@@ -386,7 +386,7 @@ export default function RoutineForm({
         <button
           type="button"
           onClick={onCancel}
-          className="rounded-full border border-slate-700/70 px-4 py-2 text-xs font-semibold uppercase text-slate-300 transition hover:border-slate-500/80 hover:text-white"
+          className="rounded-full border border-slate-700/70 px-4 py-2 text-xs font-medium uppercase text-slate-300 transition hover:border-slate-500/80 hover:text-white"
         >
           Cancel
         </button>
